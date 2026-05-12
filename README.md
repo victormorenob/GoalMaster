@@ -2,7 +2,7 @@
 
 <div align="center">
   <img src="URL_A_UN_LOGO_O_IMAGEN_PRINCIPAL" alt="GoalMaster Logo" width="150"/>
-  <h3>Un proyecto de fin de grado para transformar aspiraciones en logros medibles.</h3>
+  <h3>Un proyecto para transformar aspiraciones en logros medibles.</h3>
 </div>
 
 ---
