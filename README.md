@@ -11,7 +11,7 @@
 
 Este repositorio contiene el código fuente completo del proyecto, desarrollado como parte de un Trabajo de Fin de Grado en Ingeniería del Software.
 
-[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/V1ct0r5/proyecto_web_TFG)
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/V1ct0r5/GoalMaster)
 
 ## ✨ Características Principales
 
