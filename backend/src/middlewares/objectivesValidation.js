@@ -1,6 +1,7 @@
 // backend/src/middlewares/objectivesValidation.js
 const { body, validationResult } = require('express-validator');
 const AppError = require('../utils/AppError');
+const { ALLOWED_CATEGORIES, ALLOWED_STATUSES } = require('../shared/constants');
 
 const handleValidationErrors = (req, res, next) => {
     const errors = validationResult(req);
@@ -10,16 +11,13 @@ const handleValidationErrors = (req, res, next) => {
     next();
 };
 
-const ALLOWED_CATEGORIES = ['HEALTH', 'FINANCE', 'PERSONAL_DEV', 'RELATIONSHIPS', 'CAREER', 'OTHER'];
-const ALLOWED_STATUSES = ['PENDING', 'IN_PROGRESS', 'COMPLETED', 'ARCHIVED', 'FAILED'];
-
 exports.validateCreateObjective = [
     body('name')
         .trim()
         .isLength({ min: 3, max: 100 }).withMessage('El nombre debe tener entre 3 y 100 caracteres.'),
 
     body('description')
-        .optional({ checkFalsy: true }) // Permite que sea string vacío, null o undefined
+        .optional({ checkFalsy: true })
         .trim()
         .isLength({ max: 1000 }).withMessage('La descripción no puede superar los 1000 caracteres.'),
 
@@ -30,7 +28,7 @@ exports.validateCreateObjective = [
         .optional({ checkFalsy: true })
         .trim()
         .isNumeric().withMessage('El valor inicial debe ser un número válido.'),
-        
+
     body('targetValue')
         .optional({ checkFalsy: true })
         .trim()

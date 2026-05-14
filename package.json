@@ -1,8 +1,8 @@
 {
-  "name": "proyecto-web-tfg-root",
+  "name": "goalmaster",
   "version": "1.0.0",
   "private": true,
-  "description": "Root package.json for TFG project (backend and frontend in subdirectories)",
+  "description": "GoalMaster - Personal Goal Management Web Application",
   "scripts": {
     "test": "npm run test:unit && npm run test:integration",
     "test:unit": "cross-env NODE_ENV=test jest --config jest.config.unit.js",
