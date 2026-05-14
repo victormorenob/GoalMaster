@@ -26,7 +26,7 @@ function SettingsPage() {
     const [passwordFormError, setPasswordFormError] = useState(null);
     const [dataAccountError, setDataAccountError] = useState(null);
 
-    // Estados para el formulario de contraseña
+    // States for the password form
     const [currentPassword, setCurrentPassword] = useState('');
     const [newPassword, setNewPassword] = useState('');
     const [confirmNewPassword, setConfirmNewPassword] = useState('');
@@ -39,12 +39,12 @@ function SettingsPage() {
         dataAccount: true,
     });
 
-    // Estados para mostrar/ocultar contraseñas
+    // States for showing/hiding passwords
     const [showCurrentPassword, setShowCurrentPassword] = useState(false);
     const [showNewPassword, setShowNewPassword] = useState(false);
     const [showConfirmNewPassword, setShowConfirmNewPassword] = useState(false);
 
-    // Sincroniza el estado local cuando los ajustes del contexto cambian (ej. al cargar la página o al revertir)
+    // Sync local state when context settings change (e.g. on page load or revert)
     useEffect(() => {
         if (settings) {
             setLocalSettingsData(settings);
@@ -65,7 +65,7 @@ function SettingsPage() {
         setIsDirty(hasChanges);
     }, [settings, localSettingsData]);
 
-    // Maneja los cambios en la mayoría de los inputs del formulario
+    // Handle changes for most form inputs
     const handleInputChange = useCallback((e) => {
         const { name, value, type, checked } = e.target;
         const newValue = type === 'checkbox' ? checked : value;
@@ -112,7 +112,7 @@ function SettingsPage() {
         toast.info(t('toast.changesReverted'));
     }, [settings, i18n, t, applyTemporarySettings]); // Added applyTemporarySettings to dependencies
 
-    // Guarda todos los cambios de configuración general
+    // Save all general settings changes
     const handleSaveAllSettings = useCallback(async () => {
         setIsSaving(true);
         try {

@@ -7,16 +7,16 @@ const avatarUploadMiddleware = require('../../middlewares/uploadMiddleware');
 
 router.use(authMiddleware);
 
-// --- Rutas GET ---
+// --- GET Routes ---
 router.get('/', profileController.getUserProfile); //
 router.get('/stats', profileController.getUserStats); //
 
-// --- Ruta ÚNICA para Actualizar Perfil (Texto y/o Avatar) ---
-// El middleware procesa el archivo primero, y luego el controlador recibe tanto req.body como req.file.
+// --- SINGLE Route for Updating Profile (Text and/or Avatar) ---
+// The middleware processes the file first, then the controller receives both req.body and req.file.
 router.patch(
     '/',
-    avatarUploadMiddleware, // 1. Procesa el archivo y los campos de texto.
-    profileController.updateUserProfile // 2. El controlador actualiza la base de datos.
+    avatarUploadMiddleware, // 1. Process the file and text fields.
+    profileController.updateUserProfile // 2. The controller updates the database.
 );
 
 module.exports = router;

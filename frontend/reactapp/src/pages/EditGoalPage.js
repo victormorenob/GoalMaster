@@ -57,7 +57,7 @@ function EditGoalPage() {
     };
 
     const handleCancelEdit = () => {
-        navigate('/mis-objetivos'); // Mejor volver a la página de detalles
+        navigate('/mis-objetivos'); // Better to go back to the details page
     };
 
     if (loading) {

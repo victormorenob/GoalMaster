@@ -3,21 +3,21 @@ const { body, validationResult } = require('express-validator');
 const AppError = require('../utils/AppError');
 
 /**
- * Middleware que procesa los resultados de la validación de express-validator.
- * Si hay errores, los empaqueta en un AppError y los pasa al errorHandler global.
+ * Middleware that processes express-validator validation results.
+ * If there are errors, wraps them in an AppError and passes to the global errorHandler.
  */
 const handleValidationErrors = (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-        // Usa el AppError para un manejo de errores centralizado y consistente.
+        // Use AppError for centralized and consistent error handling.
         return next(new AppError('Se encontraron errores de validación.', 400, errors.array()));
     }
     next();
 };
 
 /**
- * Cadena de validación para el registro de un nuevo usuario.
- * Verifica nombre de usuario, email, contraseña y la confirmación de la contraseña.
+ * Validation chain for user registration.
+ * Validates username, email, password, and password confirmation.
  */
 exports.validateRegistration = [
     body('username')
@@ -44,8 +44,8 @@ exports.validateRegistration = [
 ];
 
 /**
- * Cadena de validación para el inicio de sesión.
- * Verifica el formato del email y que la contraseña no esté vacía.
+ * Validation chain for login.
+ * Validates email format and that password is not empty.
  */
 exports.validateLogin = [
     body('email')
@@ -59,8 +59,8 @@ exports.validateLogin = [
 ];
 
 /**
- * Cadena de validación para la actualización de un perfil de usuario.
- * Los campos son opcionales, pero si se proporcionan, se validan.
+ * Validation chain for user profile update.
+ * Fields are optional, but if provided, they are validated.
  */
 exports.validateUserUpdate = [
     body('username')
@@ -73,8 +73,8 @@ exports.validateUserUpdate = [
         .trim()
         .isEmail().withMessage('El formato del correo electrónico es inválido.'),
     
-    // Nota: La validación de un cambio de contraseña es más compleja (requiere contraseña actual)
-    // y se maneja en un endpoint y servicio dedicados, por lo que no se incluye aquí.
+    // Note: Password change validation is more complex (requires current password)
+    // and is handled in a dedicated endpoint and service, so it is not included here.
 
     handleValidationErrors
 ];

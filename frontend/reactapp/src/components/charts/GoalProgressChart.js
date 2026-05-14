@@ -5,7 +5,7 @@ import 'react-circular-progressbar/dist/styles.css';
 import styles from './GoalProgressChart.module.css'; // Importamos nuestro CSS Module
 
 /**
- * Muestra un gráfico de progreso circular.
+ * Displays a circular progress chart.
  * @param {number} progressPercentage - El valor del progreso (0-100).
  */
 function GoalProgressChart({ progressPercentage }) {
@@ -16,7 +16,7 @@ function GoalProgressChart({ progressPercentage }) {
             <CircularProgressbar
                 value={percentage}
                 text={`${percentage}%`}
-                // Los estilos ahora se controlan vía CSS para adaptarse al tema
+                // Styles are now controlled via CSS to adapt to the theme
                 className={styles.themedCircularProgressbar}
                 strokeWidth={8}
             />

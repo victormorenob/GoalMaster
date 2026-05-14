@@ -3,20 +3,20 @@ const router = express.Router();
 const settingsController = require('../controllers/settingsController');
 const authMiddleware = require('../../middlewares/authMiddleware');
 
-// Todas las rutas de configuración requieren autenticación
+// All settings routes require authentication
 router.use(authMiddleware);
 
-// Rutas para la configuración general
+// General settings routes
 router.get('/', settingsController.getSettings);
 router.put('/', settingsController.updateSettings);
 
-// Ruta para cambiar contraseña
+// Change password route
 router.put('/change-password', settingsController.changePassword);
 
-// Ruta para exportar datos
+// Export data route
 router.get('/export-data', settingsController.exportUserData);
 
-// Ruta para eliminar cuenta
+// Delete account route
 router.delete('/account', settingsController.deleteAccount);
 
 module.exports = router;

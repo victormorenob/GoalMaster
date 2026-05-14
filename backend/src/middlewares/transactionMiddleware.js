@@ -2,19 +2,19 @@
 const db = require("../config/database");
 
 /**
- * Middleware de transacción AUTOMÁTICA SÓLO PARA ENTORNO DE PRUEBAS (TESTING).
+ * AUTOMATIC TRANSACTION middleware FOR TESTING ENVIRONMENT ONLY.
  *
- * Propósito:
- * Este middleware envuelve cada petición de prueba en una transacción de Sequelize.
- * Al finalizar la petición, realiza un COMMIT si la respuesta fue exitosa (status < 400)
- * o un ROLLBACK si hubo un error. Esto asegura que la base de datos se mantenga limpia
- * entre cada caso de prueba de integración, ya que los cambios de cada prueba se deshacen.
+ * Purpose:
+ * This middleware wraps each test request in a Sequelize transaction.
+ * On request completion, it COMMITS if the response was successful (status < 400)
+ * or ROLLS BACK if there was an error. This ensures the database stays clean
+ * between integration test cases, as each test's changes are undone.
  *
- * IMPORTANTE: No activar este middleware en entornos de desarrollo o producción,
- * ya que la gestión explícita de transacciones en los servicios es más segura y robusta.
+ * IMPORTANT: Do not activate this middleware in development or production environments,
+ * as explicit transaction management in services is safer and more robust.
  */
 const transactionMiddleware = async (req, res, next) => {
-    // Se ejecuta únicamente en el entorno 'test'.
+    // Only runs in the 'test' environment.
     if (process.env.NODE_ENV !== "test") {
         return next();
     }
@@ -22,23 +22,23 @@ const transactionMiddleware = async (req, res, next) => {
     let transaction;
     try {
         transaction = await db.sequelize.transaction();
-        req.transaction = transaction; // Adjunta la transacción al objeto de la petición
+        req.transaction = transaction; // Attach the transaction to the request object
 
-        // Escucha el evento 'finish', que se dispara cuando la respuesta se ha enviado.
+        // Listen for the 'finish' event, which fires when the response has been sent.
         res.on('finish', async () => {
-            // Asegurarse de que la transacción no haya sido finalizada previamente.
+            // Ensure the transaction has not been finalized already.
             if (transaction && !transaction.finished) {
                 try {
-                    // Si el código de estado indica éxito, confirma la transacción.
+                    // If the status code indicates success, commit the transaction.
                     if (res.statusCode < 400) {
                         await transaction.commit();
                     } else {
-                        // Si hubo un error, revierte la transacción.
+                        // If there was an error, roll back the transaction.
                         await transaction.rollback();
                     }
                 } catch (transactionError) {
-                    console.error("[Transaction Middleware] Error al finalizar la transacción:", transactionError);
-                    // Intento final de rollback si el commit falla.
+                    console.error("[Transaction Middleware] Error finalizing transaction:", transactionError);
+                    // Final rollback attempt if commit fails.
                     if (!transaction.finished) {
                         await transaction.rollback();
                     }
@@ -49,11 +49,11 @@ const transactionMiddleware = async (req, res, next) => {
         next();
 
     } catch (error) {
-        console.error("[Transaction Middleware] Error al iniciar la transacción:", error);
+        console.error("[Transaction Middleware] Error starting transaction:", error);
         if (transaction && !transaction.finished) {
             await transaction.rollback();
         }
-        next(error); // Pasa el error al manejador global.
+        next(error); // Pass the error to the global handler.
     }
 };
 

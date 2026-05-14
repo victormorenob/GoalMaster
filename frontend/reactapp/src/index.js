@@ -1,35 +1,35 @@
 import React, { Suspense } from 'react';
 import ReactDOM from 'react-dom/client';
-import { QueryClient, QueryClientProvider } from 'react-query'; // 1. IMPORTA LO NECESARIO DE REACT-QUERY
+import { QueryClient, QueryClientProvider } from 'react-query'; // 1. IMPORT WHAT IS NEEDED FROM REACT-QUERY
 
 import App from './App';
-import FullPageLoader from './components/ui/FullPageLoader'; // Un componente de carga es mejor que un texto
+import FullPageLoader from './components/ui/FullPageLoader'; // A loading component is better than plain text
 import reportWebVitals from './reportWebVitals';
 
-// Estilos globales
+// Global styles
 import './styles/index.css';
 import 'react-toastify/dist/ReactToastify.css';
 import 'react-datepicker/dist/react-datepicker.css';
 
-// Configuración de internacionalización
+// Internationalization setup
 import './i18n';
 
-// 2. CREA UNA INSTANCIA DEL CLIENTE DE REACT-QUERY
-// Aquí puedes definir configuraciones por defecto para todas tus peticiones
+// 2. CREATE A REACT-QUERY CLIENT INSTANCE
+// Default options for all queries can be defined here
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 1000 * 60 * 5, // Los datos se consideran "frescos" por 5 minutos
-      cacheTime: 1000 * 60 * 30, // Los datos se mantienen en caché por 30 minutos
-      refetchOnWindowFocus: false, // Opcional: previene recargas al cambiar de pestaña
-      retry: 1, // Reintentar peticiones fallidas 1 sola vez
+      staleTime: 1000 * 60 * 5, // Data is considered "fresh" for 5 minutes
+      cacheTime: 1000 * 60 * 30, // Data stays cached for 30 minutes
+      refetchOnWindowFocus: false, // Optional: prevents refetching when switching tabs
+      retry: 1, // Retry failed requests 1 time
     },
   },
 });
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 
-// Renderiza la aplicación
+// Render the application
 root.render(
   <React.StrictMode>
     <Suspense fallback={<FullPageLoader />}>
@@ -40,5 +40,5 @@ root.render(
   </React.StrictMode>
 );
 
-// Si quieres medir el rendimiento, puedes dejar esta línea
+// If you want to measure performance, you can keep this line
 reportWebVitals();

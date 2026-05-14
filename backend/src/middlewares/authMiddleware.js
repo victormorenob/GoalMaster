@@ -3,14 +3,14 @@ const AppError = require('../utils/AppError');
 require('dotenv').config();
 
 /**
- * Middleware para verificar la autenticación del usuario a través de un token JWT.
- * Espera un header 'Authorization' con el formato 'Bearer <token>'.
- * Si la autenticación es exitosa, adjunta el payload del usuario a `req.user`.
- * De lo contrario, pasa un AppError al siguiente middleware de errores.
+ * Middleware to verify user authentication via JWT token.
+ * Expects an 'Authorization' header with the format 'Bearer <token>'.
+ * If authentication succeeds, attaches the decoded user payload to `req.user`.
+ * Otherwise, passes an AppError to the next error middleware.
  *
- * @param {object} req - El objeto de petición de Express.
- * @param {object} res - El objeto de respuesta de Express.
- * @param {function} next - La función para pasar al siguiente middleware.
+ * @param {object} req - The Express request object.
+ * @param {object} res - The Express response object.
+ * @param {function} next - The function to pass to the next middleware.
  */
 const authMiddleware = (req, res, next) => {
     const authHeader = req.headers['authorization'];
@@ -25,14 +25,14 @@ const authMiddleware = (req, res, next) => {
         return next(new AppError('Acceso denegado. Token no encontrado en la cabecera.', 401));
     }
 
-    // Hacemos que la carga del secreto sea consciente del entorno.
+    // Make the secret loading environment-aware.
     const secret = process.env.NODE_ENV === 'test' 
         ? process.env.JWT_SECRET_TEST 
         : process.env.JWT_SECRET;
 
     if (!secret) {
-        // Añadimos una comprobación de seguridad por si el secreto no está definido
-        console.error("FATAL: JWT_SECRET no está definido para la verificación en el entorno actual.");
+        // Add a safety check in case the secret is not defined
+        console.error("FATAL: JWT_SECRET is not defined for verification in the current environment.");
         return next(new AppError('Error de configuración del servidor de autenticación.', 500));
     }
 
@@ -41,11 +41,11 @@ const authMiddleware = (req, res, next) => {
             if (err.name === 'TokenExpiredError') {
                 return next(new AppError('Token expirado. Por favor, inicie sesión de nuevo.', 401));
             }
-            // Cubre 'JsonWebTokenError' y otros errores de verificación
+            // Covers 'JsonWebTokenError' and other verification errors
             return next(new AppError('Token inválido. La autenticación ha fallado.', 403));
         }
         
-        // Adjunta el payload decodificado a la petición para su uso posterior
+        // Attach the decoded payload to the request for downstream use
         req.user = decodedUserPayload; 
         next();
     });

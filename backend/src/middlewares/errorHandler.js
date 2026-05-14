@@ -2,9 +2,9 @@
 const AppError = require('../utils/AppError');
 
 /**
- * Envía una respuesta de error detallada para el entorno de desarrollo.
- * @param {Error} err - El objeto de error.
- * @param {object} res - El objeto de respuesta de Express.
+ * Sends a detailed error response for the development environment.
+ * @param {Error} err - The error object.
+ * @param {object} res - The Express response object.
  */
 const sendErrorDev = (err, res) => {
     console.error('ERROR DEVELOPMENT 💥:', err);
@@ -14,32 +14,32 @@ const sendErrorDev = (err, res) => {
         error: {
             name: err.name,
             message: err.message,
-            ...err, // Incluye otras propiedades del error como `errorsData`
+            ...err, // Includes other error properties like `errorsData`
         },
         stack: err.stack,
     });
 };
 
 /**
- * Envía una respuesta de error genérica y segura para el entorno de producción.
- * @param {Error} err - El objeto de error.
- * @param {object} res - El objeto de respuesta de Express.
+ * Sends a generic, safe error response for the production environment.
+ * @param {Error} err - The error object.
+ * @param {object} res - The Express response object.
  */
 const sendErrorProd = (err, res) => {
-    // Si es un AppError operacional, confiamos en él y lo enviamos al cliente.
+    // If it is an operational AppError, trust it and send to the client.
     if (err.isOperational) {
         return res.status(err.statusCode).json({
             status: err.status,
             message: err.message,
-            // Incluir detalles de validación si existen
+            // Include validation details if they exist
             ...(err.errorsData && { errors: err.errorsData }),
         });
     }
 
-    // Si no es operacional, logueamos el error completo para los desarrolladores.
+    // If not operational, log the full error for developers.
     console.error('ERROR PRODUCTION 💣:', err);
-    
-    // Y enviamos un mensaje genérico al cliente para no exponer detalles.
+
+    // Send a generic message to the client to avoid exposing details.
     return res.status(500).json({
         status: 'error',
         message: 'Ocurrió un problema en el servidor. Por favor, inténtelo de nuevo más tarde.',
@@ -47,9 +47,9 @@ const sendErrorProd = (err, res) => {
 };
 
 /**
- * Convierte errores técnicos conocidos en errores operacionales (AppError).
- * @param {Error} error - El error original.
- * @returns {AppError | Error} - Un AppError si el error es conocido, o el error original.
+ * Converts known technical errors into operational errors (AppError).
+ * @param {Error} error - The original error.
+ * @returns {AppError | Error} - An AppError if the error is known, or the original error.
  */
 const handleKnownErrors = (error) => {
     if (error.name === 'SequelizeValidationError') {

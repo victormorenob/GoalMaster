@@ -1,13 +1,13 @@
 import React from 'react';
 import styles from './FormGroup.module.css';
 
-// Componente genérico para agrupar un label, un input y un mensaje de error
+// Generic component to group a label, input, and error message
 // Esto ayuda a estandarizar la estructura de los campos de formulario.
 function FormGroup({
     label, // Texto de la etiqueta (string)
     htmlFor, // El 'id' del input asociado (string)
     required, // Indica si el campo es obligatorio (boolean)
-    error, // Mensaje de error de validación a mostrar (string o null/undefined)
+    error, // Validation error message to display (string or null/undefined)
     children // El/los elementos input, select, textarea u otro control de formulario (nodos React)
 }) {
     return (

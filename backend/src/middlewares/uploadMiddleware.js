@@ -6,15 +6,15 @@ const AppError = require('../utils/AppError');
 
 const UPLOAD_DIR = path.resolve(__dirname, '../../../public/uploads/avatars');
 
-// Se asegura de que el directorio de subida exista al arrancar la aplicación.
-// Si no puede crearse, lanza un error crítico para detener el inicio del servidor.
+// Ensure the upload directory exists when the application starts.
+// If it cannot be created, throw a critical error to halt server startup.
 try {
     if (!fs.existsSync(UPLOAD_DIR)) {
         fs.mkdirSync(UPLOAD_DIR, { recursive: true });
-        console.log(`[UploadMiddleware] Directorio para avatares creado en: ${UPLOAD_DIR}`);
+        console.log(`[UploadMiddleware] Avatar directory created at: ${UPLOAD_DIR}`);
     }
 } catch (err) {
-    const errorMsg = `[UploadMiddleware] FATAL: No se pudo crear el directorio de subida ${UPLOAD_GIR}. Error: ${err.message}`;
+    const errorMsg = `[UploadMiddleware] FATAL: Could not create upload directory ${UPLOAD_DIR}. Error: ${err.message}`;
     console.error(errorMsg);
     throw new Error(errorMsg);
 }
@@ -24,7 +24,7 @@ const storage = multer.diskStorage({
         cb(null, UPLOAD_DIR);
     },
     filename: (req, file, cb) => {
-        // Un usuario debe estar autenticado para subir un avatar. El `authMiddleware` debe ejecutarse antes.
+        // The user must be authenticated to upload an avatar. `authMiddleware` must run first.
         if (!req.user || !req.user.id) {
             return cb(new AppError('Autenticación requerida para subir archivos.', 401));
         }
@@ -38,9 +38,9 @@ const storage = multer.diskStorage({
 const fileFilter = (req, file, cb) => {
     const allowedMimeTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
     if (allowedMimeTypes.includes(file.mimetype)) {
-        cb(null, true); // Archivo aceptado
+        cb(null, true); // File accepted
     } else {
-        // Archivo rechazado, pasando un AppError para un manejo de errores consistente.
+        // File rejected, passing an AppError for consistent error handling.
         cb(new AppError('Formato de archivo no permitido. Solo se aceptan imágenes (jpeg, png, gif, webp).', 400), false);
     }
 };
@@ -48,14 +48,14 @@ const fileFilter = (req, file, cb) => {
 const upload = multer({
     storage: storage,
     limits: {
-        fileSize: 5 * 1024 * 1024 // Límite de 5MB
+        fileSize: 5 * 1024 * 1024 // 5MB limit
     },
     fileFilter: fileFilter
 });
 
 /**
- * Middleware wrapper que maneja la subida de un solo archivo llamado 'avatar'.
- * Captura y formatea los errores de Multer en instancias de AppError.
+ * Middleware wrapper that handles uploading a single file named 'avatar'.
+ * Captures and formats Multer errors into AppError instances.
  */
 const avatarUploadMiddleware = (req, res, next) => {
     const uploader = upload.single('avatar');
@@ -66,17 +66,17 @@ const avatarUploadMiddleware = (req, res, next) => {
                 if (err.code === 'LIMIT_FILE_SIZE') {
                     return next(new AppError('El archivo es demasiado grande. El límite es de 5MB.', 400));
                 }
-                // Maneja otros errores de Multer (ej. 'LIMIT_UNEXPECTED_FILE')
+                // Handle other Multer errors (e.g. 'LIMIT_UNEXPECTED_FILE')
                 return next(new AppError(`Error al procesar el archivo: ${err.message}.`, 400));
             }
-            // Si el error ya es un AppError (ej. de nuestro fileFilter)
+            // If the error is already an AppError (e.g. from our fileFilter)
             if (err instanceof AppError) {
                 return next(err);
             }
-            // Otros errores inesperados
+            // Other unexpected errors
             return next(new AppError('Ocurrió un error inesperado durante la subida del archivo.', 500, err));
         }
-        // Si no hay error, req.file estará disponible para el siguiente controlador.
+        // If no error, req.file will be available for the next controller.
         next();
     });
 };

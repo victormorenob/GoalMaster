@@ -8,7 +8,7 @@ import { SettingsProvider, useSettings } from './context/SettingsContext';
 import { Tooltip } from 'react-tooltip';
 import 'react-tooltip/dist/react-tooltip.css';
 
-// Importaciones de Páginas
+// Page imports
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegistroPage';
 import DashboardPage from './pages/DashboardPage';
@@ -21,12 +21,12 @@ import AnalysisPage from './pages/AnalysisPage';
 import ProfilePage from './pages/ProfilePage';
 import SettingsPage from './pages/SettingsPage';
 
-// Importaciones de Layouts y Componentes UI
+// Layout and UI component imports
 import AppHeader from './layouts/AppHeader';
 import Sidebar from './layouts/SideBar/SideBar';
 import FullPageLoader from './components/ui/FullPageLoader';
 
-// El componente principal que contiene la lógica de enrutamiento y layout
+// The main component that contains routing and layout logic
 function AppContent() {
     const { isAuthenticated, isLoading: isAuthLoading } = useAuth();
     const { isLoadingSettings } = useSettings();

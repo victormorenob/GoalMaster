@@ -53,14 +53,14 @@ class DashboardService {
             }
         });
         
-        // --- ESTA ES LA PARTE CORREGIDA PARA EL ERROR ACTUAL ---
+        // --- THIS IS THE FIXED PART FOR THE CURRENT ERROR ---
         const categories = await Objective.findAll({
             attributes: [
-                ['tipo_objetivo', 'category'], // Selecciona la columna 'tipo_objetivo', la nombra 'category'
+                ['tipo_objetivo', 'category'], // Select column 'tipo_objetivo', alias it as 'category'
                 [fn('COUNT', col('tipo_objetivo')), 'count']
             ],
             where: baseWhere,
-            group: [col('tipo_objetivo')], // Agrupa por la columna real 'tipo_objetivo'
+            group: [col('tipo_objetivo')], // Group by the actual column 'tipo_objetivo'
             raw: true,
         });
 

@@ -4,7 +4,7 @@ const objectivesService = require('../services/objectivesService'); // Mantenemo
 const AppError = require('../../utils/AppError');
 
 /**
- * Utility function to get the authenticated user ID from the request object.
+ * Extracts the authenticated user ID from the request object.
  * Throws an AppError if the user ID is not found.
  * @param {object} req - The Express request object.
  * @returns {number} The user ID.
@@ -18,7 +18,7 @@ const getAuthUserId = (req) => {
 };
 
 
-// --- Authentication Controllers ---
+// --- Authentication ---
 
 /**
  * Handles user registration. Creates a user and returns a JWT.
@@ -64,16 +64,16 @@ exports.login = async (req, res, next) => {
 
 /**
  * Handles user logout.
- * En una implementación basada en JWT, esto es principalmente simbólico.
- * Se podría añadir lógica de blacklisting de tokens si fuera necesario.
+ * In a JWT-based implementation, this is primarily symbolic.
+ * Token blacklisting logic could be added if needed.
  */
 exports.logout = (req, res, next) => {
-    // Aquí podría ir la lógica para invalidar el token en el servidor si se implementa una blacklist.
+    // Token invalidation logic could go here if a blacklist is implemented.
     res.status(200).json({ status: 'success', message: 'Sesión cerrada con éxito.' });
 };
 
 
-// --- Admin/CRUD Controllers ---
+// --- Admin / CRUD ---
 
 /**
  * Creates a user (e.g., by an admin). Does not return a token.

@@ -9,7 +9,7 @@ import { getDefaultDonutOptions } from '../../utils/chartUtils';
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 /**
- * Muestra un gráfico de dona para la distribución de categorías.
+ * Displays a donut chart for category distribution.
  * @param {Array<{name: string, value: number}>} data - Los datos a graficar.
  */
 const CategoryDonutChart = ({ data }) => {

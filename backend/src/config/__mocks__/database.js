@@ -1,4 +1,4 @@
-'use strict'; // Importante para que Jest trate el archivo como un módulo
+'use strict'; // Important so Jest treats the file as a module
 
 const db = {
   sequelize: {

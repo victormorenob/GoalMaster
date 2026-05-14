@@ -27,7 +27,7 @@ class ProfileController {
     async updateUserProfile(req, res, next) {
         try {
             const userId = getAuthUserId(req);
-            // Pasamos el cuerpo de la petición (texto) y el archivo (imagen) al servicio.
+            // Pass the request body (text) and file (image) to the service.
             const updatedProfile = await profileService.updateUserProfile(userId, req.body, req.file); //
             res.status(200).json({ status: 'success', data: updatedProfile });
         } catch (error) {

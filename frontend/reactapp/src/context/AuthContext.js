@@ -4,7 +4,7 @@ import { toast } from 'react-toastify';
 
 const AuthContext = createContext(null);
 
-// 15 minutos de inactividad para cierre de sesión automático
+// 15 minutes of inactivity for automatic logout
 const INACTIVITY_TIMEOUT_MS = 15 * 60 * 1000;
 
 export const AuthProvider = ({ children }) => {
@@ -25,8 +25,8 @@ export const AuthProvider = ({ children }) => {
         localStorage.removeItem("user");
         setToken(null);
         setUser(null);
-        // apiService.logout() es opcional aquí, el cliente ya está deslogueado.
-        // El apiService se encargará de cualquier limpieza necesaria si el usuario hace otra petición.
+        // apiService.logout() is optional here — the client is already logged out.
+        // apiService will handle any necessary cleanup if the user makes another request.
     }, []);
 
     const login = useCallback((newToken, userData) => {
@@ -47,7 +47,7 @@ export const AuthProvider = ({ children }) => {
         return () => window.removeEventListener('logoutUser', logout);
     }, [logout]);
 
-    // Gestión del temporizador de inactividad
+    // Inactivity timer management
     useEffect(() => {
         const resetTimer = () => {
             clearTimeout(inactivityTimerRef.current);

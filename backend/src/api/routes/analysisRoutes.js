@@ -14,8 +14,8 @@ router.get('/ranked-objectives', analysisController.getRankedObjectives);
 router.get('/category-average-progress', analysisController.getCategoryAverageProgress);
 router.get('/detailed-by-category', analysisController.getDetailedObjectivesByCategory);
 
-// NUEVO: Ruta añadida para el gráfico de progreso por objetivo.
-// Esta ruta debe coincidir con la que llama 'apiService.js' en el frontend.
+// Route added for the per-objective progress chart.
+// This route must match the one called by 'apiService.js' in the frontend.
 router.get('/objective-progress-chart-data', analysisController.getObjectivesProgressChartData);
 
 module.exports = router;

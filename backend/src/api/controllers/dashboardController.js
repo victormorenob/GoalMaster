@@ -3,7 +3,7 @@ const dashboardService = require('../services/dashboardService');
 const { createController } = require('../../utils/controllerFactory');
 
 /**
- * Obtiene las estadísticas de resumen para el dashboard.
+ * Fetches summary statistics for the dashboard.
  */
 exports.getDashboardSummary = createController(
     dashboardService.calculateSummaryStats.bind(dashboardService),
@@ -11,7 +11,7 @@ exports.getDashboardSummary = createController(
 );
 
 /**
- * Obtiene los objetivos modificados recientemente para la vista previa del dashboard.
+ * Fetches recently modified objectives for the dashboard preview.
  */
 exports.getRecentObjectives = createController(
     (userId, query) => dashboardService.fetchRecentObjectives(userId, query.limit),
@@ -19,7 +19,7 @@ exports.getRecentObjectives = createController(
 );
 
 /**
- * Obtiene las actividades recientes del usuario.
+ * Fetches the user's recent activities.
  */
 exports.getRecentActivities = createController(
     (userId, query) => dashboardService.fetchRecentActivities(userId, query.limit),

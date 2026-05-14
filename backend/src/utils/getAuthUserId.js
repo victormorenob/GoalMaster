@@ -2,10 +2,10 @@
 const AppError = require('./AppError');
 
 /**
- * Extrae de forma segura el ID de usuario autenticado de la petición.
- * @param {object} req - Objeto de la petición de Express.
- * @returns {number} El ID del usuario.
- * @throws {AppError} Si el ID de usuario no se encuentra.
+ * Safely extracts the authenticated user ID from the request.
+ * @param {object} req - The Express request object.
+ * @returns {number} The user ID.
+ * @throws {AppError} If the user ID is not found.
  */
 const getAuthUserId = (req) => {
     const userId = req.user?.id;

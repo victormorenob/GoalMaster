@@ -6,7 +6,7 @@ const authMiddleware = require('../../middlewares/authMiddleware');
 
 router.use(authMiddleware);
 
-// Rutas sin el prefijo /dashboard/
+// Routes without the /dashboard/ prefix
 router.get('/summary-stats', dashboardController.getDashboardSummary);
 router.get('/recent-objectives', dashboardController.getRecentObjectives);
 router.get('/recent-activities', dashboardController.getRecentActivities);

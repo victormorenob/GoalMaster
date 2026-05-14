@@ -37,7 +37,7 @@ const DistributionBarChart = ({ progressMade, progressRemaining, totalJourney, u
     scales: {
       y: {
         beginAtZero: true,
-        // El máximo es un poco más que el recorrido total del objetivo
+        // The maximum is slightly more than the total objective range
         suggestedMax: totalJourney > 0 ? totalJourney * 1.1 : undefined,
         ticks: { 
           callback: (value) => `${value.toLocaleString()} ${unit}` 

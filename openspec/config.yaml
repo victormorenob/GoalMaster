@@ -1,0 +1,30 @@
+# SDD Configuration for GoalMaster Project
+project: goalmaster
+persistence_mode: hybrid
+testing:
+  unit:
+    command: npm run test:unit
+    framework: jest
+    runner: jest --config jest.config.unit.js
+  integration:
+    command: npm run test:integration
+    framework: jest
+    runner: jest --config jest.config.integration.js
+  e2e:
+    command: npx cypress open
+    framework: cypress
+    runner: cypress open
+strict_tdd: true
+conventions:
+  commit: conventional
+  pr: gentle-ai
+  issue: gentle-ai
+stack:
+  frontend: react
+  backend: express.js
+  database: mysql
+  orm: sequelize
+  testing:
+    unit: jest
+    integration: jest + supertest
+    e2e: cypress

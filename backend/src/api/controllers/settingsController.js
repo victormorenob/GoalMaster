@@ -1,7 +1,7 @@
 // backend/src/api/controllers/settingsController.js
 const settingsService = require('../services/settingsService');
 const { createController } = require('../../utils/controllerFactory');
-const getAuthUserId = require('../../utils/getAuthUserId'); // Importamos la utilidad
+const getAuthUserId = require('../../utils/getAuthUserId'); // Import the utility
 
 exports.getSettings = createController(
     settingsService.fetchUserSettings.bind(settingsService),
@@ -18,7 +18,7 @@ exports.changePassword = createController(
     ['userId', 'body']
 );
 
-// Casos especiales con respuestas personalizadas
+// Special cases with custom responses
 exports.exportUserData = async (req, res, next) => {
     try {
         const userId = getAuthUserId(req);

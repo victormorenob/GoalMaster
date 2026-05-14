@@ -20,7 +20,7 @@ function CreateObjectivePage() {
             toast.success(t('toast.objectiveCreateSuccess'));
             navigate('/dashboard', { replace: true });
         } catch (err) {
-            // El interceptor de apiService se encarga del toast genérico
+            // The apiService interceptor handles the generic toast
             console.error("Error al crear el objetivo:", err);
         }
     };

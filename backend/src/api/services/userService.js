@@ -5,7 +5,7 @@ require('dotenv').config();
 const userRepository = require('../repositories/userRepository');
 const AppError = require('../../utils/AppError');
 
-// --- Service-level Constants for Error Messages ---
+// --- Service-level constants for error messages ---
 const AUTH_CONFIG_ERROR = 'Error de configuración interna del servidor.';
 const INVALID_CREDENTIALS_ERROR = 'El correo electrónico o la contraseña son incorrectos.';
 
@@ -21,9 +21,9 @@ class UserService {
     async getUserById(userId) {
         const user = await userRepository.findById(userId);
         if (!user) {
-            throw new AppError('Usuario no encontrado.', 404);
-        }
-        // Excluir la contraseña en el objeto devuelto
+        throw new AppError('Usuario no encontrado.', 404);
+    }
+        // Exclude password from the returned object
         const { password, ...userWithoutPassword } = user.toJSON();
         return userWithoutPassword;
     }
@@ -34,7 +34,7 @@ class UserService {
      * @returns {Promise<User>} The newly created user object.
      */
     async createUser(userData) {
-        // Validación para evitar duplicados de correo electrónico o nombre de usuario.
+        // Validation to avoid duplicate email or username.
         if (await userRepository.findByEmail(userData.email)) {
             throw new AppError('El correo electrónico proporcionado ya está registrado.', 409);
         }
@@ -42,8 +42,8 @@ class UserService {
             throw new AppError('El nombre de usuario ya está en uso.', 409);
         }
 
-        // Pasa los datos directamente al repositorio. El hook del modelo se encargará de hashear la contraseña.
-        // NO SE HASHEA LA CONTRASEÑA AQUÍ para evitar el doble hasheo.
+        // Pass data directly to the repository. The model hook will handle password hashing.
+        // DO NOT HASH THE PASSWORD HERE to avoid double hashing.
         const newUser = await userRepository.create(userData);
         return newUser;
     }
@@ -83,16 +83,16 @@ class UserService {
             throw new AppError('Usuario no encontrado para actualizar.', 404);
         }
 
-        // Si se actualiza la contraseña, se pasa en texto plano. El hook del modelo la hasheará.
+        // If updating the password, pass it in plain text. The model hook will hash it.
         const updatedCount = await userRepository.update(userId, userData);
 
         if (updatedCount > 0) {
-            // Refresca los datos del usuario para devolver el objeto actualizado.
+            // Refresh the user data to return the updated object.
             const updatedUser = await this.getUserById(userId);
             return updatedUser;
         }
         
-        // Si no se actualizó ninguna fila, devuelve el usuario sin cambios.
+        // If no rows were updated, return the user unchanged.
         const { password, ...userWithoutPassword } = user.toJSON();
         return userWithoutPassword;
     }
@@ -123,7 +123,7 @@ class UserService {
         const options = { expiresIn: process.env.JWT_EXPIRES_IN || '7d' };
 
         if (!secret) {
-            console.error("FATAL: JWT_SECRET no está definido en las variables de entorno.");
+            console.error("FATAL: JWT_SECRET is not defined in environment variables.");
             throw new AppError(AUTH_CONFIG_ERROR, 500);
         }
         
