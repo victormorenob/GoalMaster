@@ -41,10 +41,10 @@ Chain strategy: pending
 
 ## Phase 3: Repositories (Batch 3)
 
-- [ ] 3.1 Create `backend/src/api/repositories/progressRepository.js` — class with constructor(`this.model = db.Progress`), methods: create, findByObjectiveId, findById, delete
-- [ ] 3.2 Create `backend/src/api/repositories/activityLogRepository.js` — class with constructor(`this.model = db.ActivityLog`), methods: create, findByUserId, findById
-- [ ] 3.3 Update `backend/src/api/services/objectivesService.js` — add constructor injection for progressRepository and activityLogRepository, replace direct `Progress.create()` / `ActivityLog.create()` calls with `this.progressRepository.create()` / `this.activityLogRepository.create()`
-- [ ] 3.4 Update `tests/backend/unit/objectivesService.test.js` — mock repositories instead of direct model calls
+- [x] 3.1 Create `backend/src/api/repositories/progressRepository.js` — class with constructor(`this.model = db.Progress`), methods: create, findByObjectiveId, findById, delete
+- [x] 3.2 Create `backend/src/api/repositories/activityLogRepository.js` — class with constructor(`this.model = db.ActivityLog`), methods: create, findByUserId, findById
+- [x] 3.3 Update `backend/src/api/services/objectivesService.js` — add constructor injection for progressRepository and activityLogRepository, replace direct `Progress.create()` / `ActivityLog.create()` calls with `this.progressRepository.create()` / `this.activityLogRepository.create()`
+- [x] 3.4 Update `tests/backend/unit/objectivesService.test.js` — mock repositories instead of direct model calls; also check `settingsService.js` for direct `ActivityLog.create()` calls and inject activityLogRepository (4 calls replaced)
 
 ## Phase 4: Rename frontend/app (Batch 4)
 
