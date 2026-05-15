@@ -1,8 +1,7 @@
 // frontend/app/src/components/charts/GoalProgressChart.js
 import React from 'react';
-import { CircularProgressbar } from 'react-circular-progressbar';
+import { CircularProgressbar, buildStyles } from 'react-circular-progressbar';
 import 'react-circular-progressbar/dist/styles.css';
-import styles from './GoalProgressChart.module.css'; // Importamos nuestro CSS Module
 
 /**
  * Displays a circular progress chart.
@@ -12,12 +11,17 @@ function GoalProgressChart({ progressPercentage }) {
     const percentage = Math.round(progressPercentage || 0);
 
     return (
-        <div className={styles.chartContainer}>
+        <div className="w-[150px] h-[150px] mx-auto my-4">
             <CircularProgressbar
                 value={percentage}
                 text={`${percentage}%`}
-                // Styles are now controlled via CSS to adapt to the theme
-                className={styles.themedCircularProgressbar}
+                styles={buildStyles({
+                    pathColor: 'var(--success)',
+                    trailColor: 'var(--muted)',
+                    textColor: 'var(--success)',
+                    textSize: '20px',
+                    pathTransitionDuration: 0.5,
+                })}
                 strokeWidth={8}
             />
         </div>

@@ -3,7 +3,6 @@ import { useForm, Controller } from "react-hook-form";
 import FormGroup from "../ui/FormGroup";
 import Input from "../ui/Input";
 import Button from "../ui/Button";
-import objetivosStyles from "./ObjetivosForm.module.css";
 import DatePicker from '../ui/DatePicker/DatePicker';
 import { format, isValid, parseISO } from 'date-fns';
 import { toast } from 'react-toastify';
@@ -172,17 +171,13 @@ ObjectiveForm.propTypes = {
 
     const finalButtonText = buttonText || (isEditMode ? t('objectivesForm.updateButton') : t('objectivesForm.createButton'));
 
-    const buttonContainerClass = [objetivosStyles.buttonContainer];
-    if (isEditMode || !isFirstObjective) {
-        buttonContainerClass.push(objetivosStyles.buttonsWithCancel);
-    } else {
-        buttonContainerClass.push(objetivosStyles.firstObjectiveButtons);
-    }
+    const buttonContainerClass = "flex gap-4 border-t border-[var(--border-light)] pt-6 mt-6";
+    const isWithCancel = isEditMode || !isFirstObjective;
 
     return (
-        <div className={objetivosStyles.formContainer}>
+        <div className="bg-[var(--card)] shadow-[var(--shadow-lg)] border border-[var(--border)] rounded-[var(--radius-md,0.5rem)] p-6 md:p-8 w-full max-w-[768px] mx-auto mb-8">
             <form onSubmit={handleSubmit(onSubmitInternal)} noValidate>
-                <div className={objetivosStyles.formGroupContainer}>
+                <div className="flex flex-col gap-4">
                     <FormGroup label={t('objectivesForm.nameLabel')} htmlFor="name" required={true} error={errors.name?.message}>
                         <Input
                             data-cy="objective-name-input" type="text" id="name" placeholder={t('objectivesForm.namePlaceholder')}
@@ -218,7 +213,7 @@ ObjectiveForm.propTypes = {
                         </Input>
                     </FormGroup>
 
-                    <div className={objetivosStyles.formGrid}>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
                         {!isEditMode && (
                             <FormGroup label={t('objectivesForm.initialValueLabel')} htmlFor="initialValue" required={true} error={errors.initialValue?.message}>
                                 <Input
@@ -268,26 +263,26 @@ ObjectiveForm.propTypes = {
                         </FormGroup>
                         {(targetValueWatch !== null && targetValueWatch !== '' && !isNaN(parseFloat(targetValueWatch))) && (
                             <FormGroup htmlFor="isLowerBetter">
-                                <div className={objetivosStyles.checkboxWrapper}>
-                                <div className={objetivosStyles.checkboxWithTooltipContainer}>
-                                    <label className={objetivosStyles.checkboxLabel}>
-                                        <input type="checkbox" id="isLowerBetter" {...register("isLowerBetter")} disabled={loading} />
+                                <div className="flex items-center gap-2">
+                                <div className="flex items-center gap-2">
+                                    <label className="flex items-center gap-2 text-[var(--foreground)] text-[0.9rem]">
+                                        <input type="checkbox" id="isLowerBetter" {...register("isLowerBetter")} disabled={loading} className="w-[1.1rem] h-[1.1rem] accent-[var(--primary)]" />
                                         <span>{t('objectivesForm.isLowerBetter.label')}</span>
                                     </label>
                                     <FaInfoCircle
-                                        className={objetivosStyles.tooltipIcon}
+                                        className="text-[var(--muted-foreground)] text-[1rem] cursor-help transition-colors duration-200 hover:text-[var(--primary)]"
                                         data-tooltip-id="info-tooltip"
                                         data-tooltip-place="right"
                                         data-tooltip-content={t('objectivesForm.isLowerBetter.tooltip')}
                                     />
                                 </div>
-                                {errors.isLowerBetter && (<p className={objetivosStyles.errorText}>{errors.isLowerBetter.message}</p>)}
+                                {errors.isLowerBetter && (<p className="text-[var(--destructive)] text-[0.85rem] mt-1">{errors.isLowerBetter.message}</p>)}
                             </div>
                             </FormGroup>
                         )}
                     </div>
 
-                    <div className={objetivosStyles.dateFieldsGrid}>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                         <FormGroup label={t('objectivesForm.startDateLabel')} htmlFor="startDate" error={errors.startDate?.message}>
                             <Controller
                                 name="startDate"
@@ -352,7 +347,7 @@ ObjectiveForm.propTypes = {
                             </Input>
                         </FormGroup>
                     )}
-                    <div className={buttonContainerClass.join(' ').trim()}>
+                    <div className={`${buttonContainerClass} ${isWithCancel ? '' : 'justify-end'}`}>
                         {(isEditMode || !isFirstObjective) && (
                             <Button type="button" onClick={handleCancelClick} disabled={loading} variant="buttonOutline" >
                                 {t('common.cancel')}

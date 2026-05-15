@@ -6,7 +6,6 @@ import api from '../services/apiService';
 
 import ObjetivosForm from '../components/objetivos/ObjetivosForm';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
-import styles from './EditGoalPage.module.css';
 
 function EditGoalPage() {
     const { id } = useParams();
@@ -61,16 +60,16 @@ function EditGoalPage() {
     };
 
     if (loading) {
-        return <div className={styles.loadingState}><LoadingSpinner size="large" text={t('loaders.loadingObjectiveForEdit')} /></div>;
+        return <div className="text-center text-[1.1rem] text-[var(--muted-foreground)] p-8 bg-[var(--muted)] rounded-[var(--radius)] mt-8"><LoadingSpinner size="large" text={t('loaders.loadingObjectiveForEdit')} /></div>;
     }
 
     if (error) {
-        return <div className={styles.errorState}>{error}</div>;
+        return <div className="text-center text-[1.1rem] text-[var(--destructive)] p-8 bg-[#fcebeb] rounded-[var(--radius)] mt-8 border border-[var(--destructive)]">{error}</div>;
     }
 
     return (
-        <div className={styles.editGoalContainer}>
-            <h1 className={styles.pageTitle}>{t('pageTitles.editObjective')}</h1>
+        <div className="max-w-[800px] mx-auto p-8 pt-8 pb-0 w-full overflow-y-hidden">
+            <h1 className="text-[1.8rem] text-[var(--foreground)] m-0 text-center mb-6">{t('pageTitles.editObjective')}</h1>
             {objective && (
                 <ObjetivosForm
                     initialData={objective}

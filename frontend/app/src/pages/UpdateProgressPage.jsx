@@ -2,7 +2,6 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../services/apiService';
 import { toast } from 'react-toastify';
-import styles from './UpdateProgressPage.module.css';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
 import Button from '../components/ui/Button';
 import { format, parseISO, isValid } from 'date-fns';
@@ -36,17 +35,17 @@ function UpdateProgressPage() {
         if (objectiveId) fetchGoalDetails();
     }, [objectiveId, fetchGoalDetails]);
     
-    if (loading) return (<div className={styles.updateProgressPage}><LoadingSpinner size='large' text={t('loaders.loadingObjectiveForEdit')}/></div>);
-    if (error && !goalData) return (<div className={`${styles.updateProgressPage} ${styles.updateProgressPageError}`}><p>{error}</p><Button onClick={() => navigate('/')}>{t('common.backToDashboard')}</Button></div>);
-    if (!goalData) return (<div className={styles.updateProgressPage}><p>{t('errors.objectiveNotFound')}</p><Button onClick={() => navigate('/')}>{t('common.backToDashboard')}</Button></div>);
+    if (loading) return (<div className="flex justify-center items-start bg-[var(--background)]"><LoadingSpinner size='large' text={t('loaders.loadingObjectiveForEdit')}/></div>);
+    if (error && !goalData) return (<div className="flex justify-center items-start bg-[var(--background)] text-center p-8 text-[var(--destructive)] font-medium"><p>{error}</p><Button onClick={() => navigate('/')}>{t('common.backToDashboard')}</Button></div>);
+    if (!goalData) return (<div className="flex justify-center items-start bg-[var(--background)]"><p>{t('errors.objectiveNotFound')}</p><Button onClick={() => navigate('/')}>{t('common.backToDashboard')}</Button></div>);
     
     if (goalData.status === 'ARCHIVED') {
         return ( 
-            <div className={styles.updateProgressPage}>
-                <div className={styles.nonQuantitativeMessage}>
-                    <h2 className={styles.nonQuantitativeMessageTitle}>{t('updateProgressPage.titleArchived', { name: goalData.name })}</h2>
-                    <p className={styles.nonQuantitativeMessageText}>{t('updateProgressPage.archivedError')}</p>
-                    <div className={styles.nonQuantitativeMessageActions}>
+            <div className="flex justify-center items-start bg-[var(--background)]">
+                <div className="bg-[var(--card)] border border-[var(--border)] rounded-[var(--radius)] p-8 w-full max-w-[600px] shadow-[0_4px_12px_rgba(0,0,0,0.08)] text-center text-[var(--foreground)] flex flex-col items-center gap-5">
+                    <h2 className="text-[1.5rem] mb-4 text-[var(--primary)]">{t('updateProgressPage.titleArchived', { name: goalData.name })}</h2>
+                    <p className="text-[1rem] leading-relaxed mb-6">{t('updateProgressPage.archivedError')}</p>
+                    <div className="flex justify-center gap-3">
                         <Button onClick={() => navigate(`/objectives/${objectiveId}`)} variant="secondary">{t('updateProgressPage.backToObjective')}</Button>
                     </div>
                 </div>
@@ -56,12 +55,12 @@ function UpdateProgressPage() {
 
     if (goalData.targetValue === null || isNaN(Number(goalData.targetValue))) {
         return ( 
-            <div className={styles.updateProgressPage}>
-                <div className={`${styles.nonQuantitativeMessage}`}>
-                    <h2 className={styles.nonQuantitativeMessageTitle}>{t('updateProgressPage.title', { name: goalData.name })}</h2>
-                    <p className={styles.nonQuantitativeMessageText}>{t('updateProgressPage.notQuantitative')}</p>
-                    <p className={styles.nonQuantitativeMessageText}>{t('updateProgressPage.notQuantitativeSuggestion')}</p>
-                    <div className={styles.nonQuantitativeMessageActions}>
+            <div className="flex justify-center items-start bg-[var(--background)]">
+                <div className="bg-[var(--card)] border border-[var(--border)] rounded-[var(--radius)] p-8 w-full max-w-[600px] shadow-[0_4px_12px_rgba(0,0,0,0.08)] text-center text-[var(--foreground)] flex flex-col items-center gap-5">
+                    <h2 className="text-[1.5rem] mb-4 text-[var(--primary)]">{t('updateProgressPage.title', { name: goalData.name })}</h2>
+                    <p className="text-[1rem] leading-relaxed mb-6">{t('updateProgressPage.notQuantitative')}</p>
+                    <p className="text-[1rem] leading-relaxed mb-6">{t('updateProgressPage.notQuantitativeSuggestion')}</p>
+                    <div className="flex justify-center gap-3">
                         <Button onClick={() => navigate(`/objectives/${objectiveId}`)} variant="secondary">{t('updateProgressPage.backToObjective')}</Button>
                         <Button onClick={() => navigate(`/objectives/edit/${objectiveId}`)}>{t('common.edit')}</Button>
                     </div>
@@ -148,35 +147,35 @@ function QuantitativeUpdateForm({ goalData }) {
     }, [newProgressValue, goalData]);
     
     return (
-        <div className={styles.updateProgressPage}>
-            <div className={styles.updateProgressCard}>
-                <div className={styles.updateProgressHeader}>
-                    <h1 className={styles.goalTitle}>{goalData.name}</h1>
-                    <p className={styles.goalDescription}>{goalData.description || t('common.noDescription')}</p>
+        <div className="flex justify-center items-start bg-[var(--background)]">
+            <div className="bg-[var(--card)] border border-[var(--border)] rounded-[var(--radius)] p-8 w-full max-w-[500px] shadow-[0_4px_12px_rgba(0,0,0,0.08)] flex flex-col gap-6">
+                <div className="text-center mb-4">
+                    <h1 className="text-[1.8rem] text-[var(--foreground)] mb-2 font-bold">{goalData.name}</h1>
+                    <p className="text-[0.95rem] text-[var(--muted-foreground)] mb-4">{goalData.description || t('common.noDescription')}</p>
                 </div>
-                <div className={styles.progressSection}>
-                    <h2 className={styles.sectionHeading}>{t('updateProgressPage.progressPreviewTitle')}</h2>
-                    <div className={styles.progressBarContainer}>
-                        <div className={styles.progressBarHeader}><span className={styles.progressBarLabel}>{t('updateProgressPage.progressLabel')}</span><span className={styles.progressBarPercentage}>{Math.round(progressPercentage)}%</span></div>
-                        <div className={styles.progressBar}><div className={`${styles.progressBarFill} ${progressPercentage < 33 ? styles.progressFillLow : progressPercentage < 66 ? styles.progressFillMedium : styles.progressFillHigh}`} style={{ width: `${progressPercentage}%` }}></div></div>
+                <div className="bg-[var(--background)] border border-[var(--border)] rounded-[var(--radius)] p-4 px-6 flex flex-col items-center gap-2">
+                    <h2 className="text-[1.1rem] text-[var(--foreground)] font-semibold mb-2 text-center w-full">{t('updateProgressPage.progressPreviewTitle')}</h2>
+                    <div className="w-full mb-4">
+                        <div className="flex justify-between items-center mb-2"><span className="text-[0.9rem] text-[var(--muted-foreground)] font-medium">{t('updateProgressPage.progressLabel')}</span><span className="text-[1.2rem] font-bold text-[var(--primary)]">{Math.round(progressPercentage)}%</span></div>
+                        <div className="w-full h-2 bg-[var(--muted)] rounded overflow-hidden"><div className={`h-full rounded transition-[width] duration-300 ease-in-out ${progressPercentage < 33 ? 'bg-[var(--destructive)]' : progressPercentage < 66 ? 'bg-[var(--warning)]' : 'bg-[var(--success)]'}`} style={{ width: `${progressPercentage}%` }}></div></div>
                     </div>
-                    <div className={styles.progressDetails}>
-                        <div className={styles.detailItem}><span className={styles.detailLabel}>{t('updateProgressPage.newValueLabel')}</span><span className={styles.detailValue}>{displayCurrentValue} {goalData.unit || ''}</span></div>
-                        <div className={styles.detailItem}><span className={styles.detailLabel}>{t('updateProgressPage.targetValueLabel')}</span><span className={styles.detailValue}>{Number(goalData.targetValue || 0).toFixed(1)} {goalData.unit || ''}</span></div>
+                    <div className="flex justify-around w-full mt-4 gap-4 bg-[var(--border)] p-4 rounded-lg">
+                        <div className="flex flex-col items-start text-center flex-1"><span className="text-[0.85rem] text-[var(--muted-foreground)] mb-0.5">{t('updateProgressPage.newValueLabel')}</span><span className="text-[1.1rem] font-semibold text-[var(--foreground)]">{displayCurrentValue} {goalData.unit || ''}</span></div>
+                        <div className="flex flex-col items-start text-center flex-1"><span className="text-[0.85rem] text-[var(--muted-foreground)] mb-0.5">{t('updateProgressPage.targetValueLabel')}</span><span className="text-[1.1rem] font-semibold text-[var(--foreground)]">{Number(goalData.targetValue || 0).toFixed(1)} {goalData.unit || ''}</span></div>
                     </div>
-                    <p className={styles.lastUpdateInfo}>{t('updateProgressPage.lastUpdateInfo')}<span className={styles.lastUpdateDate}>{lastUpdateDate}</span></p>
+                    <p className="text-[0.8rem] text-[var(--muted-foreground)] mt-4">{t('updateProgressPage.lastUpdateInfo')}<span className="font-medium text-[var(--foreground)]">{lastUpdateDate}</span></p>
                 </div>
-                <form onSubmit={handleSubmit} className={styles.updateForm}>
-                    <div className={styles.formGroup}>
-                        <label htmlFor="newProgressValue" className={styles.formLabel}>{t('updateProgressPage.newProgressValueLabel')}</label>
-                        <input type="text" id="newProgressValue" inputMode="decimal" className={styles.formInput} value={newProgressValue} onChange={handleValueChange} placeholder={t('updateProgressPage.newProgressValuePlaceholder', { unit: goalData.unit || 'unidades' })} autoFocus />
+                <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+                    <div className="flex flex-col gap-2">
+                        <label htmlFor="newProgressValue" className="text-[0.9rem] font-semibold text-[var(--foreground)]">{t('updateProgressPage.newProgressValueLabel')}</label>
+                        <input type="text" id="newProgressValue" inputMode="decimal" className="p-3 px-4 border border-[var(--border)] rounded-[var(--radius)] text-[1rem] text-[var(--foreground)] w-full box-border bg-[var(--background)] placeholder:text-[var(--muted-foreground)] focus:outline-none focus:border-[var(--primary)] focus:shadow-[0_0_0_2px_color-mix(in_srgb,var(--primary)_20%,transparent)]" value={newProgressValue} onChange={handleValueChange} placeholder={t('updateProgressPage.newProgressValuePlaceholder', { unit: goalData.unit || 'unidades' })} autoFocus />
                     </div>
-                    <div className={styles.formGroup}>
-                        <label htmlFor="notes" className={styles.formLabel}>{t('updateProgressPage.notesLabel')}</label>
-                        <textarea id="notes" className={styles.formTextarea} value={notes} onChange={(e) => setNotes(e.target.value)} placeholder={t('updateProgressPage.notesPlaceholder')} rows="4"></textarea>
+                    <div className="flex flex-col gap-2">
+                        <label htmlFor="notes" className="text-[0.9rem] font-semibold text-[var(--foreground)]">{t('updateProgressPage.notesLabel')}</label>
+                        <textarea id="notes" className="p-3 px-4 border border-[var(--border)] rounded-[var(--radius)] text-[1rem] text-[var(--foreground)] w-full box-border bg-[var(--background)] placeholder:text-[var(--muted-foreground)] focus:outline-none focus:border-[var(--primary)] focus:shadow-[0_0_0_2px_color-mix(in_srgb,var(--primary)_20%,transparent)] resize-y min-h-[80px]" value={notes} onChange={(e) => setNotes(e.target.value)} placeholder={t('updateProgressPage.notesPlaceholder')} rows="4"></textarea>
                     </div>
-                    {error && <p className={styles.formErrorMessage}>{error}</p>}
-                    <div className={styles.formActions}>
+                    {error && <p className="text-[var(--destructive)] text-[0.85rem] mt-2 text-left">{error}</p>}
+                    <div className="flex justify-between gap-3 mt-4">
                         <Button type="button" onClick={() => navigate(`/objectives/${objectiveId}`)} variant="secondary" disabled={isSubmitting}>{t('common.cancel')}</Button>
                         <Button type="submit" disabled={isSubmitting}>{isSubmitting ? t('common.saving') : t('updateProgressPage.saveButton')}</Button>
                     </div>

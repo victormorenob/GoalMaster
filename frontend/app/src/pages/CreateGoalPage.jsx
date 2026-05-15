@@ -6,7 +6,6 @@ import api from "../services/apiService";
 import { useAuth } from "../context/AuthContext";
 
 import ObjetivosForm from "../components/objetivos/ObjetivosForm";
-import styles from "./CreateGoalPage.module.css";
 
 function CreateObjectivePage() {
     const { t } = useTranslation();
@@ -31,9 +30,9 @@ function CreateObjectivePage() {
     };
 
     return (
-        <div className={styles.createGoalPageContainer}>
-            <div className={styles.formWrapper}>
-                <h2 className={styles.formTitle}>
+        <div className="min-h-screen bg-[#f9fafb] p-4 pt-8 pb-8 sm:px-6 box-border">
+            <div className="max-w-3xl mx-auto w-full px-3 box-border">
+                <h2 className="text-center mb-6 mt-0 text-[#333] text-[1.8rem]">
                     {user?.hasObjectives ? t('createGoalPage.title.new') : t('createGoalPage.title.first')}
                 </h2>
                 <ObjetivosForm
