@@ -1,5 +1,6 @@
 // frontend/app/src/components/tags/TagManager.js
 import React, { useState, useEffect, useCallback } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'react-toastify';
@@ -14,125 +15,21 @@ const COLORS = [
   '#ec4899', '#06b6d4', '#f97316', '#14b8a6', '#6366f1',
 ];
 
-const containerStyle = {
-  padding: '1rem',
+const containerVariants = {
+    hidden: { opacity: 0 },
+    show: { opacity: 1, transition: { staggerChildren: 0.05 } },
 };
 
-const headerStyle = {
-  display: 'flex',
-  justifyContent: 'space-between',
-  alignItems: 'center',
-  marginBottom: '1rem',
+const itemVariants = {
+    hidden: { opacity: 0, x: -10 },
+    show: { opacity: 1, x: 0 },
+    exit: { opacity: 0, x: 10, transition: { duration: 0.15 } },
 };
 
-const titleStyle = {
-  fontSize: '1.1rem',
-  fontWeight: 600,
-  color: 'var(--foreground)',
-  margin: 0,
-};
-
-const tagListStyle = {
-  display: 'flex',
-  flexDirection: 'column',
-  gap: '0.5rem',
-};
-
-const tagItemStyle = {
-  display: 'flex',
-  justifyContent: 'space-between',
-  alignItems: 'center',
-  padding: '0.5rem 0.75rem',
-  borderRadius: 'var(--radius)',
-  border: '1px solid var(--border)',
-  backgroundColor: 'var(--card)',
-};
-
-const tagItemLeftStyle = {
-  display: 'flex',
-  alignItems: 'center',
-  gap: '0.5rem',
-};
-
-const colorDotStyle = (color) => ({
-  width: '12px',
-  height: '12px',
-  borderRadius: '50%',
-  backgroundColor: color,
-  flexShrink: 0,
-});
-
-const tagActionsStyle = {
-  display: 'flex',
-  gap: '0.35rem',
-};
-
-const iconButtonStyle = {
-  background: 'none',
-  border: 'none',
-  cursor: 'pointer',
-  padding: '0.25rem',
-  color: 'var(--muted-foreground)',
-  fontSize: '0.9rem',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  borderRadius: '4px',
-  transition: 'background-color 0.15s',
-};
-
-// Modal styles
-const modalOverlayStyle = {
-  position: 'fixed',
-  top: 0,
-  left: 0,
-  right: 0,
-  bottom: 0,
-  backgroundColor: 'rgba(0,0,0,0.5)',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  zIndex: 1000,
-};
-
-const modalContentStyle = {
-  backgroundColor: 'var(--card, #fff)',
-  borderRadius: 'var(--radius, 0.4rem)',
-  padding: '1.5rem',
-  width: '90%',
-  maxWidth: '400px',
-  boxShadow: '0 10px 25px rgba(0,0,0,0.2)',
-};
-
-const modalTitleStyle = {
-  fontSize: '1.1rem',
-  fontWeight: 600,
-  marginBottom: '1rem',
-  color: 'var(--foreground)',
-};
-
-const colorGridStyle = {
-  display: 'flex',
-  flexWrap: 'wrap',
-  gap: '0.5rem',
-  marginBottom: '1rem',
-};
-
-const colorSwatchStyle = (color, isSelected) => ({
-  width: '32px',
-  height: '32px',
-  borderRadius: '50%',
-  backgroundColor: color,
-  cursor: 'pointer',
-  border: isSelected ? '3px solid var(--foreground)' : '3px solid transparent',
-  transition: 'transform 0.15s, border-color 0.15s',
-});
-
-const modalActionsStyle = {
-  display: 'flex',
-  justifyContent: 'flex-end',
-  gap: '0.5rem',
-  marginTop: '1rem',
+const modalVariants = {
+    hidden: { opacity: 0, scale: 0.9 },
+    visible: { opacity: 1, scale: 1, transition: { type: 'spring', stiffness: 300, damping: 25 } },
+    exit: { opacity: 0, scale: 0.95 },
 };
 
 function TagManager({ onTagsChanged }) {
@@ -218,122 +115,133 @@ function TagManager({ onTagsChanged }) {
   };
 
   return (
-    <div style={containerStyle}>
-      <div style={headerStyle}>
-        <h3 style={titleStyle}>{t('tags.managerTitle')}</h3>
+    <div className="p-4">
+      <div className="flex justify-between items-center mb-4">
+        <h3 className="text-[1.1rem] font-semibold text-[var(--foreground)] m-0">{t('tags.managerTitle')}</h3>
         <Button variant="primary" size="small" onClick={openCreateModal} leftIcon={<FaPlus />}>
           {t('tags.addTag')}
         </Button>
       </div>
 
-      {isLoading && <p>{t('common.loading')}</p>}
+      {isLoading && <p className="text-[var(--muted-foreground)]">{t('common.loading')}</p>}
 
       {!isLoading && tags.length === 0 && (
-        <p style={{ color: 'var(--muted-foreground)', fontSize: '0.9rem' }}>
-          {t('tags.noTags')}
-        </p>
+        <p className="text-sm text-[var(--muted-foreground)]">{t('tags.noTags')}</p>
       )}
 
       {!isLoading && tags.length > 0 && (
-        <div style={tagListStyle}>
-          {tags.map((tag) => (
-            <div key={tag.id} style={tagItemStyle}>
-              <div style={tagItemLeftStyle}>
-                <span style={colorDotStyle(tag.color)} />
-                <TagBadge name={tag.name} color={tag.color} />
-              </div>
-              <div style={tagActionsStyle}>
-                <button
-                  style={iconButtonStyle}
-                  onClick={() => openEditModal(tag)}
-                  aria-label={t('common.edit')}
-                  title={t('common.edit')}
-                  onMouseEnter={(e) => { e.target.style.backgroundColor = 'var(--muted)'; }}
-                  onMouseLeave={(e) => { e.target.style.backgroundColor = 'transparent'; }}
-                >
-                  <FaEdit />
-                </button>
-                <button
-                  style={iconButtonStyle}
-                  onClick={() => handleDelete(tag)}
-                  aria-label={t('common.delete')}
-                  title={t('common.delete')}
-                  onMouseEnter={(e) => { e.target.style.color = 'var(--destructive)'; e.target.style.backgroundColor = 'var(--muted)'; }}
-                  onMouseLeave={(e) => { e.target.style.color = 'var(--muted-foreground)'; e.target.style.backgroundColor = 'transparent'; }}
-                >
-                  <FaTrash />
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
+        <motion.div
+            className="flex flex-col gap-2"
+            variants={containerVariants}
+            initial="hidden"
+            animate="show"
+        >
+          <AnimatePresence mode="popLayout">
+            {tags.map((tag) => (
+              <motion.div
+                key={tag.id}
+                layout
+                variants={itemVariants}
+                initial="hidden"
+                animate="show"
+                exit="exit"
+                className="flex justify-between items-center p-2 rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card)]"
+              >
+                <div className="flex items-center gap-2">
+                  <span className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: tag.color }} />
+                  <TagBadge name={tag.name} color={tag.color} />
+                </div>
+                <div className="flex gap-1">
+                  <button
+                    className="bg-transparent border-none cursor-pointer p-1 text-[var(--muted-foreground)] hover:text-[var(--foreground)] hover:bg-[var(--muted)] rounded"
+                    onClick={() => openEditModal(tag)}
+                    aria-label={t('common.edit')}
+                    title={t('common.edit')}
+                  >
+                    <FaEdit size={14} />
+                  </button>
+                  <button
+                    className="bg-transparent border-none cursor-pointer p-1 text-[var(--muted-foreground)] hover:text-[var(--destructive)] hover:bg-[var(--muted)] rounded"
+                    onClick={() => handleDelete(tag)}
+                    aria-label={t('common.delete')}
+                    title={t('common.delete')}
+                  >
+                    <FaTrash size={14} />
+                  </button>
+                </div>
+              </motion.div>
+            ))}
+          </AnimatePresence>
+        </motion.div>
       )}
 
       {/* Modal for creating/editing tags */}
-      {modalOpen && (
-        <div style={modalOverlayStyle} onClick={() => setModalOpen(false)}>
-          <div style={modalContentStyle} onClick={(e) => e.stopPropagation()}>
-            <h3 style={modalTitleStyle}>
-              {editingTag ? t('tags.editTag') : t('tags.createTag')}
-            </h3>
+      <AnimatePresence>
+        {modalOpen && (
+          <motion.div
+            className="fixed inset-0 bg-black/50 flex items-center justify-center z-[1000]"
+            variants={modalVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            onClick={() => setModalOpen(false)}
+          >
+            <motion.div
+              className="bg-[var(--card)] rounded-[var(--radius)] p-6 w-[90%] max-w-[400px] shadow-lg"
+              onClick={(e) => e.stopPropagation()}
+              variants={modalVariants}
+            >
+              <h3 className="text-[1.1rem] font-semibold mb-4 text-[var(--foreground)]">
+                {editingTag ? t('tags.editTag') : t('tags.createTag')}
+              </h3>
 
-            <div style={{ marginBottom: '1rem' }}>
-              <label
-                htmlFor="tag-name-input"
-                style={{
-                  display: 'block',
-                  fontSize: '0.85rem',
-                  fontWeight: 500,
-                  marginBottom: '0.3rem',
-                  color: 'var(--foreground)',
-                }}
-              >
-                {t('tags.nameLabel')}
-              </label>
-              <Input
-                id="tag-name-input"
-                type="text"
-                value={formName}
-                onChange={(e) => setFormName(e.target.value)}
-                placeholder={t('tags.namePlaceholder')}
-                autoFocus
-              />
-            </div>
-
-            <div style={{ marginBottom: '1rem' }}>
-              <label
-                style={{
-                  display: 'block',
-                  fontSize: '0.85rem',
-                  fontWeight: 500,
-                  marginBottom: '0.5rem',
-                  color: 'var(--foreground)',
-                }}
-              >
-                {t('tags.colorLabel')}
-              </label>
-              <div style={colorGridStyle}>
-                {COLORS.map((color) => (
-                  <div
-                    key={color}
-                    style={colorSwatchStyle(color, formColor === color)}
-                    onClick={() => setFormColor(color)}
-                  />
-                ))}
+              <div className="mb-4">
+                <label htmlFor="tag-name-input" className="block text-sm font-medium mb-1 text-[var(--foreground)]">
+                  {t('tags.nameLabel')}
+                </label>
+                <Input
+                  id="tag-name-input"
+                  type="text"
+                  value={formName}
+                  onChange={(e) => setFormName(e.target.value)}
+                  placeholder={t('tags.namePlaceholder')}
+                  autoFocus
+                />
               </div>
-            </div>
 
-            <div style={modalActionsStyle}>
-              <Button variant="secondary" onClick={() => setModalOpen(false)}>
-                {t('common.cancel')}
-              </Button>
-              <Button variant="primary" onClick={handleSave}>
-                {editingTag ? t('common.save') : t('common.create')}
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
+              <div className="mb-4">
+                <label className="block text-sm font-medium mb-2 text-[var(--foreground)]">
+                  {t('tags.colorLabel')}
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  {COLORS.map((color) => (
+                    <motion.div
+                      key={color}
+                      className="w-8 h-8 rounded-full cursor-pointer"
+                      style={{
+                        backgroundColor: color,
+                        border: formColor === color ? '3px solid var(--foreground)' : '3px solid transparent',
+                      }}
+                      onClick={() => setFormColor(color)}
+                      whileHover={{ scale: 1.15 }}
+                      whileTap={{ scale: 0.9 }}
+                    />
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-2 mt-4">
+                <Button variant="secondary" onClick={() => setModalOpen(false)}>
+                  {t('common.cancel')}
+                </Button>
+                <Button variant="primary" onClick={handleSave}>
+                  {editingTag ? t('common.save') : t('common.create')}
+                </Button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

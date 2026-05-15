@@ -1,34 +1,29 @@
 // frontend/app/src/components/tags/TagBadge.js
 import React from 'react';
+import { motion } from 'framer-motion';
 import PropTypes from 'prop-types';
-
-const TAG_BADGE_STYLES = {
-  display: 'inline-flex',
-  alignItems: 'center',
-  gap: '0.25rem',
-  padding: '0.15rem 0.6rem',
-  borderRadius: '9999px',
-  fontSize: '0.75rem',
-  fontWeight: 600,
-  lineHeight: 1.4,
-  whiteSpace: 'nowrap',
-};
 
 function TagBadge({ name, color, onRemove, size = 'small' }) {
   const bgColor = color || '#3b82f6';
   const textColor = 'white';
 
-  const badgeStyle = {
-    ...TAG_BADGE_STYLES,
-    backgroundColor: bgColor,
-    color: textColor,
-    fontSize: size === 'small' ? '0.75rem' : '0.85rem',
-    padding: size === 'small' ? '0.15rem 0.6rem' : '0.25rem 0.8rem',
-    cursor: onRemove ? 'pointer' : 'default',
-  };
+  const fontSize = size === 'small' ? '0.75rem' : '0.85rem';
+  const padding = size === 'small' ? '0.15rem 0.6rem' : '0.25rem 0.8rem';
 
   return (
-    <span style={badgeStyle} title={name}>
+    <motion.span
+      className="inline-flex items-center gap-1 rounded-full font-semibold whitespace-nowrap"
+      style={{
+        backgroundColor: bgColor,
+        color: textColor,
+        fontSize,
+        padding,
+        cursor: onRemove ? 'pointer' : 'default',
+      }}
+      title={name}
+      whileHover={{ scale: 1.08 }}
+      transition={{ type: 'spring', stiffness: 400, damping: 15 }}
+    >
       {name}
       {onRemove && (
         <span
@@ -45,7 +40,7 @@ function TagBadge({ name, color, onRemove, size = 'small' }) {
           ✕
         </span>
       )}
-    </span>
+    </motion.span>
   );
 }
 

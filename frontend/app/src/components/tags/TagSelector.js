@@ -1,71 +1,14 @@
 // frontend/app/src/components/tags/TagSelector.js
 import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import PropTypes from 'prop-types';
 import TagBadge from './TagBadge';
 
-const containerStyle = {
-  position: 'relative',
-  width: '100%',
+const dropdownVariants = {
+    hidden: { opacity: 0, y: -5, scale: 0.95 },
+    visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.15 } },
+    exit: { opacity: 0, y: -5, scale: 0.95, transition: { duration: 0.1 } },
 };
-
-const inputWrapperStyle = {
-  display: 'flex',
-  flexWrap: 'wrap',
-  gap: '0.35rem',
-  padding: '0.4rem 0.5rem',
-  border: '1px solid var(--border, #d1d5db)',
-  borderRadius: 'var(--radius, 0.4rem)',
-  backgroundColor: 'var(--card, #fff)',
-  minHeight: '2.5rem',
-  cursor: 'text',
-  alignItems: 'center',
-};
-
-const inputStyle = {
-  border: 'none',
-  outline: 'none',
-  flex: '1 1 100px',
-  minWidth: '80px',
-  padding: '0.2rem',
-  fontSize: '0.9rem',
-  backgroundColor: 'transparent',
-  color: 'var(--foreground, #1f2937)',
-};
-
-const dropdownStyle = {
-  position: 'absolute',
-  top: '100%',
-  left: 0,
-  right: 0,
-  backgroundColor: 'var(--card, #fff)',
-  border: '1px solid var(--border, #d1d5db)',
-  borderRadius: 'var(--radius, 0.4rem)',
-  boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-  zIndex: 50,
-  maxHeight: '200px',
-  overflowY: 'auto',
-  marginTop: '2px',
-};
-
-const dropdownItemStyle = (isSelected) => ({
-  display: 'flex',
-  alignItems: 'center',
-  gap: '0.5rem',
-  padding: '0.5rem 0.75rem',
-  cursor: 'pointer',
-  fontSize: '0.9rem',
-  backgroundColor: isSelected ? 'var(--muted, #f3f4f6)' : 'transparent',
-  color: 'var(--foreground, #1f2937)',
-  transition: 'background-color 0.15s',
-});
-
-const colorCircleStyle = (color) => ({
-  width: '10px',
-  height: '10px',
-  borderRadius: '50%',
-  backgroundColor: color || '#3b82f6',
-  flexShrink: 0,
-});
 
 function TagSelector({ availableTags = [], selectedTags = [], onChange }) {
   const [inputValue, setInputValue] = useState('');
@@ -109,14 +52,12 @@ function TagSelector({ availableTags = [], selectedTags = [], onChange }) {
   const handleKeyDown = (e) => {
     if (e.key === 'Enter' && inputValue.trim()) {
       e.preventDefault();
-      // If there's a matching tag in filteredTags, select it
       const exactMatch = filteredTags.find(
         (t) => t.name.toLowerCase() === inputValue.trim().toLowerCase()
       );
       if (exactMatch) {
         handleSelectTag(exactMatch.name);
       } else {
-        // Allow creating a free-form tag if it doesn't exist in availableTags
         handleSelectTag(inputValue.trim());
       }
     }
@@ -128,7 +69,6 @@ function TagSelector({ availableTags = [], selectedTags = [], onChange }) {
     }
   };
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (containerRef.current && !containerRef.current.contains(e.target)) {
@@ -145,9 +85,9 @@ function TagSelector({ availableTags = [], selectedTags = [], onChange }) {
   };
 
   return (
-    <div ref={containerRef} style={containerStyle}>
+    <div ref={containerRef} className="relative w-full">
       <div
-        style={inputWrapperStyle}
+        className="flex flex-wrap gap-1 p-2 border border-[var(--border)] rounded-[var(--radius)] bg-[var(--card)] min-h-[2.5rem] cursor-text items-center"
         onClick={() => inputRef.current?.focus()}
       >
         {selectedTags.map((tagName) => (
@@ -166,38 +106,48 @@ function TagSelector({ availableTags = [], selectedTags = [], onChange }) {
           onFocus={handleInputFocus}
           onKeyDown={handleKeyDown}
           placeholder={selectedTags.length === 0 ? 'Search or add tags...' : ''}
-          style={inputStyle}
+          className="border-none outline-none flex-[1_1_100px] min-w-[80px] p-[0.2rem] text-sm bg-transparent text-[var(--foreground)]"
+          style={{ color: 'var(--foreground)' }}
         />
       </div>
 
-      {isOpen && filteredTags.length > 0 && (
-        <div style={dropdownStyle}>
-          {filteredTags.map((tag) => (
-            <div
-              key={tag.id || tag.name}
-              style={dropdownItemStyle(false)}
-              onClick={() => handleSelectTag(tag.name)}
-              onMouseEnter={(e) => {
-                e.target.style.backgroundColor = 'var(--muted, #f3f4f6)';
-              }}
-              onMouseLeave={(e) => {
-                e.target.style.backgroundColor = 'transparent';
-              }}
-            >
-              <span style={colorCircleStyle(tag.color)} />
-              <span>{tag.name}</span>
-            </div>
-          ))}
-        </div>
-      )}
+      <AnimatePresence>
+        {isOpen && filteredTags.length > 0 && (
+          <motion.div
+            className="absolute top-full left-0 right-0 z-50 bg-[var(--card)] border border-[var(--border)] rounded-[var(--radius)] shadow-lg max-h-[200px] overflow-y-auto mt-1"
+            variants={dropdownVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+          >
+            {filteredTags.map((tag) => (
+              <motion.div
+                key={tag.id || tag.name}
+                className="flex items-center gap-2 px-3 py-2 text-sm cursor-pointer hover:bg-[var(--muted)] text-[var(--foreground)]"
+                onClick={() => handleSelectTag(tag.name)}
+                whileHover={{ backgroundColor: 'var(--muted)' }}
+              >
+                <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: tag.color || '#3b82f6' }} />
+                <span>{tag.name}</span>
+              </motion.div>
+            ))}
+          </motion.div>
+        )}
 
-      {isOpen && inputValue && filteredTags.length === 0 && (
-        <div style={dropdownStyle}>
-          <div style={{ ...dropdownItemStyle(false), opacity: 0.6, cursor: 'default' }}>
-            Press Enter to add "{inputValue}"
-          </div>
-        </div>
-      )}
+        {isOpen && inputValue && filteredTags.length === 0 && (
+          <motion.div
+            className="absolute top-full left-0 right-0 z-50 bg-[var(--card)] border border-[var(--border)] rounded-[var(--radius)] shadow-lg mt-1"
+            variants={dropdownVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+          >
+            <div className="px-3 py-2 text-sm opacity-60 cursor-default text-[var(--muted-foreground)]">
+              Press Enter to add &ldquo;{inputValue}&rdquo;
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
