@@ -1,0 +1,73 @@
+/* frontend/app/src/layouts/AppHeader.module.css */
+
+.header {
+  height: var(--app-header-height);
+  background-color: var(--card);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 1.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  width: 100%;
+  z-index: 10;
+  flex-shrink: 0;
+}
+
+.headerPageTitle {
+  margin-block: 0;
+  color: var(--foreground);
+  font-size: 1.2rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.leftContent {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.menuButton {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  width: 24px;
+  height: 24px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  z-index: 20;
+  flex-shrink: 0;
+}
+
+.menuIconBar {
+  width: 24px;
+  height: 3px;
+  background-color: var(--foreground);
+  border-radius: 2px;
+}
+
+.rightContent {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.userInfo {
+  font-size: 0.95rem;
+  color: var(--muted-foreground);
+}
+
+@media (min-width: 768px) {
+  .menuButton {
+      display: none;
+  }
+  .headerPageTitle {
+    font-size: 1.8rem;
+  }
+}
