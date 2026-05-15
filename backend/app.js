@@ -81,6 +81,7 @@ app.use('/api/settings', require('./src/api/routes/settingsRoutes'));
 app.use('/api/tags', require('./src/api/routes/tagRoutes'));
 app.use('/api/streak', require('./src/api/routes/streakRoutes'));
 app.use('/api/templates', require('./src/api/routes/templateRoutes'));
+app.use('/api/ai', require('./src/api/routes/aiRoutes'));
 
 // Endpoint raíz de la API
 app.get('/api', (req, res) => {

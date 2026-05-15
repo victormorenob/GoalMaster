@@ -1,23 +1,31 @@
-import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import { defineConfig } from 'vite';
 
 export default defineConfig({
+  // 1. Forzamos al plugin de React a tratar los .js como archivos con JSX
   plugins: [
     react({
-      include: /\.js$/,
+      include: /\.(js|jsx|ts|tsx)$/,
     }),
   ],
+  // 2. Configuramos esbuild para que acepte JSX en archivos .js
   esbuild: {
     loader: 'jsx',
-    include: /\.js$/,
-    exclude: /node_modules/,
+    include: /src\/.*\.js$/, // Solo archivos en src para evitar conflictos
+    exclude: [],
+  },
+  optimizeDeps: {
+    esbuildOptions: {
+      loader: {
+        '.js': 'jsx',
+      },
+    },
   },
   root: '.',
   build: {
     outDir: 'dist',
     rollupOptions: {
       onwarn(warning, warn) {
-        // Suppress known warnings
         if (warning.code === 'SOURCEMAP_ERROR') return;
         warn(warning);
       },
