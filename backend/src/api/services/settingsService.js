@@ -2,11 +2,15 @@
 const db = require('../../config/database');
 const { User, Objective, Progress, ActivityLog } = db;
 const AppError = require('../../utils/AppError');
+const activityLogRepository = require('../repositories/activityLogRepository');
 
 /**
  * Service layer for user settings and account management.
  */
 class SettingsService {
+    constructor(activityLogRepo) {
+        this.activityLogRepository = activityLogRepo || activityLogRepository;
+    }
     /**
      * Fetches a user's application settings.
      * @param {number} userId - The ID of the user.
@@ -37,7 +41,7 @@ class SettingsService {
         // With consistent keys between frontend and backend, mapping is no longer needed.
         // It is assumed that `settingsData` contains keys like `themePreference`, `languagePreference`.
         await user.update(settingsData);
-        await ActivityLog.create({
+        await this.activityLogRepository.create({
             userId,
             activityType: 'USER_SETTINGS_UPDATED',
             descriptionKey: 'activityLog.settingsUpdated',
@@ -66,7 +70,7 @@ class SettingsService {
         // The 'beforeUpdate' hook in the User model will handle hashing the new password.
         user.password = newPassword;
         await user.save();
-        await ActivityLog.create({
+        await this.activityLogRepository.create({
             userId,
             activityType: 'USER_PASSWORD_CHANGED',
             descriptionKey: 'activityLog.passwordChanged',
@@ -102,7 +106,7 @@ class SettingsService {
             throw new AppError('Usuario no encontrado para exportar datos.', 404);
         }
 
-        await ActivityLog.create({
+        await this.activityLogRepository.create({
             userId,
             activityType: 'USER_DATA_EXPORTED',
             descriptionKey: 'activityLog.dataExported',
@@ -124,7 +128,7 @@ class SettingsService {
                 throw new AppError('Usuario no encontrado para eliminar.', 404);
             }
 
-            await ActivityLog.create({
+            await this.activityLogRepository.create({
                 userId,
                 activityType: 'USER_ACCOUNT_DELETED',
                 descriptionKey: 'activityLog.accountDeleted',
