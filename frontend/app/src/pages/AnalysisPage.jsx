@@ -1,7 +1,6 @@
 // frontend/app/src/components/pages/AnalysisPage.js
 
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import styles from './AnalysisPage.module.css';
 import api from '../services/apiService';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
 import Button from '../components/ui/Button';
@@ -199,32 +198,32 @@ function AnalysisPage() {
 
     const renderCurrentTabContent = () => {
         const translatedTabName = t(`analysis.tabs.${activeTab}`);
-        if (isLoading) return <div className={styles.centeredStatus}><LoadingSpinner size="large" text={t('loaders.loadingTab', { tab: translatedTabName })} /></div>;
-        if (error) return <div className={styles.centeredStatus}><p className={styles.errorMessage}>{error}</p><Button onClick={() => { const p = timePeriod; setTimePeriod(''); setTimeout(() => setTimePeriod(p), 0);}} className={styles.retryButton}>{t('common.retry')}</Button></div>;
+        if (isLoading) return <div className="flex flex-col items-center justify-center p-12 pt-3 text-center min-h-[300px] flex-grow"><LoadingSpinner size="large" text={t('loaders.loadingTab', { tab: translatedTabName })} /></div>;
+        if (error) return <div className="flex flex-col items-center justify-center p-12 pt-3 text-center min-h-[300px] flex-grow"><p className="text-[var(--destructive)] mb-4">{error}</p><Button onClick={() => { const p = timePeriod; setTimePeriod(''); setTimeout(() => setTimePeriod(p), 0);}} className="!mt-0">{t('common.retry')}</Button></div>;
 
         switch (activeTab) {
             case 'general':
                 return (<>
-                    <section className={styles.donutChartsRow}>
-                        <div className={styles.sectionWrapper}>
-                            <h3 className={styles.chartTitle}>{t('analysis.chartTitles.categoryDistribution')}</h3>
-                            <span className={styles.chartSubtitle}>{t('analysis.chartTitles.categoryDistributionSubtitle')}</span>
-                            <div className={styles.chartContainer}>{categoryDistribution.length > 0 ? <CategoryDonutChart data={categoryDistribution} /> : <p className={styles.noDataText}>{t('analysis.noDetailedObjectives')}</p>}</div>
+                    <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="bg-[var(--card,#ffffff)] p-6 rounded-[var(--radius-lg,12px)] border border-[var(--border-light,#e9ecef)] shadow-[var(--shadow-sm,0_1px_3px_rgba(0,0,0,0.05))] flex flex-col">
+                            <h3 className="text-[1.1rem] font-semibold text-[var(--heading-color,var(--foreground))] m-0 mb-0.25 block">{t('analysis.chartTitles.categoryDistribution')}</h3>
+                            <span className="text-[0.85rem] text-[var(--muted-foreground)] mb-5 block">{t('analysis.chartTitles.categoryDistributionSubtitle')}</span>
+                            <div className="flex flex-col min-h-[280px] flex-grow relative">{categoryDistribution.length > 0 ? <CategoryDonutChart data={categoryDistribution} /> : <p className="flex-grow flex items-center justify-center text-[var(--muted-foreground)] text-[0.9rem] min-h-[100px]">{t('analysis.noDetailedObjectives')}</p>}</div>
                         </div>
-                        <div className={styles.sectionWrapper}>
-                            <h3 className={styles.chartTitle}>{t('analysis.chartTitles.objectiveStatus')}</h3>
-                            <span className={styles.chartSubtitle}>{t('analysis.chartTitles.objectiveStatusSubtitle')}</span>
-                            <div className={styles.chartContainer}>{objectiveStatus.length > 0 ? <ObjectiveStatusChart data={objectiveStatus} /> : <p className={styles.noDataText}>{t('charts.noStatusData')}</p>}</div>
+                        <div className="bg-[var(--card,#ffffff)] p-6 rounded-[var(--radius-lg,12px)] border border-[var(--border-light,#e9ecef)] shadow-[var(--shadow-sm,0_1px_3px_rgba(0,0,0,0.05))] flex flex-col">
+                            <h3 className="text-[1.1rem] font-semibold text-[var(--heading-color,var(--foreground))] m-0 mb-0.25 block">{t('analysis.chartTitles.objectiveStatus')}</h3>
+                            <span className="text-[0.85rem] text-[var(--muted-foreground)] mb-5 block">{t('analysis.chartTitles.objectiveStatusSubtitle')}</span>
+                            <div className="flex flex-col min-h-[280px] flex-grow relative">{objectiveStatus.length > 0 ? <ObjectiveStatusChart data={objectiveStatus} /> : <p className="flex-grow flex items-center justify-center text-[var(--muted-foreground)] text-[0.9rem] min-h-[100px]">{t('charts.noStatusData')}</p>}</div>
                         </div>
                     </section>
-                    <section className={styles.sectionWrapper}>
-                        <h3 className={styles.chartTitle}>{t('analysis.chartTitles.monthlyProgress')}</h3>
-                        <span className={styles.chartSubtitle}>{t('analysis.chartTitles.monthlyProgressSubtitle')}</span>
-                        <div className={`${styles.chartContainer} ${styles.chartContainerFullWidth}`}>
+                    <section className="bg-[var(--card,#ffffff)] p-6 rounded-[var(--radius-lg,12px)] border border-[var(--border-light,#e9ecef)] shadow-[var(--shadow-sm,0_1px_3px_rgba(0,0,0,0.05))] flex flex-col">
+                        <h3 className="text-[1.1rem] font-semibold text-[var(--heading-color,var(--foreground))] m-0 mb-0.25 block">{t('analysis.chartTitles.monthlyProgress')}</h3>
+                        <span className="text-[0.85rem] text-[var(--muted-foreground)] mb-5 block">{t('analysis.chartTitles.monthlyProgressSubtitle')}</span>
+                        <div className="flex flex-col min-h-[200px] flex-grow relative">
                             {(rawMonthlyProgress?.datasets?.length > 0) ? (
                                 <MonthlyProgressChart data={rawMonthlyProgress} />
                             ) : (
-                                <p className={styles.noDataText}>{t('analysis.noDataMessages.monthlyProgress')}</p>
+                                <p className="flex-grow flex items-center justify-center text-[var(--muted-foreground)] text-[0.9rem] min-h-[100px]">{t('analysis.noDataMessages.monthlyProgress')}</p>
                             )}
                         </div>
                     </section>
@@ -232,57 +231,57 @@ function AnalysisPage() {
             case 'byCategory':
                 return (
                     <>
-                        <section className={styles.sectionWrapper}>
-                            <h3 className={styles.chartTitle}>{t('analysis.chartTitles.categoryAverageProgress')}</h3>
-                            <span className={styles.chartSubtitle}>{t('analysis.chartTitles.categoryAverageProgressSubtitle')}</span>
-                            <div className={`${styles.chartContainer} ${styles.chartContainerFullWidth}`}>{categoryAverageProgress.length > 0 ? <CategoryAverageProgressBarChart data={categoryAverageProgress} /> : <p className={styles.noDataText}>{t('analysis.noDataMessages.categoryAverageProgress')}</p>}</div>
+                        <section className="bg-[var(--card,#ffffff)] p-6 rounded-[var(--radius-lg,12px)] border border-[var(--border-light,#e9ecef)] shadow-[var(--shadow-sm,0_1px_3px_rgba(0,0,0,0.05))] flex flex-col">
+                            <h3 className="text-[1.1rem] font-semibold text-[var(--heading-color,var(--foreground))] m-0 mb-0.25 block">{t('analysis.chartTitles.categoryAverageProgress')}</h3>
+                            <span className="text-[0.85rem] text-[var(--muted-foreground)] mb-5 block">{t('analysis.chartTitles.categoryAverageProgressSubtitle')}</span>
+                            <div className="flex flex-col min-h-[200px] flex-grow relative">{categoryAverageProgress.length > 0 ? <CategoryAverageProgressBarChart data={categoryAverageProgress} /> : <p className="flex-grow flex items-center justify-center text-[var(--muted-foreground)] text-[0.9rem] min-h-[100px]">{t('analysis.noDataMessages.categoryAverageProgress')}</p>}</div>
                         </section>
-                        <section className={styles.categoriesDetailGrid}>{coloredDetailedObjectivesByCategory.length > 0 ? coloredDetailedObjectivesByCategory.map((catData, index) => (<CategoryObjectivesCard key={catData.categoryName || index} categoryName={catData.categoryName} objectiveCount={catData.objectiveCount} objectives={catData.objectives} color={catData.color}/>)) : (!isLoading && <div className={styles.sectionWrapper}><p className={styles.noDataText}>{t('analysis.noDetailedObjectives')}</p></div>)}</section>
+                        <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">{coloredDetailedObjectivesByCategory.length > 0 ? coloredDetailedObjectivesByCategory.map((catData, index) => (<CategoryObjectivesCard key={catData.categoryName || index} categoryName={catData.categoryName} objectiveCount={catData.objectiveCount} objectives={catData.objectives} color={catData.color}/>)) : (!isLoading && <div className="bg-[var(--card,#ffffff)] p-6 rounded-[var(--radius-lg,12px)] border border-[var(--border-light,#e9ecef)] shadow-[var(--shadow-sm,0_1px_3px_rgba(0,0,0,0.05))] flex flex-col"><p className="flex-grow flex items-center justify-center text-[var(--muted-foreground)] text-[0.9rem] min-h-[100px]">{t('analysis.noDetailedObjectives')}</p></div>)}</section>
                     </>
                 );
             case 'byObjective':
                 return (<>
-                    <section className={styles.sectionWrapper}>
-                        <h3 className={styles.chartTitle}>{t('analysis.chartTitles.objectiveProgress')}</h3>
-                        <span className={styles.chartSubtitle}>{t('analysis.chartTitles.objectiveProgressSubtitle')}</span>
-                        <div className={`${styles.chartContainer} ${styles.chartContainerFullWidth}`}>{objectivesProgressData.length > 0 ? <ObjectiveProgressBarChart data={objectivesProgressData} /> : <p className={styles.noDataText}>{t('analysis.noDataMessages.objectiveProgress')}</p>}</div>
+                    <section className="bg-[var(--card,#ffffff)] p-6 rounded-[var(--radius-lg,12px)] border border-[var(--border-light,#e9ecef)] shadow-[var(--shadow-sm,0_1px_3px_rgba(0,0,0,0.05))] flex flex-col">
+                        <h3 className="text-[1.1rem] font-semibold text-[var(--heading-color,var(--foreground))] m-0 mb-0.25 block">{t('analysis.chartTitles.objectiveProgress')}</h3>
+                        <span className="text-[0.85rem] text-[var(--muted-foreground)] mb-5 block">{t('analysis.chartTitles.objectiveProgressSubtitle')}</span>
+                        <div className="flex flex-col min-h-[200px] flex-grow relative">{objectivesProgressData.length > 0 ? <ObjectiveProgressBarChart data={objectivesProgressData} /> : <p className="flex-grow flex items-center justify-center text-[var(--muted-foreground)] text-[0.9rem] min-h-[100px]">{t('analysis.noDataMessages.objectiveProgress')}</p>}</div>
                     </section>
-                    <section className={styles.rankedObjectivesGrid}>{coloredTopProgressObjectives.length > 0 || coloredLowProgressObjectives.length > 0 ? (<><RankedObjectivesList title={t('analysis.chartTitles.topProgress')} objectives={coloredTopProgressObjectives} noDataMessage={t('analysis.noDataMessages.topProgress')} /><RankedObjectivesList title={t('analysis.chartTitles.lowProgress')} objectives={coloredLowProgressObjectives} noDataMessage={t('analysis.noDataMessages.lowProgress')} /></>) : (!isLoading && <div className={styles.sectionWrapper}><p className={styles.noDataText}>{t('analysis.noDataMessages.rankedObjectives')}</p></div>)}</section>
+                    <section className="grid grid-cols-1 md:grid-cols-2 gap-6">{coloredTopProgressObjectives.length > 0 || coloredLowProgressObjectives.length > 0 ? (<><RankedObjectivesList title={t('analysis.chartTitles.topProgress')} objectives={coloredTopProgressObjectives} noDataMessage={t('analysis.noDataMessages.topProgress')} /><RankedObjectivesList title={t('analysis.chartTitles.lowProgress')} objectives={coloredLowProgressObjectives} noDataMessage={t('analysis.noDataMessages.lowProgress')} /></>) : (!isLoading && <div className="bg-[var(--card,#ffffff)] p-6 rounded-[var(--radius-lg,12px)] border border-[var(--border-light,#e9ecef)] shadow-[var(--shadow-sm,0_1px_3px_rgba(0,0,0,0.05))] flex flex-col"><p className="flex-grow flex items-center justify-center text-[var(--muted-foreground)] text-[0.9rem] min-h-[100px]">{t('analysis.noDataMessages.rankedObjectives')}</p></div>)}</section>
                 </>);
             default:
-                return <div className={styles.sectionWrapper}><p>{t('analysis.selectTabPrompt')}</p></div>;
+                return <div className="bg-[var(--card,#ffffff)] p-6 rounded-[var(--radius-lg,12px)] border border-[var(--border-light,#e9ecef)] shadow-[var(--shadow-sm,0_1px_3px_rgba(0,0,0,0.05))] flex flex-col"><p>{t('analysis.selectTabPrompt')}</p></div>;
         }
     };
 
     return (
-        <div className={styles.analysisPageContainer}>
-            <div className={styles.pageHeader}>
-                <h1 className={styles.pageTitle}>{t('pageTitles.analysisTrends')}</h1>
-                <div className={styles.timeFilterContainer}>
-                    <Input type="select" id="time-period-filter" value={timePeriod} onChange={(e) => setTimePeriod(e.target.value)} className={styles.timeFilterSelect}>
+        <div className="p-6 px-8 m-0 w-full flex flex-col gap-6 flex-grow">
+            <div className="flex justify-between items-center flex-wrap gap-4 mb-2">
+                <h1 className="text-[1.75rem] text-[var(--heading-color,var(--foreground))] m-0 font-semibold">{t('pageTitles.analysisTrends')}</h1>
+                <div>
+                    <Input type="select" id="time-period-filter" value={timePeriod} onChange={(e) => setTimePeriod(e.target.value)} className="min-w-[160px]">
                         {timePeriodOptions.map(option => (<option key={option.value} value={option.value}>{t(option.key)}</option>))}
                     </Input>
                 </div>
             </div>
 
-            <section className={styles.statsRow}>
-                <StatsCard title={t('analysis.stats.totalObjectives')} value={summaryStats.totalObjectives.toString()} ><p className={styles.statsDetailText}>{t('analysis.stats.active')}: {summaryStats.activeObjectives}</p><p className={styles.statsDetailText}>{t('analysis.stats.completed')}: {summaryStats.completedObjectives}</p></StatsCard>
+            <section className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 mb-4">
+                <StatsCard title={t('analysis.stats.totalObjectives')} value={summaryStats.totalObjectives.toString()} ><p className="text-[0.8rem] text-[var(--muted-foreground)] m-0 mt-0.5 leading-relaxed">{t('analysis.stats.active')}: {summaryStats.activeObjectives}</p><p className="text-[0.8rem] text-[var(--muted-foreground)] m-0 mt-0.5 leading-relaxed">{t('analysis.stats.completed')}: {summaryStats.completedObjectives}</p></StatsCard>
                 <StatsCard title={t('analysis.stats.averageProgress')} value={`${Math.round(summaryStats.averageProgress)}%`} />
                 <StatsCard title={t('analysis.stats.categories')} value={summaryStats.categoryCount.toString()}>
-                    <div className={styles.categoryListInCard}>
-                        {summaryStats.categories.slice(0, 3).map((cat, index) => (<span key={cat.name} className={styles.categoryChip} style={{ backgroundColor: getCategoryColor(cat.name, index, summaryStats.categories) }}>{t(categoryNameToKeyMap[cat.name] || cat.name)}</span>))}
-                        {summaryStats.categories.length > 3 && <span className={styles.categoryChipMore}>{t('analysis.stats.moreCategories', { count: summaryStats.categories.length - 3 })}</span>}
+                    <div className="flex flex-wrap gap-1.5 mt-2">
+                        {summaryStats.categories.slice(0, 3).map((cat, index) => (<span key={cat.name} className="text-[0.7rem] px-2 py-0.5 rounded-[var(--radius)] text-white font-medium capitalize" style={{ backgroundColor: getCategoryColor(cat.name, index, summaryStats.categories) }}>{t(categoryNameToKeyMap[cat.name] || cat.name)}</span>))}
+                        {summaryStats.categories.length > 3 && <span className="text-[0.7rem] px-1 py-0.5 text-[var(--muted-foreground)]">{t('analysis.stats.moreCategories', { count: summaryStats.categories.length - 3 })}</span>}
                     </div>
                 </StatsCard>
-                <StatsCard title={t('analysis.stats.trend')} value={summaryStats.trend?.textKey ? t(summaryStats.trend.textKey) : '...'} ><p className={styles.statsDetailTextSmall}>{dynamicTrendSubtitle}</p></StatsCard>
+                <StatsCard title={t('analysis.stats.trend')} value={summaryStats.trend?.textKey ? t(summaryStats.trend.textKey) : '...'} ><p className="text-[0.75rem] text-[var(--muted-foreground)] mt-1 leading-relaxed">{dynamicTrendSubtitle}</p></StatsCard>
             </section>
 
-            <div className={styles.tabsContainer}>
-                <Button onClick={() => setActiveTab('general')} className={`${styles.tabButton} ${activeTab === 'general' ? styles.activeTabButton : ''}`} >{t('analysis.tabs.general')}</Button>
-                <Button onClick={() => setActiveTab('byCategory')} className={`${styles.tabButton} ${activeTab === 'byCategory' ? styles.activeTabButton : ''}`} >{t('analysis.tabs.byCategory')}</Button>
-                <Button onClick={() => setActiveTab('byObjective')} className={`${styles.tabButton} ${activeTab === 'byObjective' ? styles.activeTabButton : ''}`} >{t('analysis.tabs.byObjective')}</Button>
+            <div className="inline-flex items-center bg-[var(--accent)] rounded-[var(--radius-lg,0.75rem)] p-1 border border-[var(--border)] mb-8 max-w-max">
+                <Button onClick={() => setActiveTab('general')} className={`!bg-transparent !border-none !m-0 !shadow-none !p-2 !px-4 rounded-[var(--radius-md,0.5rem)] font-semibold text-[0.9rem] text-[var(--muted-foreground)] transition-all duration-200 ${activeTab === 'general' ? '!bg-[var(--card)] !text-[var(--foreground)] !shadow-[var(--shadow-sm)] !font-bold' : ''} hover:!bg-[var(--muted)] hover:!text-[var(--foreground)]`} data-active={activeTab === 'general'} >{t('analysis.tabs.general')}</Button>
+                <Button onClick={() => setActiveTab('byCategory')} className={`!bg-transparent !border-none !m-0 !shadow-none !p-2 !px-4 rounded-[var(--radius-md,0.5rem)] font-semibold text-[0.9rem] text-[var(--muted-foreground)] transition-all duration-200 ${activeTab === 'byCategory' ? '!bg-[var(--card)] !text-[var(--foreground)] !shadow-[var(--shadow-sm)] !font-bold' : ''} hover:!bg-[var(--muted)] hover:!text-[var(--foreground)]`} data-active={activeTab === 'byCategory'} >{t('analysis.tabs.byCategory')}</Button>
+                <Button onClick={() => setActiveTab('byObjective')} className={`!bg-transparent !border-none !m-0 !shadow-none !p-2 !px-4 rounded-[var(--radius-md,0.5rem)] font-semibold text-[0.9rem] text-[var(--muted-foreground)] transition-all duration-200 ${activeTab === 'byObjective' ? '!bg-[var(--card)] !text-[var(--foreground)] !shadow-[var(--shadow-sm)] !font-bold' : ''} hover:!bg-[var(--muted)] hover:!text-[var(--foreground)]`} data-active={activeTab === 'byObjective'} >{t('analysis.tabs.byObjective')}</Button>
             </div>
-            <div className={styles.tabContent}>{renderCurrentTabContent()}</div>
+            <div className="flex flex-col gap-8">{renderCurrentTabContent()}</div>
         </div>
     );
 }

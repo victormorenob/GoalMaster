@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useCallback } from 'react'; // Added useCallback
-import styles from './SettingsPage.module.css';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
 import FormGroup from '../components/ui/FormGroup';
@@ -219,25 +218,25 @@ function SettingsPage() {
     }, []);
 
     if (isLoadingSettings) {
-        return <div className={styles.centeredStatus}><LoadingSpinner size="large" text={t('loaders.loadingSettings')} /></div>;
+        return <div className="flex flex-col items-center justify-center min-h-[300px] text-center text-[var(--muted-foreground)] p-8"><LoadingSpinner size="large" text={t('loaders.loadingSettings')} /></div>;
     }
 
     return (
-        <div className={styles.settingsPageContainer}>
-            <div className={styles.pageHeader}>
-                <h1 className={styles.pageTitle}>{t('settingsPage.accountSettingsTitle')}</h1>
+        <div className="p-6 flex flex-col gap-6 w-full box-border">
+            <div className="flex justify-between items-center flex-wrap gap-4 mb-2">
+                <h1 className="text-[1.75rem] text-[var(--heading-color,var(--foreground))] m-0 font-semibold">{t('settingsPage.accountSettingsTitle')}</h1>
                 
             </div>
 
-            <section className={styles.settingsCard}>
-                <div className={styles.cardHeaderWithToggle} onClick={() => toggleSection('appearance')} role="button" tabIndex={0}>
-                    <h2 className={styles.cardTitle}>{t('settingsPage.appearance.title')}</h2>
-                    {openSections.appearance ? <FaChevronUp className={styles.toggleIconOpen} /> : <FaChevronDown className={styles.toggleIcon} />}
+            <section className="bg-[var(--card)] p-6 rounded-[var(--radius-lg)] border border-[var(--border)] shadow-[var(--shadow-sm)] flex flex-col">
+                <div className="flex justify-between items-center pb-4 border-b border-[var(--border-light)] cursor-pointer mb-4 hover:bg-[var(--hover-bg,#f0f0f0)] hover:rounded-[var(--radius-lg)] hover:p-[0.5rem_1rem] hover:m-[-0.5rem_-1rem_0.5rem_-1rem]" onClick={() => toggleSection('appearance')} role="button" tabIndex={0}>
+                    <h2 className="text-[1.3rem] font-semibold text-[var(--foreground)] m-0">{t('settingsPage.appearance.title')}</h2>
+                    {openSections.appearance ? <FaChevronUp className="text-[1rem] text-[var(--muted-foreground)] transition-transform duration-300" /> : <FaChevronDown className="text-[1rem] text-[var(--muted-foreground)]" />}
                 </div>
                 {openSections.appearance && (
                     <>
-                        <p className={styles.cardSubtitle}>{t('settingsPage.appearance.subtitle')}</p>
-                        <div className={styles.formSection}>
+                        <p className="text-[0.85rem] text-[var(--muted-foreground)] mb-4 block">{t('settingsPage.appearance.subtitle')}</p>
+                        <div className="flex flex-col gap-4">
                             <FormGroup label={t('settingsPage.appearance.themeLabel')} htmlFor="theme-preference">
                                 <Input type="select" id="theme-preference" name="themePreference" value={localSettingsData.themePreference || 'system'} onChange={handleInputChange}>
                                     <option value="light">{t('theme.light')}</option>
@@ -263,16 +262,16 @@ function SettingsPage() {
                 )}
             </section>
 
-            <section className={styles.settingsCard}>
-                <div className={styles.cardHeaderWithToggle} onClick={() => toggleSection('changePassword')} role="button" tabIndex={0}>
-                    <h2 className={styles.cardTitle}>{t('settingsPage.password.title')}</h2>
-                    {openSections.changePassword ? <FaChevronUp className={styles.toggleIconOpen} /> : <FaChevronDown className={styles.toggleIcon} />}
+            <section className="bg-[var(--card)] p-6 rounded-[var(--radius-lg)] border border-[var(--border)] shadow-[var(--shadow-sm)] flex flex-col">
+                <div className="flex justify-between items-center pb-4 border-b border-[var(--border-light)] cursor-pointer mb-4 hover:bg-[var(--hover-bg,#f0f0f0)] hover:rounded-[var(--radius-lg)] hover:p-[0.5rem_1rem] hover:m-[-0.5rem_-1rem_0.5rem_-1rem]" onClick={() => toggleSection('changePassword')} role="button" tabIndex={0}>
+                    <h2 className="text-[1.3rem] font-semibold text-[var(--foreground)] m-0">{t('settingsPage.password.title')}</h2>
+                    {openSections.changePassword ? <FaChevronUp className="text-[1rem] text-[var(--muted-foreground)] transition-transform duration-300" /> : <FaChevronDown className="text-[1rem] text-[var(--muted-foreground)]" />}
                 </div>
                 {openSections.changePassword && (
                     <>
-                        <p className={styles.cardSubtitle}>{t('settingsPage.password.subtitle')}</p>
+                        <p className="text-[0.85rem] text-[var(--muted-foreground)] mb-4 block">{t('settingsPage.password.subtitle')}</p>
                         <form onSubmit={handleChangePassword}>
-                            <div className={styles.formSection}>
+                            <div className="flex flex-col gap-4">
                                 <FormGroup label={t('settingsPage.password.currentLabel')} htmlFor="current-password">
                                     <Input type={showCurrentPassword ? "text" : "password"} id="current-password" name="currentPassword" value={currentPassword} onChange={handlePasswordInputChange} actionIcon={showCurrentPassword ? <FaEyeSlash /> : <FaEye />} onActionClick={() => setShowCurrentPassword(!showCurrentPassword)} actionIconAriaLabel={t(showCurrentPassword ? 'settingsPage.password.toggleAria.hideCurrent' : 'settingsPage.password.toggleAria.showCurrent')} autoComplete="current-password" />
                                 </FormGroup>
@@ -282,8 +281,8 @@ function SettingsPage() {
                                 <FormGroup label={t('settingsPage.password.confirmLabel')} htmlFor="confirm-new-password">
                                     <Input type={showConfirmNewPassword ? "text" : "password"} id="confirm-new-password" name="confirmNewPassword" value={confirmNewPassword} onChange={handlePasswordInputChange} actionIcon={showConfirmNewPassword ? <FaEyeSlash /> : <FaEye />} onActionClick={() => setShowConfirmNewPassword(!showConfirmNewPassword)} actionIconAriaLabel={t(showConfirmNewPassword ? 'settingsPage.password.toggleAria.hideConfirm' : 'settingsPage.password.toggleAria.showConfirm')} autoComplete="new-password" />
                                 </FormGroup>
-                                {passwordFormError && <p className={`${styles.formErrorMessage} ${styles.sectionFormError}`}>{passwordFormError}</p>}
-                                <div className={styles.passwordChangeActions}>
+                                {passwordFormError && <p className="text-[var(--destructive)] text-[0.85rem] mt-2 text-left">{passwordFormError}</p>}
+                                <div className="flex justify-end mt-2">
                                     <Button type="submit" variant="primary" isLoading={isSavingPassword} disabled={isSavingPassword}>{t('settingsPage.password.changeButton')}</Button>
                                 </div>
                             </div>
@@ -292,21 +291,21 @@ function SettingsPage() {
                 )}
             </section>
 
-            <section className={styles.settingsCard}>
-                <div className={styles.cardHeaderWithToggle} onClick={() => toggleSection('dataAccount')} role="button" tabIndex={0}>
-                    <h2 className={styles.cardTitle}>{t('settingsPage.data.title')}</h2>
-                    {openSections.dataAccount ? <FaChevronUp className={styles.toggleIconOpen} /> : <FaChevronDown className={styles.toggleIcon} />}
+            <section className="bg-[var(--card)] p-6 rounded-[var(--radius-lg)] border border-[var(--border)] shadow-[var(--shadow-sm)] flex flex-col">
+                <div className="flex justify-between items-center pb-4 border-b border-[var(--border-light)] cursor-pointer mb-4 hover:bg-[var(--hover-bg,#f0f0f0)] hover:rounded-[var(--radius-lg)] hover:p-[0.5rem_1rem] hover:m-[-0.5rem_-1rem_0.5rem_-1rem]" onClick={() => toggleSection('dataAccount')} role="button" tabIndex={0}>
+                    <h2 className="text-[1.3rem] font-semibold text-[var(--foreground)] m-0">{t('settingsPage.data.title')}</h2>
+                    {openSections.dataAccount ? <FaChevronUp className="text-[1rem] text-[var(--muted-foreground)] transition-transform duration-300" /> : <FaChevronDown className="text-[1rem] text-[var(--muted-foreground)]" />}
                 </div>
 
                 {openSections.dataAccount && (
-                    <div className={styles.formSection}>
+                    <div className="flex flex-col gap-4">
                         {/* Fila para Exportar Datos */}
-                        <div className={styles.actionRow}>
-                            <div className={styles.actionDescription}>
-                                <strong>{t('settingsPage.data.exportLabel')}</strong>
-                                <p>{t('settingsPage.data.exportDescription')}</p>
+                        <div className="flex flex-wrap justify-between items-center gap-4 pb-6 border-b border-[var(--border)]">
+                            <div className="flex-grow mr-4">
+                                <strong className="block text-[1rem] font-semibold text-[var(--foreground)] mb-1">{t('settingsPage.data.exportLabel')}</strong>
+                                <p className="text-[0.9rem] text-[var(--muted-foreground)] m-0 max-w-[60ch]">{t('settingsPage.data.exportDescription')}</p>
                             </div>
-                            <div className={styles.actionButtonContainer}>
+                            <div className="shrink-0">
                                 <Button variant="secondary" onClick={handleExportData} isLoading={isProcessingDataAction} disabled={isProcessingDataAction} leftIcon={<FaDownload />} >
                                     {t('settingsPage.data.exportButton')}
                                 </Button>
@@ -314,25 +313,25 @@ function SettingsPage() {
                         </div>
 
                         {/* Fila para Eliminar Cuenta */}
-                        <div className={`${styles.actionRow} ${styles.actionRowDestructive}`}>
-                            <div className={styles.actionDescription}>
-                                <strong>{t('settingsPage.data.deleteLabel')}</strong>
-                                <p>{t('settingsPage.data.deleteDescription')}</p>
+                        <div className="flex flex-wrap justify-between items-center gap-4 pb-6">
+                            <div className="flex-grow mr-4">
+                                <strong className="block text-[1rem] font-semibold text-[var(--destructive)] mb-1">{t('settingsPage.data.deleteLabel')}</strong>
+                                <p className="text-[0.9rem] text-[var(--muted-foreground)] m-0 max-w-[60ch]">{t('settingsPage.data.deleteDescription')}</p>
                             </div>
-                            <div className={styles.actionButtonContainer}>
+                            <div className="shrink-0">
                                 <Button variant="destructive" onClick={handleDeleteAccount} isLoading={isProcessingDataAction} disabled={isProcessingDataAction} leftIcon={<FaTrash />} >
                                     {t('settingsPage.data.deleteButton')}
                                 </Button>
                             </div>
                         </div>
                         
-                        {dataAccountError && <p className={`${styles.formErrorMessage} ${styles.sectionFormError}`}>{dataAccountError}</p>}
+                        {dataAccountError && <p className="text-[var(--destructive)] text-[0.85rem] mt-2 text-left">{dataAccountError}</p>}
                     </div>
                 )}
             </section>
             <div>
             {isDirty && (
-                    <div className={styles.globalActionsContainer}>  {/* <--- ESTE ES EL CONTENEDOR */}
+                    <div className="flex justify-end items-center gap-4 ml-auto">
                         <Button variant="secondary" onClick={handleRevertChanges} disabled={isSaving}>
                             {t('common.revert')}
                         </Button>

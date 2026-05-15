@@ -1,6 +1,5 @@
 // frontend/app/src/pages/ProfilePage.js
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import styles from './ProfilePage.module.css';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
 import FormGroup from '../components/ui/FormGroup';
@@ -141,30 +140,30 @@ function ProfilePage() {
         }
     };
     
-    if (isLoading) return <div className={styles.centeredStatus}><LoadingSpinner size="large" text={t('loaders.loadingProfile')} /></div>;
-    if (error) return <div className={`${styles.centeredStatus} ${styles.errorText}`}>{error}</div>;
+    if (isLoading) return <div className="flex flex-col items-center justify-center min-h-[300px] text-center text-[var(--muted-foreground)]"><LoadingSpinner size="large" text={t('loaders.loadingProfile')} /></div>;
+    if (error) return <div className="flex flex-col items-center justify-center min-h-[300px] text-center text-[var(--destructive)]">{error}</div>;
 
     const formattedMemberSince = userData?.memberSince ? formatDateByPreference(userData.memberSince, settings.dateFormat, settings.language) : t('common.notAvailable');
 
     return (
-        <div className={styles.profilePageContainer}>
-            <header className={styles.profileHeader}>
-                <div className={styles.avatarContainer}>
-                     {avatarPreview ? <img src={avatarPreview} alt={t('profilePage.avatarAlt', { name: formData.name })} className={styles.avatar} /> : <FaUserCircle className={styles.avatarPlaceholder} />}
+        <div className="p-6 flex flex-col gap-8">
+            <header className="bg-[var(--card)] p-6 px-8 rounded-[var(--radius-lg)] flex items-center gap-6 shadow-[var(--shadow-md)] flex-wrap">
+                <div className="relative flex flex-col items-center gap-3 mb-4 shrink-0">
+                     {avatarPreview ? <img src={avatarPreview} alt={t('profilePage.avatarAlt', { name: formData.name })} className="w-[120px] h-[120px] rounded-full object-cover border-4 border-[var(--primary-soft-bg,color-mix(in_srgb,var(--primary)_15%,transparent))] shadow-[var(--shadow-md)]" /> : <FaUserCircle className="text-[120px] text-[var(--muted)] border-4 border-[var(--border-ultralight,var(--border))] rounded-full p-[5px] bg-[var(--background)]" />}
                      {isEditMode && (
-                        <Button size="small" variant="outline" onClick={() => fileInputRef.current?.click()} className={styles.avatarEditButton} disabled={isSubmitting}>{t('profilePage.selectPhoto')}</Button>
+                        <Button size="small" variant="outline" onClick={() => fileInputRef.current?.click()} className="!text-[0.8rem] !p-[0.4rem_0.8rem] w-auto max-w-[150px] text-center" disabled={isSubmitting}>{t('profilePage.selectPhoto')}</Button>
                     )}
                 </div>
-                <div className={styles.userInfoMain}>
-                    <h1 className={styles.userName}>{isEditMode ? formData.name : userData.name}</h1>
-                    <p className={styles.userInfoDetail}><FaEnvelope /> {userData.email}</p>
-                    {!isEditMode && userData.location && <p className={styles.userInfoDetail}><FaMapMarkerAlt /> {userData.location}</p>}
-                    {!isEditMode && userData.phone && <p className={styles.userInfoDetail}><FaPhone /> {userData.phone}</p>}
-                    <p className={styles.userInfoDetail}><FaCalendarAlt /> {t('profilePage.memberSince', { date: formattedMemberSince })}</p>
+                <div className="flex-grow">
+                    <h1 className="text-[1.75rem] font-bold text-[var(--foreground)] m-0 break-words">{isEditMode ? formData.name : userData.name}</h1>
+                    <p className="text-[0.9rem] text-[var(--muted-foreground)] my-1 flex items-center gap-2 break-all"><FaEnvelope /> {userData.email}</p>
+                    {!isEditMode && userData.location && <p className="text-[0.9rem] text-[var(--muted-foreground)] my-1 flex items-center gap-2 break-all"><FaMapMarkerAlt /> {userData.location}</p>}
+                    {!isEditMode && userData.phone && <p className="text-[0.9rem] text-[var(--muted-foreground)] my-1 flex items-center gap-2 break-all"><FaPhone /> {userData.phone}</p>}
+                    <p className="text-[0.9rem] text-[var(--muted-foreground)] my-1 flex items-center gap-2 break-all"><FaCalendarAlt /> {t('profilePage.memberSince', { date: formattedMemberSince })}</p>
                 </div>
-                <div className={styles.profileActions}>
+                <div className="ml-auto self-start">
                     {isEditMode ? (
-                        <div className={styles.editHeaderActions}>
+                        <div className="flex gap-4">
                             <Button variant="buttonOutline" onClick={handleCancelEdit} disabled={isSubmitting} leftIcon={<FaTimes />}>{t('common.cancel')}</Button>
                             <Button type="submit" form="profile-form" variant="primary" isLoading={isSubmitting} disabled={isSubmitting} leftIcon={<FaSave />}>{t('common.saveChanges')}</Button>
                         </div>
@@ -174,9 +173,9 @@ function ProfilePage() {
                 </div>
             </header>
             
-            <div className={styles.profileContentGrid}>
-                <section className={`${styles.profileCard} ${styles.personalInfoCard}`}>
-                     <h2 className={styles.cardTitle}>{t('profilePage.cards.personalInfo.title')}</h2>
+            <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] gap-6">
+                <section className="bg-[var(--card)] rounded-[var(--radius-md)] p-6 shadow-[var(--shadow-sm)] border border-[var(--border)] h-fit">
+                     <h2 className="text-[1.3rem] font-semibold text-[var(--foreground)] m-0 mb-2">{t('profilePage.cards.personalInfo.title')}</h2>
                     {isEditMode ? (
                         <form id="profile-form" onSubmit={handleSaveChanges}>
                             <FormGroup label={t('profilePage.labels.fullName')} htmlFor="name">
@@ -192,29 +191,29 @@ function ProfilePage() {
                                 <Input type="text" id="location" name="location" value={formData.location} onChange={handleInputChange} placeholder={t('profilePage.placeholders.location')} />
                             </FormGroup>
                             <FormGroup label={t('profilePage.labels.bio')} htmlFor="bio">
-                                <textarea id="bio" name="bio" value={formData.bio} onChange={handleInputChange} className={styles.bioTextarea} rows="4" placeholder={t('profilePage.placeholders.bio')} />
+                                <textarea id="bio" name="bio" value={formData.bio} onChange={handleInputChange} className="w-full p-[0.6rem_0.8rem] border border-[var(--border)] rounded-[var(--radius-sm)] text-[0.95rem] bg-[var(--input-bg,var(--card))] text-[var(--foreground)] min-h-[100px] resize-y font-inherit leading-relaxed focus:outline-none focus:border-[var(--ring)] focus:shadow-[0_0_0_2px_color-mix(in_srgb,var(--ring)_25%,transparent)]" rows="4" placeholder={t('profilePage.placeholders.bio')} />
                             </FormGroup>
-                            {formError && <p className={styles.formErrorMessage}>{formError}</p>}
+                            {formError && <p className="text-[var(--destructive)] text-[0.85rem] mt-4 text-left">{formError}</p>}
                         </form>
                     ) : (
-                        <div className={styles.infoGrid}>
-                            <div className={styles.infoItem}><label>{t('profilePage.labels.fullName')}</label><p>{userData.name || '-'}</p></div>
-                            <div className={styles.infoItem}><label>{t('profilePage.labels.email')}</label><p>{userData.email || '-'}</p></div>
-                            <div className={styles.infoItem}><label>{t('profilePage.labels.phone')}</label><p>{userData.phone || '-'}</p></div>
-                            <div className={styles.infoItem}><label>{t('profilePage.labels.location')}</label><p>{userData.location || '-'}</p></div>
-                            <div className={styles.infoItemWide}><label>{t('profilePage.labels.bio')}</label><p>{userData.bio || t('profilePage.noBio')}</p></div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                            <div className="sm:col-span-1"><label className="block text-[0.8rem] text-[var(--muted-foreground)] mb-1 font-medium">{t('profilePage.labels.fullName')}</label><p className="text-[0.95rem] text-[var(--foreground)] break-words m-0">{userData.name || '-'}</p></div>
+                            <div><label className="block text-[0.8rem] text-[var(--muted-foreground)] mb-1 font-medium">{t('profilePage.labels.email')}</label><p className="text-[0.95rem] text-[var(--foreground)] break-words m-0">{userData.email || '-'}</p></div>
+                            <div><label className="block text-[0.8rem] text-[var(--muted-foreground)] mb-1 font-medium">{t('profilePage.labels.phone')}</label><p className="text-[0.95rem] text-[var(--foreground)] break-words m-0">{userData.phone || '-'}</p></div>
+                            <div><label className="block text-[0.8rem] text-[var(--muted-foreground)] mb-1 font-medium">{t('profilePage.labels.location')}</label><p className="text-[0.95rem] text-[var(--foreground)] break-words m-0">{userData.location || '-'}</p></div>
+                            <div className="sm:col-span-2"><label className="block text-[0.8rem] text-[var(--muted-foreground)] mb-1 font-medium">{t('profilePage.labels.bio')}</label><p className="text-[0.95rem] text-[var(--foreground)] break-words m-0">{userData.bio || t('profilePage.noBio')}</p></div>
                         </div>
                     )}
                 </section>
-                <aside className={styles.rightColumn}>
+                <aside className="flex flex-col gap-6">
                     {statsData && (
-                        <section className={`${styles.profileCard} ${styles.statsCard}`}>
-                            <h2 className={styles.cardTitle}>{t('profilePage.cards.stats.title')}</h2>
-                            <ul className={styles.statsList}>
-                                <li><span>{t('profilePage.cards.stats.total')}</span><span>{statsData.totalObjectives}</span></li>
-                                <li><span>{t('profilePage.cards.stats.completed')}</span><span>{statsData.completed}</span></li>
-                                <li><span>{t('profilePage.cards.stats.inProgress')}</span><span>{statsData.inProgress}</span></li>
-                                <li><span>{t('profilePage.cards.stats.successRate')}</span><span>{statsData.successRate}%</span></li>
+                        <section className="bg-[var(--card)] rounded-[var(--radius-md)] p-6 shadow-[var(--shadow-sm)] border border-[var(--border)] h-fit">
+                            <h2 className="text-[1.3rem] font-semibold text-[var(--foreground)] m-0 mb-2">{t('profilePage.cards.stats.title')}</h2>
+                            <ul className="list-none p-0 m-0">
+                                <li className="flex justify-between items-center py-[0.6rem] text-[0.9rem] border-b border-[var(--border-ultralight,var(--border))] last:border-b-0"><span>{t('profilePage.cards.stats.total')}</span><span className="font-semibold">{statsData.totalObjectives}</span></li>
+                                <li className="flex justify-between items-center py-[0.6rem] text-[0.9rem] border-b border-[var(--border-ultralight,var(--border))] last:border-b-0"><span>{t('profilePage.cards.stats.completed')}</span><span className="font-semibold text-[var(--success)]">{statsData.completed}</span></li>
+                                <li className="flex justify-between items-center py-[0.6rem] text-[0.9rem] border-b border-[var(--border-ultralight,var(--border))] last:border-b-0"><span>{t('profilePage.cards.stats.inProgress')}</span><span className="font-semibold text-[var(--primary)]">{statsData.inProgress}</span></li>
+                                <li className="flex justify-between items-center py-[0.6rem] text-[0.9rem]"><span>{t('profilePage.cards.stats.successRate')}</span><span className="font-semibold text-[var(--primary)]">{statsData.successRate}%</span></li>
                             </ul>
                         </section>
                     )}
