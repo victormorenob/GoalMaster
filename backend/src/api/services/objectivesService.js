@@ -1,10 +1,8 @@
 const objectiveRepository = require('../repositories/objectiveRepository');
-const progressRepository = require('../repositories/progressRepository');
-const activityLogRepository = require('../repositories/activityLogRepository');
 const db = require('../../config/database');
 const AppError = require('../../utils/AppError');
 
-const { Objective, Progress } = db;
+const { Objective, Progress, ActivityLog } = db;
 
 const calculateProgressPercentage = (objective) => {
     const initial = parseFloat(objective.initialValue);
@@ -62,10 +60,6 @@ const processObjectiveForResponse = (objective) => {
 };
 
 class ObjectivesService {
-    constructor(progressRepo, activityLogRepo) {
-        this.progressRepository = progressRepo || progressRepository;
-        this.activityLogRepository = activityLogRepo || activityLogRepository;
-    }
 
     async getAllObjectives(userId, filters = {}) {
         const objectives = await objectiveRepository.findAll(userId, filters);
@@ -115,7 +109,7 @@ class ObjectivesService {
             const newObjective = await objectiveRepository.create(dataToCreate, { transaction });
 
             if (isQuantitative) {
-                await this.progressRepository.create({
+                await Progress.create({
                     objectiveId: newObjective.id,
                     userId: userId,
                     entryDate: new Date(),
@@ -124,7 +118,7 @@ class ObjectivesService {
                 }, { transaction });
             }
 
-            await this.activityLogRepository.create({
+            await ActivityLog.create({
                 userId,
                 objectiveId: newObjective.id,
                 activityType: 'OBJECTIVE_CREATED',
@@ -200,7 +194,7 @@ class ObjectivesService {
         objective.currentValue = newValue;
         await objective.save({ transaction });
 
-        await this.progressRepository.create({
+        await Progress.create({
             objectiveId: objective.id,
             userId: userId,
             entryDate: new Date(),
@@ -208,7 +202,7 @@ class ObjectivesService {
             notes: progressData.notes || null
         }, { transaction });
 
-        await this.activityLogRepository.create({
+        await ActivityLog.create({
             userId,
             objectiveId: objective.id,
             activityType: 'PROGRESS_UPDATED',
@@ -224,7 +218,7 @@ class ObjectivesService {
             activityType = 'OBJECTIVE_ARCHIVED';
             descriptionKey = 'activityLog.objectiveArchived';
         }
-        await this.activityLogRepository.create({
+        await ActivityLog.create({
             userId,
             objectiveId: objective.id,
             activityType,
@@ -247,7 +241,7 @@ class ObjectivesService {
             const newStatus = objective.previousStatus || 'PENDING';
             await objective.update({ status: newStatus, previousStatus: null }, { transaction });
 
-            await this.activityLogRepository.create({
+            await ActivityLog.create({
                 userId,
                 objectiveId: objective.id,
                 activityType: 'OBJECTIVE_UNARCHIVED',
@@ -271,7 +265,7 @@ class ObjectivesService {
             const objective = await objectiveRepository.findById(objectiveId, userId, { transaction });
             if (!objective) throw new AppError('Objetivo no encontrado.', 404);
             
-            await this.activityLogRepository.create({
+            await ActivityLog.create({
                 userId,
                 objectiveId: objectiveId,
                 activityType: 'OBJECTIVE_DELETED',
