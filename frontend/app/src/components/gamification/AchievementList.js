@@ -1,5 +1,6 @@
 // frontend/app/src/components/gamification/AchievementList.jsx
 import React, { useMemo } from 'react';
+import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import PropTypes from 'prop-types';
 
@@ -27,30 +28,39 @@ export const checkAchievements = (userData) => {
 
     const earnedMap = {};
 
-    // FIRST_GOAL: created at least one objective
     earnedMap.FIRST_GOAL = objectives.length > 0;
 
-    // STREAK_3/7/30: streak milestones
     earnedMap.STREAK_3 = streakCount >= 3;
     earnedMap.STREAK_7 = streakCount >= 7;
     earnedMap.STREAK_30 = streakCount >= 30;
 
-    // CATEGORY_COMPLETE: completed an objective in each category
     const categories = ['HEALTH', 'FINANCE', 'PERSONAL_DEV', 'RELATIONSHIPS', 'CAREER'];
     const completedCategorySet = new Set(completedObjectives.map(o => o.category));
     earnedMap.CATEGORY_COMPLETE = categories.every(cat => completedCategorySet.has(cat));
 
-    // PROGRESS_10/50: total progress entries
     earnedMap.PROGRESS_10 = progressCount >= 10;
     earnedMap.PROGRESS_50 = progressCount >= 50;
 
-    // ANALYZER: visit analysis page 10 times (from localStorage or prop)
     earnedMap.ANALYZER = analysisVisits >= 10;
 
     return ACHIEVEMENT_DEFINITIONS.map(a => ({
         ...a,
         earned: !!earnedMap[a.id],
     }));
+};
+
+const containerVariants = {
+    hidden: { opacity: 0 },
+    show: { opacity: 1, transition: { staggerChildren: 0.06 } },
+};
+
+const cardVariants = {
+    hidden: { opacity: 0, scale: 0.9 },
+    show: (earned) => ({
+        opacity: 1,
+        scale: 1,
+        transition: { duration: 0.3, ease: 'easeOut' },
+    }),
 };
 
 const AchievementList = ({ userData, compact = false }) => {
@@ -72,13 +82,14 @@ const AchievementList = ({ userData, compact = false }) => {
                 </div>
                 <div className="flex flex-wrap gap-1">
                     {achievements.slice(0, 5).map(a => (
-                        <span
+                        <motion.span
                             key={a.id}
                             className={`text-lg ${a.earned ? 'opacity-100' : 'opacity-30 grayscale'}`}
                             title={a.earned ? a.name : '???'}
+                            whileHover={a.earned ? { scale: 1.2, rotate: 5 } : {}}
                         >
                             {a.icon}
-                        </span>
+                        </motion.span>
                     ))}
                     {achievements.length > 5 && (
                         <span className="text-xs text-gray-400 self-center">
@@ -91,19 +102,33 @@ const AchievementList = ({ userData, compact = false }) => {
     }
 
     return (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+        <motion.div
+            className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3"
+            variants={containerVariants}
+            initial="hidden"
+            animate="show"
+        >
             {achievements.map(a => (
-                <div
+                <motion.div
                     key={a.id}
+                    custom={a.earned}
+                    variants={cardVariants}
+                    whileHover={a.earned ? { scale: 1.05, y: -2 } : { scale: 1.02 }}
                     className={`
-                        relative rounded-lg p-3 border-2 transition-all duration-200
+                        relative rounded-lg p-3 border-2 transition-colors duration-200 cursor-default
                         ${a.earned
                             ? 'bg-gradient-to-br from-yellow-50 to-amber-50 dark:from-yellow-900/20 dark:to-amber-900/20 border-yellow-300 dark:border-yellow-700 shadow-sm'
                             : 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 opacity-60'
                         }
                     `}
                 >
-                    <div className="text-3xl mb-1 text-center">{a.icon}</div>
+                    <motion.div
+                        className="text-3xl mb-1 text-center"
+                        animate={a.earned ? { rotate: [0, -5, 5, -5, 0] } : {}}
+                        transition={{ duration: 0.5, delay: 0.2 }}
+                    >
+                        {a.icon}
+                    </motion.div>
                     <h4 className={`text-sm font-bold text-center ${a.earned ? 'text-amber-800 dark:text-amber-200' : 'text-gray-400 dark:text-gray-500'}`}>
                         {a.earned ? a.name : '???'}
                     </h4>
@@ -113,9 +138,9 @@ const AchievementList = ({ userData, compact = false }) => {
                     {a.earned && (
                         <div className="absolute top-1 right-1 text-xs">✅</div>
                     )}
-                </div>
+                </motion.div>
             ))}
-        </div>
+        </motion.div>
     );
 };
 

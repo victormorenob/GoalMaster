@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useCallback } from "react";
+import { motion } from "framer-motion";
 import { useForm, Controller } from "react-hook-form";
 import FormGroup from "../ui/FormGroup";
 import Input from "../ui/Input";
 import Button from "../ui/Button";
-import objetivosStyles from "./ObjetivosForm.module.css";
 import DatePicker from '../ui/DatePicker/DatePicker';
 import { format, isValid, parseISO } from 'date-fns';
 import { toast } from 'react-toastify';
@@ -12,6 +12,11 @@ import { FaInfoCircle } from 'react-icons/fa';
 import PropTypes from 'prop-types';
 import TagSelector from '../tags/TagSelector';
 import api from '../../services/apiService';
+
+const sectionVariants = {
+    hidden: { opacity: 0, y: 15 },
+    show: (i) => ({ opacity: 1, y: 0, transition: { delay: i * 0.06, duration: 0.3, ease: 'easeOut' } }),
+};
 
 function ObjectiveForm({
     initialData = null,
@@ -37,14 +42,12 @@ ObjectiveForm.propTypes = {
         Array.isArray(initialData?.tags) ? initialData.tags : []
     );
 
-    // Fetch available tags for the selector
     useEffect(() => {
         const fetchTags = async () => {
             try {
                 const response = await api.getTags();
                 setAvailableTags(response?.data?.tags || []);
             } catch {
-                // Silently fail — tags are optional
                 setAvailableTags([]);
             }
         };
@@ -133,7 +136,6 @@ ObjectiveForm.propTypes = {
 
         const isQuantitative = data.targetValue !== '' && data.targetValue !== null;
 
-    // Construimos el payload solo con lo necesario
     const payload = {
         name: data.name,
         description: data.description || null,
@@ -143,27 +145,22 @@ ObjectiveForm.propTypes = {
         endDate: data.endDate ? format(data.endDate, 'yyyy-MM-dd') : null,
         isLowerBetter: data.isLowerBetter,
         tags: selectedTags.length > 0 ? selectedTags : null,
-        // Valores cuantitativos solo si es de ese tipo
         initialValue: isQuantitative ? parseFloat(data.initialValue || 0) : null,
         targetValue: isQuantitative ? parseFloat(data.targetValue) : null,
     };
-        
-        // Special case: progressData is only added if 'currentValue' has been modified
+
         if (isEditMode && dirtyFields.currentValue) {
             payload.progressData = {
                 value: isQuantitative ? parseFloat(data.currentValue) : 0,
                 notes: 'Valor actualizado desde la pantalla de edición.'
             };
         } else if (!isEditMode) {
-             // In creation mode, these values are always sent
             payload.initialValue = isQuantitative ? parseFloat(data.initialValue) : null;
             payload.currentValue = payload.initialValue;
-            // Pass the rest of the data that is not in dirtyFields but is necessary
             payload.name = data.name;
             payload.category = data.category;
         }
 
-        // If no fields were modified, do nothing (except for creation)
         if (isEditMode && Object.keys(payload).length === 0) {
             toast.info("No se han detectado cambios.");
             setLoading(false);
@@ -196,65 +193,69 @@ ObjectiveForm.propTypes = {
 
     const finalButtonText = buttonText || (isEditMode ? t('objectivesForm.updateButton') : t('objectivesForm.createButton'));
 
-    const buttonContainerClass = [objetivosStyles.buttonContainer];
-    if (isEditMode || !isFirstObjective) {
-        buttonContainerClass.push(objetivosStyles.buttonsWithCancel);
-    } else {
-        buttonContainerClass.push(objetivosStyles.firstObjectiveButtons);
-    }
+    const buttonContainerClasses = `flex gap-4 pt-6 mt-6 border-t border-[var(--border-light)] ${(isEditMode || !isFirstObjective) ? 'justify-between' : 'justify-end'}`;
 
     return (
-        <div className={objetivosStyles.formContainer}>
+        <motion.div
+            className="bg-[var(--card)] shadow-[var(--shadow-lg)] border border-[var(--border)] rounded-[var(--radius-md,0.5rem)] p-6 w-full max-w-[768px] mx-auto mb-8 md:p-8"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.35, ease: 'easeOut' }}
+        >
             <form onSubmit={handleSubmit(onSubmitInternal)} noValidate>
-                <div className={objetivosStyles.formGroupContainer}>
-                    <FormGroup label={t('objectivesForm.nameLabel')} htmlFor="name" required={true} error={errors.name?.message}>
-                        <Input
-                            data-cy="objective-name-input" type="text" id="name" placeholder={t('objectivesForm.namePlaceholder')}
-                            {...register("name", {
-                                required: t('formValidation.nameRequired'),
-                                minLength: { value: 3, message: t('formValidation.nameMinLength', { count: 3 }) },
-                            })}
-                            disabled={loading} isError={!!errors.name}
-                        />
-                    </FormGroup>
+                <div className="flex flex-col gap-4">
+                    <motion.div custom={0} variants={sectionVariants} initial="hidden" animate="show">
+                        <FormGroup label={t('objectivesForm.nameLabel')} htmlFor="name" required={true} error={errors.name?.message}>
+                            <Input data-cy="objective-name-input" type="text" id="name" placeholder={t('objectivesForm.namePlaceholder')}
+                                {...register("name", {
+                                    required: t('formValidation.nameRequired'),
+                                    minLength: { value: 3, message: t('formValidation.nameMinLength', { count: 3 }) },
+                                })}
+                                disabled={loading} isError={!!errors.name}
+                            />
+                        </FormGroup>
+                    </motion.div>
 
-                    <FormGroup label={t('objectivesForm.descriptionLabel')} htmlFor="description" error={errors.description?.message}>
-                        <Input
-                            data-cy="objective-description-input" type="textarea" id="description" placeholder={t('objectivesForm.descriptionPlaceholder')}
-                            {...register("description")}
-                            disabled={loading} isError={!!errors.description}
-                        />
-                    </FormGroup>
+                    <motion.div custom={1} variants={sectionVariants} initial="hidden" animate="show">
+                        <FormGroup label={t('objectivesForm.descriptionLabel')} htmlFor="description" error={errors.description?.message}>
+                            <Input data-cy="objective-description-input" type="textarea" id="description" placeholder={t('objectivesForm.descriptionPlaceholder')}
+                                {...register("description")}
+                                disabled={loading} isError={!!errors.description}
+                            />
+                        </FormGroup>
+                    </motion.div>
 
-                    <FormGroup label={t('objectivesForm.tagsLabel')} htmlFor="tags">
-                        <TagSelector
-                            availableTags={availableTags}
-                            selectedTags={selectedTags}
-                            onChange={setSelectedTags}
-                        />
-                    </FormGroup>
+                    <motion.div custom={2} variants={sectionVariants} initial="hidden" animate="show">
+                        <FormGroup label={t('objectivesForm.tagsLabel')} htmlFor="tags">
+                            <TagSelector
+                                availableTags={availableTags}
+                                selectedTags={selectedTags}
+                                onChange={setSelectedTags}
+                            />
+                        </FormGroup>
+                    </motion.div>
 
-                    <FormGroup label={t('objectivesForm.typeLabel')} htmlFor="category" required={true} error={errors.category?.message}>
-                        <Input
-                            data-cy="objective-category-select" type="select" id="category"
-                            {...register("category", {
-                                required: t('formValidation.typeRequired'),
-                                validate: (value) => value !== "" || t('formValidation.typeRequired'),
-                            })}
-                            disabled={loading} isError={!!errors.category}
-                        >
-                            <option value="" disabled>{t('objectivesForm.selectType')}</option>
-                            {Object.entries(categoryKeyMap).map(([key, value]) => (
-                                <option key={key} value={key}>{t(`categories.${value}`)}</option>
-                            ))}
-                        </Input>
-                    </FormGroup>
+                    <motion.div custom={3} variants={sectionVariants} initial="hidden" animate="show">
+                        <FormGroup label={t('objectivesForm.typeLabel')} htmlFor="category" required={true} error={errors.category?.message}>
+                            <Input data-cy="objective-category-select" type="select" id="category"
+                                {...register("category", {
+                                    required: t('formValidation.typeRequired'),
+                                    validate: (value) => value !== "" || t('formValidation.typeRequired'),
+                                })}
+                                disabled={loading} isError={!!errors.category}
+                            >
+                                <option value="" disabled>{t('objectivesForm.selectType')}</option>
+                                {Object.entries(categoryKeyMap).map(([key, value]) => (
+                                    <option key={key} value={key}>{t(`categories.${value}`)}</option>
+                                ))}
+                            </Input>
+                        </FormGroup>
+                    </motion.div>
 
-                    <div className={objetivosStyles.formGrid}>
+                    <motion.div custom={4} variants={sectionVariants} initial="hidden" animate="show" className="grid grid-cols-1 gap-4 md:grid-cols-3 md:gap-6">
                         {!isEditMode && (
                             <FormGroup label={t('objectivesForm.initialValueLabel')} htmlFor="initialValue" required={true} error={errors.initialValue?.message}>
-                                <Input
-                                    data-cy="objective-initial-value-input" type="number" id="initialValue" step="any" placeholder="Ej. 78"
+                                <Input data-cy="objective-initial-value-input" type="number" id="initialValue" step="any" placeholder="Ej. 78"
                                     {...register("initialValue", {
                                         valueAsNumber: true,
                                         required: t('formValidation.initialValueRequired'),
@@ -267,8 +268,7 @@ ObjectiveForm.propTypes = {
                         )}
                         {isEditMode && (
                             <FormGroup label={t('objectivesForm.currentValueLabel')} htmlFor="currentValue" required={true} error={errors.currentValue?.message}>
-                                <Input
-                                    type="number" id="currentValue" step="any" placeholder="Ej. 79"
+                                <Input type="number" id="currentValue" step="any" placeholder="Ej. 79"
                                     {...register("currentValue", {
                                         valueAsNumber: true,
                                         required: t('formValidation.currentValueRequired'),
@@ -280,8 +280,7 @@ ObjectiveForm.propTypes = {
                             </FormGroup>
                         )}
                         <FormGroup label={t('objectivesForm.targetValueLabel')} htmlFor="targetValue" required={true} error={errors.targetValue?.message}>
-                            <Input
-                                data-cy="objective-target-value-input" type="number" id="targetValue" step="any" placeholder="Ej. 81"
+                            <Input data-cy="objective-target-value-input" type="number" id="targetValue" step="any" placeholder="Ej. 81"
                                 {...register("targetValue", {
                                     valueAsNumber: true,
                                     required: t('formValidation.targetValueRequired'),
@@ -292,34 +291,33 @@ ObjectiveForm.propTypes = {
                             />
                         </FormGroup>
                         <FormGroup label={t('objectivesForm.unitLabel')} htmlFor="unit" error={errors.unit?.message}>
-                            <Input
-                                type="text" id="unit" placeholder={t('objectivesForm.unitPlaceholder')}
+                            <Input type="text" id="unit" placeholder={t('objectivesForm.unitPlaceholder')}
                                 {...register("unit")}
                                 disabled={loading} isError={!!errors.unit}
                             />
                         </FormGroup>
                         {(targetValueWatch !== null && targetValueWatch !== '' && !isNaN(parseFloat(targetValueWatch))) && (
                             <FormGroup htmlFor="isLowerBetter">
-                                <div className={objetivosStyles.checkboxWrapper}>
-                                <div className={objetivosStyles.checkboxWithTooltipContainer}>
-                                    <label className={objetivosStyles.checkboxLabel}>
-                                        <input type="checkbox" id="isLowerBetter" {...register("isLowerBetter")} disabled={loading} />
+                                <div className="flex flex-col">
+                                <div className="flex items-center gap-2">
+                                    <label className="flex items-center gap-2 text-sm text-[var(--foreground)]">
+                                        <input type="checkbox" id="isLowerBetter" className="w-[1.1rem] h-[1.1rem] accent-[var(--primary)]" {...register("isLowerBetter")} disabled={loading} />
                                         <span>{t('objectivesForm.isLowerBetter.label')}</span>
                                     </label>
                                     <FaInfoCircle
-                                        className={objetivosStyles.tooltipIcon}
+                                        className="text-[var(--muted-foreground)] text-base cursor-help transition-colors duration-200 hover:text-[var(--primary)]"
                                         data-tooltip-id="info-tooltip"
                                         data-tooltip-place="right"
                                         data-tooltip-content={t('objectivesForm.isLowerBetter.tooltip')}
                                     />
                                 </div>
-                                {errors.isLowerBetter && (<p className={objetivosStyles.errorText}>{errors.isLowerBetter.message}</p>)}
+                                {errors.isLowerBetter && (<p className="text-[var(--destructive)] text-sm mt-0 mb-0">{errors.isLowerBetter.message}</p>)}
                             </div>
                             </FormGroup>
                         )}
-                    </div>
+                    </motion.div>
 
-                    <div className={objetivosStyles.dateFieldsGrid}>
+                    <motion.div custom={5} variants={sectionVariants} initial="hidden" animate="show" className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6">
                         <FormGroup label={t('objectivesForm.startDateLabel')} htmlFor="startDate" error={errors.startDate?.message}>
                             <Controller
                                 name="startDate"
@@ -345,13 +343,10 @@ ObjectiveForm.propTypes = {
                                 rules={{
                                     validate: (value) => {
                                         if (!value) return true;
-                                        
                                         if (!isValid(value)) return t('formValidation.invalidEndDate');
-                                        
                                         if (startDateValue && isValid(startDateValue) && value < startDateValue) {
                                             return t('formValidation.endDateAfterStart');
                                         }
-
                                         if (!isEditMode) {
                                             const today = new Date(); today.setHours(0,0,0,0);
                                             const selectedEndDate = new Date(value); selectedEndDate.setHours(0,0,0,0);
@@ -374,17 +369,19 @@ ObjectiveForm.propTypes = {
                                 )}
                             />
                         </FormGroup>
-                    </div>
+                    </motion.div>
                     {isEditMode && (
-                        <FormGroup label={t('common.status')} htmlFor="status" required={true} error={errors.status?.message}>
-                            <Input type="select" id="status" {...register("status", { required: t('formValidation.statusRequired') })} disabled={loading} isError={!!errors.status}>
-                                {Object.entries(statusKeyMap).map(([key, value]) => (
-                                    <option key={key} value={key}>{t(`status.${value}`)}</option>
-                                ))}
-                            </Input>
-                        </FormGroup>
+                        <motion.div custom={6} variants={sectionVariants} initial="hidden" animate="show">
+                            <FormGroup label={t('common.status')} htmlFor="status" required={true} error={errors.status?.message}>
+                                <Input type="select" id="status" {...register("status", { required: t('formValidation.statusRequired') })} disabled={loading} isError={!!errors.status}>
+                                    {Object.entries(statusKeyMap).map(([key, value]) => (
+                                        <option key={key} value={key}>{t(`status.${value}`)}</option>
+                                    ))}
+                                </Input>
+                            </FormGroup>
+                        </motion.div>
                     )}
-                    <div className={buttonContainerClass.join(' ').trim()}>
+                    <motion.div custom={7} variants={sectionVariants} initial="hidden" animate="show" className={buttonContainerClasses}>
                         {(isEditMode || !isFirstObjective) && (
                             <Button type="button" onClick={handleCancelClick} disabled={loading} variant="buttonOutline" >
                                 {t('common.cancel')}
@@ -393,10 +390,10 @@ ObjectiveForm.propTypes = {
                         <Button data-cy="objective-submit-button" type="submit" disabled={loading} variant="primary">
                             {loading ? (isEditMode ? t('common.updating') : t('common.creating')) : finalButtonText}
                         </Button>
-                    </div>
+                    </motion.div>
                 </div>
             </form>
-        </div>
+        </motion.div>
     );
 }
 

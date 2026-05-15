@@ -1,5 +1,6 @@
 // frontend/app/src/components/gamification/LevelBadge.jsx
 import React, { useMemo } from 'react';
+import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import PropTypes from 'prop-types';
 
@@ -18,15 +19,12 @@ const LEVEL_THRESHOLDS = [
  */
 export const calculateXP = (stats) => {
     let xp = 0;
-    // 100 XP per objective completed
     if (stats?.completedObjectives) {
         xp += stats.completedObjectives * 100;
     }
-    // 50 XP per streak day
     if (stats?.streakCount) {
         xp += stats.streakCount * 50;
     }
-    // 200 XP per achievement (placeholder — actual achievements calculated elsewhere)
     if (stats?.achievementsCount) {
         xp += stats.achievementsCount * 200;
     }
@@ -66,35 +64,55 @@ const LevelBadge = ({ stats, compact = false }) => {
 
     if (compact) {
         return (
-            <div className="flex items-center gap-2 px-3 py-1.5">
-                <div className={`w-8 h-8 rounded-full bg-gradient-to-br ${levelInfo.color} flex items-center justify-center font-bold text-sm ${levelInfo.textColor}`}>
+            <motion.div
+                className="flex items-center gap-2 px-3 py-1.5"
+                whileHover={{ scale: 1.02 }}
+                transition={{ duration: 0.2 }}
+            >
+                <motion.div
+                    className={`w-8 h-8 rounded-full bg-gradient-to-br ${levelInfo.color} flex items-center justify-center font-bold text-sm ${levelInfo.textColor}`}
+                    whileHover={{ scale: 1.1, rotate: 5 }}
+                >
                     {levelInfo.level}
-                </div>
+                </motion.div>
                 <div className="flex flex-col">
                     <span className="text-xs font-semibold text-gray-700 dark:text-gray-300">
                         {t('gamification.level', 'Level')} {levelInfo.level}
                     </span>
                     <div className="w-16 h-1.5 bg-gray-200 dark:bg-gray-600 rounded-full overflow-hidden">
-                        <div
-                            className="h-full bg-gradient-to-r from-blue-400 to-purple-400 rounded-full transition-all duration-300"
-                            style={{ width: `${levelInfo.progress}%` }}
+                        <motion.div
+                            className="h-full bg-gradient-to-r from-blue-400 to-purple-400 rounded-full"
+                            initial={{ width: 0 }}
+                            animate={{ width: `${levelInfo.progress}%` }}
+                            transition={{ duration: 0.8, ease: 'easeOut' }}
                         />
                     </div>
                 </div>
-            </div>
+            </motion.div>
         );
     }
 
     return (
-        <div className={`bg-gradient-to-br ${levelInfo.color} rounded-xl p-4 shadow-sm`}>
+        <motion.div
+            className={`bg-gradient-to-br ${levelInfo.color} rounded-xl p-4 shadow-sm`}
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.4, type: 'spring', stiffness: 200 }}
+            whileHover={{ scale: 1.02 }}
+        >
             <div className="flex items-center justify-between">
                 <div>
                     <span className={`text-sm font-medium ${levelInfo.textColor} opacity-80`}>
                         {t('gamification.level', 'Level')}
                     </span>
-                    <span className={`text-3xl font-bold block ${levelInfo.textColor}`}>
+                    <motion.span
+                        className={`text-3xl font-bold block ${levelInfo.textColor}`}
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        transition={{ type: 'spring', stiffness: 300, delay: 0.15 }}
+                    >
                         {levelInfo.level}
-                    </span>
+                    </motion.span>
                 </div>
                 <div className={`text-right ${levelInfo.textColor}`}>
                     <span className="text-lg font-bold">{xp.toLocaleString()}</span>
@@ -108,9 +126,11 @@ const LevelBadge = ({ stats, compact = false }) => {
                         <span>{levelInfo.nextLevelXP.toLocaleString()} XP</span>
                     </div>
                     <div className="w-full h-2 bg-white/30 rounded-full overflow-hidden">
-                        <div
-                            className="h-full bg-white/70 rounded-full transition-all duration-300"
-                            style={{ width: `${levelInfo.progress}%` }}
+                        <motion.div
+                            className="h-full bg-white/70 rounded-full"
+                            initial={{ width: 0 }}
+                            animate={{ width: `${levelInfo.progress}%` }}
+                            transition={{ duration: 0.8, ease: 'easeOut' }}
                         />
                     </div>
                     <p className="text-xs mt-1 opacity-80">
@@ -118,7 +138,7 @@ const LevelBadge = ({ stats, compact = false }) => {
                     </p>
                 </div>
             )}
-        </div>
+        </motion.div>
     );
 };
 
