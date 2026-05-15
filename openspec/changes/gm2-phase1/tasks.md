@@ -14,3 +14,13 @@
 - [x] A10. Setup Tailwind directives in index.css
 - [x] A11. Update package.json scripts for Vite
 - [x] A12. Rename remaining .js files to .tsx (progressive, add @ts-nocheck)
+
+## Batch B: Ollama Installation + AI Integration
+
+- [x] B1. Install Ollama (v0.24.0, binary install to ~/.local/bin)
+- [x] B2. Create backend AI routes (POST /api/ai/chat, POST /api/ai/suggest)
+- [x] B3. Register routes in backend/app.js
+- [x] B4. Create frontend aiService.ts
+- [x] B5. Create ChatPanel component with Tailwind styling
+- [x] B6. Create backend unit tests for AI routes
+- [x] B7. Update tasks.md with progress
