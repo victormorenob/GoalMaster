@@ -79,7 +79,7 @@ Para ejecutar este proyecto en tu entorno local, sigue los siguientes pasos.
 4.  **Instala las dependencias del Frontend:**
     *   Desde la raíz del proyecto:
     ```bash
-    cd frontend/reactapp
+    cd frontend/app
     npm install
     ```
 
@@ -91,7 +91,7 @@ Para ejecutar este proyecto en tu entorno local, sigue los siguientes pasos.
     La API estará escuchando en el puerto especificado (ej. `http://localhost:3001`).
 
 6.  **Ejecuta el Frontend:**
-    *   Desde la carpeta `/frontend/reactapp` (en una terminal separada):
+    *   Desde la carpeta `/frontend/app` (en una terminal separada):
     ```bash
     npm start
     ```
