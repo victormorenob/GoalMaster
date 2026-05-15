@@ -98,6 +98,12 @@ const api = {
     changePassword: (data) => axiosInstance.put('/settings/change-password', data),
     exportUserData: () => axiosInstance.get('/settings/export-data'),
     deleteAccount: () => axiosInstance.delete('/settings/account'),
+
+    // Tags
+    getTags: () => axiosInstance.get('/tags'),
+    createTag: (data) => axiosInstance.post('/tags', data),
+    updateTag: (id, data) => axiosInstance.put(`/tags/${id}`, data),
+    deleteTag: (id) => axiosInstance.delete(`/tags/${id}`),
 };
 
 export default api;
