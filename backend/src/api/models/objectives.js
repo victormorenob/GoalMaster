@@ -77,6 +77,12 @@ module.exports = (sequelize) => {
             field: 'estado_anterior',
             comment: 'Stores the previous status before the objective was archived.'
         },
+        tags: {
+            type: DataTypes.TEXT,
+            allowNull: true,
+            field: 'etiquetas',
+            comment: 'Comma-separated list of tag names for quick filtering/serialization.'
+        },
         userId: {
             type: DataTypes.INTEGER,
             allowNull: false,

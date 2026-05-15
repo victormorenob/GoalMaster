@@ -47,6 +47,32 @@ const checkAndUpdateOverdueStatus = (objectiveJson) => {
     return objectiveJson;
 };
 
+/**
+ * Parse tags from a comma-separated string to an array.
+ * @param {string|null} tagsStr - Comma-separated tag string or null.
+ * @returns {string[]} Array of trimmed tag names.
+ */
+const parseTags = (tagsStr) => {
+    if (!tagsStr || typeof tagsStr !== 'string') return [];
+    return tagsStr.split(',').map(t => t.trim()).filter(Boolean);
+};
+
+/**
+ * Serialize an array of tag names to a comma-separated string.
+ * @param {string[]|string|null} tags - Array of tags or comma-separated string.
+ * @returns {string|null} Comma-separated string or null.
+ */
+const serializeTags = (tags) => {
+    if (!tags) return null;
+    if (Array.isArray(tags)) {
+        return tags.map(t => t.trim()).filter(Boolean).join(',') || null;
+    }
+    if (typeof tags === 'string') {
+        return parseTags(tags).join(',') || null;
+    }
+    return null;
+};
+
 const processObjectiveForResponse = (objective) => {
     let objectiveJson = objective.toJSON();
     objectiveJson = checkAndUpdateOverdueStatus(objectiveJson);
@@ -55,6 +81,9 @@ const processObjectiveForResponse = (objective) => {
     objectiveJson.initialValue = objectiveJson.initialValue != null ? +objectiveJson.initialValue : null;
     objectiveJson.currentValue = objectiveJson.currentValue != null ? +objectiveJson.currentValue : null;
     objectiveJson.targetValue = objectiveJson.targetValue != null ? +objectiveJson.targetValue : null;
+    
+    // Parse tags from comma-separated string to array for frontend consumption
+    objectiveJson.tags = parseTags(objectiveJson.tags);
     
     return objectiveJson;
 };
@@ -65,6 +94,14 @@ class ObjectivesService {
         const objectives = await objectiveRepository.findAll(userId, filters);
         
         let processedObjectives = objectives.map(processObjectiveForResponse);
+
+        // Filter by tags if specified (client-side since tags are stored as TEXT)
+        if (filters.tags) {
+            const filterTags = Array.isArray(filters.tags) ? filters.tags : [filters.tags];
+            processedObjectives = processedObjectives.filter(obj => {
+                return obj.tags.some(tag => filterTags.includes(tag));
+            });
+        }
 
         if (filters.sortBy === 'progressAsc') {
             processedObjectives.sort((a, b) => a.progressPercentage - b.progressPercentage);
@@ -98,9 +135,11 @@ class ObjectivesService {
                 objectiveData.targetValue !== null && objectiveData.targetValue !== undefined
             );
 
+            // Serialize tags to comma-separated string for storage
             const dataToCreate = {
                 ...objectiveData,
                 userId,
+                tags: serializeTags(objectiveData.tags),
                 initialValue: isQuantitative ? objectiveData.initialValue : null,
                 targetValue: isQuantitative ? objectiveData.targetValue : null,
                 currentValue: isQuantitative ? objectiveData.initialValue : null,
@@ -162,6 +201,11 @@ class ObjectivesService {
             }
             
             const { progressData, ...objectiveData } = updateData;
+
+            // Serialize tags to comma-separated string for storage
+            if (objectiveData.tags !== undefined) {
+                objectiveData.tags = serializeTags(objectiveData.tags);
+            }
 
             if (Object.keys(objectiveData).length > 0) {
                 await objective.update(objectiveData, { transaction });

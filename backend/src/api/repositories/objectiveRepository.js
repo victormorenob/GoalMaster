@@ -30,11 +30,12 @@ class ObjectiveRepository {
             whereClause.category = filters.category;
         }
 
-        // Filter by search term in name or description
+        // Filter by search term in name, description, or tags
         if (filters.searchTerm) {
             whereClause[Op.or] = [
                 { name: { [Op.like]: `%${filters.searchTerm}%` } },
-                { description: { [Op.like]: `%${filters.searchTerm}%` } }
+                { description: { [Op.like]: `%${filters.searchTerm}%` } },
+                { tags: { [Op.like]: `%${filters.searchTerm}%` } }
             ];
         }
         
