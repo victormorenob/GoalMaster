@@ -35,6 +35,38 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
+// Push event: show notification from server push
+self.addEventListener('push', (event) => {
+  if (!event.data) return;
+  try {
+    const data = event.data.json();
+    const title = data.title || 'GoalMaster';
+    const options = {
+      body: data.body || '',
+      icon: data.icon || '/logo192.png',
+      badge: '/favicon.ico',
+    };
+    event.waitUntil(self.registration.showNotification(title, options));
+  } catch (e) {
+    console.error('Push event error:', e);
+  }
+});
+
+// Notification click: open the app
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
+      if (clientList.length > 0) {
+        const client = clientList[0];
+        client.focus();
+        return client.navigate ? client.navigate('/') : client.postMessage('focus');
+      }
+      return clients.openWindow('/');
+    })
+  );
+});
+
 // Fetch event: network-first, fallback to cache
 self.addEventListener('fetch', (event) => {
   // Only handle GET requests

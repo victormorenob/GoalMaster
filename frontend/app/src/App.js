@@ -20,6 +20,7 @@ import UpdateProgressPage from './pages/UpdateProgressPage';
 import AnalysisPage from './pages/AnalysisPage';
 import ProfilePage from './pages/ProfilePage';
 import SettingsPage from './pages/SettingsPage';
+import AchievementsPage from './pages/AchievementsPage';
 
 // Layout and UI component imports
 import AppHeader from './layouts/AppHeader';
@@ -54,6 +55,7 @@ function AppContent() {
                             <Route path="/objectives/:id" element={<GoalDetailPage />} />
                             <Route path="/analisis" element={<AnalysisPage />} />
                             <Route path="/profile" element={<ProfilePage />} />
+                            <Route path="/logros" element={<AchievementsPage />} />
                             <Route path="/settings" element={<SettingsPage />} />
                             <Route path="*" element={<Navigate to="/dashboard" replace />} />
                         </Routes>

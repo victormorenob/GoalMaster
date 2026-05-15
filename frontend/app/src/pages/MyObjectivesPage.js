@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { toast } from 'react-toastify';
 import api from '../services/apiService';
 
-import { FaFilter } from 'react-icons/fa';
+import { FaFilter, FaDownload } from 'react-icons/fa';
 
 import ObjetivoCard from '../components/objetivos/ObjetivoCard';
 import Button from '../components/ui/Button';
@@ -12,6 +12,7 @@ import Input from '../components/ui/Input';
 import FormGroup from '../components/ui/FormGroup';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
 import TagBadge from '../components/tags/TagBadge';
+import { exportToCSV, exportToJSON } from '../utils/exportUtils';
 import styles from './MyObjectivesPage.module.css';
 
 const INITIAL_DISPLAY_LIMIT = 6;
@@ -41,6 +42,7 @@ function MyObjectivesPage() {
     const navigate = useNavigate();
 
     const [isFiltersOpen, setIsFiltersOpen] = useState(false);
+    const [showExportMenu, setShowExportMenu] = useState(false);
     const [objectives, setObjectives] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -108,6 +110,18 @@ function MyObjectivesPage() {
         }));
     }, [t]);
 
+    const handleExportCSV = useCallback(() => {
+        exportToCSV(objectives);
+        setShowExportMenu(false);
+        toast.success(t('toast.exportSuccess', 'Data exported successfully'));
+    }, [objectives, t]);
+
+    const handleExportJSON = useCallback(() => {
+        exportToJSON(objectives, `goalmaster_objectives_${new Date().toISOString().split('T')[0]}.json`);
+        setShowExportMenu(false);
+        toast.success(t('toast.exportSuccess', 'Data exported successfully'));
+    }, [objectives, t]);
+
     const objectivesToRender = showAllObjectives ? objectives : objectives.slice(0, INITIAL_DISPLAY_LIMIT);
 
     return (
@@ -124,6 +138,27 @@ function MyObjectivesPage() {
                     >
                         <FaFilter />
                     </Button>
+                    <div className="relative">
+                        <Button onClick={() => setShowExportMenu(!showExportMenu)} variant="outline" leftIcon={<FaDownload />}>
+                            {t('myObjectives.export', 'Export')}
+                        </Button>
+                        {showExportMenu && (
+                            <div className="absolute right-0 top-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-20 min-w-[160px]">
+                                <button
+                                    onClick={handleExportCSV}
+                                    className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300"
+                                >
+                                    {t('myObjectives.exportCSV', 'Export as CSV')}
+                                </button>
+                                <button
+                                    onClick={handleExportJSON}
+                                    className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300"
+                                >
+                                    {t('myObjectives.exportJSON', 'Export as JSON')}
+                                </button>
+                            </div>
+                        )}
+                    </div>
                     <Button onClick={() => navigate('/objectives/new')} variant="primary">
                         {t('myObjectives.addNewObjective')}
                     </Button>
@@ -199,6 +234,7 @@ function MyObjectivesPage() {
             </div>
 
             {isFiltersOpen && <div className={styles.overlay} onClick={() => setIsFiltersOpen(false)} />}
+            {showExportMenu && <div className="fixed inset-0 z-10" onClick={() => setShowExportMenu(false)} />}
         </div>
     );
 }

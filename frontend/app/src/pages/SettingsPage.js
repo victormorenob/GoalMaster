@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react'; // Added useCallback
+import React, { useState, useEffect, useCallback } from 'react';
 import styles from './SettingsPage.module.css';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
@@ -6,32 +6,38 @@ import FormGroup from '../components/ui/FormGroup';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
 import apiService from '../services/apiService';
 import { toast } from 'react-toastify';
-import { FaChevronDown, FaChevronUp, FaEye, FaEyeSlash, FaDownload, FaTrash } from 'react-icons/fa';
+import { FaChevronDown, FaChevronUp, FaEye, FaEyeSlash, FaDownload, FaTrash, FaBell, FaFileExport } from 'react-icons/fa';
 import { useSettings } from '../context/SettingsContext';
 import { useTranslation } from 'react-i18next';
+import useNotifications from '../hooks/useNotifications';
+import { exportToCSV, exportToJSON } from '../utils/exportUtils';
+import api from '../services/apiService';
 
 function SettingsPage() {
-    const { settings, updateSettings, isLoadingSettings, applyTemporarySettings } = useSettings(); // Assuming applyTemporarySettings exists or you'll add it
+    const { settings, updateSettings, isLoadingSettings, applyTemporarySettings } = useSettings();
     const { t, i18n } = useTranslation();
+    const {
+        permission: notifPermission,
+        reminderEnabled,
+        reminderTime,
+        requestPermission,
+        enableReminder,
+        disableReminder,
+    } = useNotifications();
 
-    // Estado para los datos del formulario (el estado "sucio" o de borrador)
     const [localSettingsData, setLocalSettingsData] = useState(settings || {});
-    // Nuevo estado para saber si hay cambios sin guardar
     const [isDirty, setIsDirty] = useState(false);
 
-    // Estados para los diferentes procesos de guardado y errores
     const [isSaving, setIsSaving] = useState(false);
     const [isSavingPassword, setIsSavingPassword] = useState(false);
     const [isProcessingDataAction, setIsProcessingDataAction] = useState(false);
     const [passwordFormError, setPasswordFormError] = useState(null);
     const [dataAccountError, setDataAccountError] = useState(null);
 
-    // States for the password form
     const [currentPassword, setCurrentPassword] = useState('');
     const [newPassword, setNewPassword] = useState('');
     const [confirmNewPassword, setConfirmNewPassword] = useState('');
 
-    // Estado para las secciones desplegables
     const [openSections, setOpenSections] = useState({
         notifications: true,
         appearance: true,
@@ -39,33 +45,25 @@ function SettingsPage() {
         dataAccount: true,
     });
 
-    // States for showing/hiding passwords
     const [showCurrentPassword, setShowCurrentPassword] = useState(false);
     const [showNewPassword, setShowNewPassword] = useState(false);
     const [showConfirmNewPassword, setShowConfirmNewPassword] = useState(false);
+    const [reminderTimeInput, setReminderTimeInput] = useState(reminderTime || '20:00');
 
-    // Sync local state when context settings change (e.g. on page load or revert)
     useEffect(() => {
         if (settings) {
             setLocalSettingsData(settings);
-            // Apply language immediately if it changes from settings (e.g., initial load or revert)
             if (i18n.language !== settings.language) {
                 i18n.changeLanguage(settings.language);
             }
-            // If you have a global mechanism to apply theme/date format immediately
-            // based on the context's 'settings', you would call it here too.
-            // For example, if your useSettings context applies these globally:
-            // applyTemporarySettings(settings); // Or a specific function for initial load
         }
-    }, [settings, i18n]); // Added i18n to dependencies
+    }, [settings, i18n]);
 
-    // Detecta si hay cambios sin guardar comparando el estado local con el del contexto
     useEffect(() => {
         const hasChanges = JSON.stringify(settings) !== JSON.stringify(localSettingsData);
         setIsDirty(hasChanges);
     }, [settings, localSettingsData]);
 
-    // Handle changes for most form inputs
     const handleInputChange = useCallback((e) => {
         const { name, value, type, checked } = e.target;
         const newValue = type === 'checkbox' ? checked : value;
@@ -73,57 +71,49 @@ function SettingsPage() {
         setLocalSettingsData(prev => {
             const updatedData = { ...prev, [name]: newValue };
 
-            // Apply appearance settings immediately to the UI
             if (name === 'themePreference' || name === 'dateFormat') {
-                if (applyTemporarySettings) { // Assuming applyTemporarySettings exists in context
+                if (applyTemporarySettings) {
                     applyTemporarySettings({ [name]: newValue });
                 } else {
-                    // Fallback or direct DOM manipulation if no context function
-                    // This is less ideal but would achieve immediate visual change
                     if (name === 'themePreference') {
                         document.documentElement.setAttribute('data-theme', newValue);
                     }
-                    // For dateFormat, direct visual change might be harder without re-rendering components
                 }
             }
             return updatedData;
         });
-    }, [applyTemporarySettings]); // Added applyTemporarySettings to dependencies
+    }, [applyTemporarySettings]);
 
-    // Maneja el cambio de idioma: actualiza la UI y el estado local, pero no guarda
     const handleLanguageChange = useCallback((e) => {
         const newLang = e.target.value;
-        i18n.changeLanguage(newLang); // This changes the UI language immediately
-        setLocalSettingsData(prev => ({ ...prev, language: newLang })); // Update local form state
-    }, [i18n]); // Added i18n to dependencies
+        i18n.changeLanguage(newLang);
+        setLocalSettingsData(prev => ({ ...prev, language: newLang }));
+    }, [i18n]);
 
-    // Descarta los cambios locales y vuelve al estado guardado
     const handleRevertChanges = useCallback(() => {
         setLocalSettingsData(settings);
         if (i18n.language !== settings.language) {
             i18n.changeLanguage(settings.language);
         }
-        if (applyTemporarySettings) { // Reapply original theme/date format if available
+        if (applyTemporarySettings) {
             applyTemporarySettings(settings);
         } else {
-             // Fallback for theme:
-             document.documentElement.setAttribute('data-theme', settings.themePreference || 'system');
+            document.documentElement.setAttribute('data-theme', settings.themePreference || 'system');
         }
         toast.info(t('toast.changesReverted'));
-    }, [settings, i18n, t, applyTemporarySettings]); // Added applyTemporarySettings to dependencies
+    }, [settings, i18n, t, applyTemporarySettings]);
 
-    // Save all general settings changes
     const handleSaveAllSettings = useCallback(async () => {
         setIsSaving(true);
         try {
-            await updateSettings(localSettingsData); // This calls the API
+            await updateSettings(localSettingsData);
             toast.success(t('toast.settingsSaveSuccess'));
         } catch (err) {
-            // The error toast is already handled by the context or interceptor
+            // Error toast handled by context or interceptor
         } finally {
             setIsSaving(false);
         }
-    }, [localSettingsData, updateSettings, t]); // Added t to dependencies
+    }, [localSettingsData, updateSettings, t]);
 
     const handlePasswordInputChange = useCallback((e) => {
         const { name, value } = e.target;
@@ -169,7 +159,7 @@ function SettingsPage() {
         } finally {
             setIsSavingPassword(false);
         }
-    }, [currentPassword, newPassword, confirmNewPassword, t]); // Added t to dependencies
+    }, [currentPassword, newPassword, confirmNewPassword, t]);
 
     const handleExportData = useCallback(async () => {
         setIsProcessingDataAction(true);
@@ -195,6 +185,34 @@ function SettingsPage() {
         }
     }, [t]);
 
+    const handleExportCSV = useCallback(async () => {
+        setIsProcessingDataAction(true);
+        try {
+            const response = await api.getObjectives({ includeArchived: true });
+            const objectives = response?.data?.objectives || [];
+            exportToCSV(objectives);
+            toast.success(t('toast.exportSuccess'));
+        } catch (err) {
+            toast.error(err.message || t('toast.exportError'));
+        } finally {
+            setIsProcessingDataAction(false);
+        }
+    }, [t]);
+
+    const handleExportJSON = useCallback(async () => {
+        setIsProcessingDataAction(true);
+        try {
+            const response = await api.getObjectives({ includeArchived: true });
+            const objectives = response?.data?.objectives || [];
+            exportToJSON(objectives, `goalmaster_objectives_${new Date().toISOString().split('T')[0]}.json`);
+            toast.success(t('toast.exportSuccess'));
+        } catch (err) {
+            toast.error(err.message || t('toast.exportError'));
+        } finally {
+            setIsProcessingDataAction(false);
+        }
+    }, [t]);
+
     const handleDeleteAccount = useCallback(async () => {
         if (!window.confirm(t('settingsPage.data.deleteConfirmation'))) {
             return;
@@ -214,6 +232,20 @@ function SettingsPage() {
         }
     }, [t]);
 
+    const handleEnableReminder = useCallback(async () => {
+        const success = await enableReminder(reminderTimeInput);
+        if (success) {
+            toast.success(t('settingsPage.notifications.reminderEnabled', 'Daily reminder enabled'));
+        } else {
+            toast.error(t('settingsPage.notifications.permissionDenied', 'Notification permission was denied'));
+        }
+    }, [enableReminder, reminderTimeInput, t]);
+
+    const handleDisableReminder = useCallback(() => {
+        disableReminder();
+        toast.info(t('settingsPage.notifications.reminderDisabled', 'Daily reminder disabled'));
+    }, [disableReminder, t]);
+
     const toggleSection = useCallback((sectionName) => {
         setOpenSections(prev => ({ ...prev, [sectionName]: !prev[sectionName] }));
     }, []);
@@ -226,8 +258,74 @@ function SettingsPage() {
         <div className={styles.settingsPageContainer}>
             <div className={styles.pageHeader}>
                 <h1 className={styles.pageTitle}>{t('settingsPage.accountSettingsTitle')}</h1>
-                
             </div>
+
+            {/* Notifications Section */}
+            <section className={styles.settingsCard}>
+                <div className={styles.cardHeaderWithToggle} onClick={() => toggleSection('notifications')} role="button" tabIndex={0}>
+                    <h2 className={styles.cardTitle}><FaBell className="inline mr-2" /> {t('settingsPage.notifications.title', 'Notifications')}</h2>
+                    {openSections.notifications ? <FaChevronUp className={styles.toggleIconOpen} /> : <FaChevronDown className={styles.toggleIcon} />}
+                </div>
+                {openSections.notifications && (
+                    <div className={styles.formSection}>
+                        <p className={styles.cardSubtitle}>{t('settingsPage.notifications.subtitle', 'Manage your notification preferences')}</p>
+                        
+                        {/* Notification permission status */}
+                        <div className={styles.actionRow}>
+                            <div className={styles.actionDescription}>
+                                <strong>{t('settingsPage.notifications.browserPermission', 'Browser Notification Permission')}</strong>
+                                <p>
+                                    {notifPermission === 'granted'
+                                        ? t('settingsPage.notifications.permissionGranted', 'Permission granted ✓')
+                                        : notifPermission === 'denied'
+                                            ? t('settingsPage.notifications.permissionDenied', 'Permission denied — update your browser settings')
+                                            : t('settingsPage.notifications.permissionPrompt', 'Click to enable notifications')
+                                    }
+                                </p>
+                            </div>
+                            {notifPermission !== 'granted' && notifPermission !== 'denied' && (
+                                <div className={styles.actionButtonContainer}>
+                                    <Button variant="secondary" onClick={requestPermission} leftIcon={<FaBell />}>
+                                        {t('settingsPage.notifications.enableButton', 'Enable Notifications')}
+                                    </Button>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Daily reminder toggle */}
+                        <div className={styles.actionRow}>
+                            <div className={styles.actionDescription}>
+                                <strong>{t('settingsPage.notifications.dailyReminder', 'Daily Reminder')}</strong>
+                                <p>{t('settingsPage.notifications.dailyReminderDesc', 'Get a reminder to log your progress every day')}</p>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                {reminderEnabled ? (
+                                    <>
+                                        <span className="text-xs text-green-600 dark:text-green-400">
+                                            {t('settingsPage.notifications.active', 'Active')}
+                                        </span>
+                                        <Button variant="destructive" size="small" onClick={handleDisableReminder}>
+                                            {t('common.disable', 'Disable')}
+                                        </Button>
+                                    </>
+                                ) : (
+                                    <>
+                                        <Input
+                                            type="time"
+                                            value={reminderTimeInput}
+                                            onChange={(e) => setReminderTimeInput(e.target.value)}
+                                            className="w-32"
+                                        />
+                                        <Button variant="primary" size="small" onClick={handleEnableReminder} disabled={notifPermission === 'denied'}>
+                                            {t('common.enable', 'Enable')}
+                                        </Button>
+                                    </>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                )}
+            </section>
 
             <section className={styles.settingsCard}>
                 <div className={styles.cardHeaderWithToggle} onClick={() => toggleSection('appearance')} role="button" tabIndex={0}>
@@ -300,7 +398,7 @@ function SettingsPage() {
 
                 {openSections.dataAccount && (
                     <div className={styles.formSection}>
-                        {/* Fila para Exportar Datos */}
+                        {/* Export Data - JSON */}
                         <div className={styles.actionRow}>
                             <div className={styles.actionDescription}>
                                 <strong>{t('settingsPage.data.exportLabel')}</strong>
@@ -313,7 +411,23 @@ function SettingsPage() {
                             </div>
                         </div>
 
-                        {/* Fila para Eliminar Cuenta */}
+                        {/* Export Objectives as CSV */}
+                        <div className={styles.actionRow}>
+                            <div className={styles.actionDescription}>
+                                <strong>{t('settingsPage.data.exportCSV', 'Export Objectives as CSV')}</strong>
+                                <p>{t('settingsPage.data.exportCSVDesc', 'Download your objectives as a CSV file')}</p>
+                            </div>
+                            <div className={styles.actionButtonContainer}>
+                                <Button variant="secondary" onClick={handleExportCSV} isLoading={isProcessingDataAction} disabled={isProcessingDataAction} leftIcon={<FaFileExport />}>
+                                    CSV
+                                </Button>
+                                <Button variant="secondary" onClick={handleExportJSON} isLoading={isProcessingDataAction} disabled={isProcessingDataAction} leftIcon={<FaFileExport />}>
+                                    JSON
+                                </Button>
+                            </div>
+                        </div>
+
+                        {/* Delete Account */}
                         <div className={`${styles.actionRow} ${styles.actionRowDestructive}`}>
                             <div className={styles.actionDescription}>
                                 <strong>{t('settingsPage.data.deleteLabel')}</strong>
@@ -332,7 +446,7 @@ function SettingsPage() {
             </section>
             <div>
             {isDirty && (
-                    <div className={styles.globalActionsContainer}>  {/* <--- ESTE ES EL CONTENEDOR */}
+                    <div className={styles.globalActionsContainer}>
                         <Button variant="secondary" onClick={handleRevertChanges} disabled={isSaving}>
                             {t('common.revert')}
                         </Button>

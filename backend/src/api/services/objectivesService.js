@@ -1,6 +1,7 @@
 const objectiveRepository = require('../repositories/objectiveRepository');
 const db = require('../../config/database');
 const AppError = require('../../utils/AppError');
+const streakService = require('./streakService');
 
 const { Objective, Progress, ActivityLog } = db;
 
@@ -253,6 +254,14 @@ class ObjectivesService {
             descriptionKey: 'activityLog.progressUpdated',
             additionalDetails: { objectiveName: objective.name, newValue: newValue, unit: objective.unit || '' }
         }, { transaction });
+
+        // Update user streak after progress is logged (non-blocking)
+        try {
+            await streakService.updateStreak(userId);
+        } catch (streakError) {
+            console.error('Error updating streak:', streakError);
+            // Non-critical — don't fail the progress update
+        }
     }
 
     async _logStatusChange(objective, originalStatus, userId, transaction) {

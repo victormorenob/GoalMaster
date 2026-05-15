@@ -11,6 +11,8 @@ import { FaUserCircle, FaEnvelope, FaMapMarkerAlt, FaCalendarAlt, FaPhone, FaEdi
 import { formatDateByPreference } from '../utils/dateUtils';
 import { useSettings } from '../context/SettingsContext';
 import { useTranslation } from 'react-i18next';
+import LevelBadge from '../components/gamification/LevelBadge';
+import AchievementList from '../components/gamification/AchievementList';
 
 function ProfilePage() {
     const { settings } = useSettings();
@@ -26,6 +28,7 @@ function ProfilePage() {
     const [selectedAvatarFile, setSelectedAvatarFile] = useState(null);
     const [avatarPreview, setAvatarPreview] = useState(null);
     const fileInputRef = useRef(null);
+    const [achievementData, setAchievementData] = useState(null);
 
     const mapApiDataToState = (apiData) => ({
         name: apiData.username || '',
@@ -41,14 +44,16 @@ function ProfilePage() {
         setIsLoading(true);
         setError(null);
         try {
-            const [profileResponse, statsResponse] = await Promise.all([
+            const [profileResponse, statsResponse, streakRes] = await Promise.allSettled([
                 apiService.getUserProfile(),
-                apiService.getUserProfileStats()
+                apiService.getUserProfileStats(),
+                apiService.getStreak(),
             ]);
 
-            const profileData = profileResponse?.data;
-            const userStats = statsResponse?.data;
-            
+            const profileData = profileResponse.status === 'fulfilled' ? profileResponse.value?.data : null;
+            const userStats = statsResponse.status === 'fulfilled' ? statsResponse.value?.data : null;
+            const streakData = streakRes.status === 'fulfilled' ? streakRes.value?.data?.streak : null;
+
             if (!profileData || !userStats) {
                 throw new Error(t('errors.profileLoadError'));
             }
@@ -58,6 +63,14 @@ function ProfilePage() {
             setFormData(normalizedProfile);
             setAvatarPreview(normalizedProfile.avatarUrl);
             setStatsData(userStats);
+
+            // Build achievement data
+            setAchievementData({
+                objectives: userStats?.objectives || [],
+                progressCount: userStats?.totalProgressEntries || 0,
+                streakCount: streakData?.streakCount || 0,
+                analysisVisits: parseInt(localStorage.getItem('goalmaster_analysis_visits') || '0', 10),
+            });
 
         } catch (err) {
             setError(err.message || t('errors.profileLoadError'));
@@ -207,6 +220,19 @@ function ProfilePage() {
                     )}
                 </section>
                 <aside className={styles.rightColumn}>
+                    {/* Level & XP Badge */}
+                    {statsData && (
+                        <section className={`${styles.profileCard}`}>
+                            <h2 className={styles.cardTitle}>{t('profilePage.cards.level.title', 'Level & XP')}</h2>
+                            <LevelBadge
+                                stats={{
+                                    completedObjectives: statsData.completed || 0,
+                                    streakCount: 0, // We'd need this from streak endpoint
+                                    achievementsCount: 0,
+                                }}
+                            />
+                        </section>
+                    )}
                     {statsData && (
                         <section className={`${styles.profileCard} ${styles.statsCard}`}>
                             <h2 className={styles.cardTitle}>{t('profilePage.cards.stats.title')}</h2>
@@ -216,6 +242,13 @@ function ProfilePage() {
                                 <li><span>{t('profilePage.cards.stats.inProgress')}</span><span>{statsData.inProgress}</span></li>
                                 <li><span>{t('profilePage.cards.stats.successRate')}</span><span>{statsData.successRate}%</span></li>
                             </ul>
+                        </section>
+                    )}
+                    {/* Achievements */}
+                    {achievementData && (
+                        <section className={`${styles.profileCard}`}>
+                            <h2 className={styles.cardTitle}>{t('profilePage.cards.achievements.title', 'Achievements')}</h2>
+                            <AchievementList userData={achievementData} />
                         </section>
                     )}
                 </aside>

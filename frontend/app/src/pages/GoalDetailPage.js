@@ -8,11 +8,12 @@ import { es, enUS } from 'date-fns/locale';
 import api from '../services/apiService';
 import { calculateProgressPercentage } from '../utils/progressUtils';
 
-import { FaCalendarAlt, FaFlagCheckered, FaExclamationTriangle, FaEdit, FaPlusCircle, FaTrashAlt } from 'react-icons/fa';
+import { FaCalendarAlt, FaFlagCheckered, FaExclamationTriangle, FaEdit, FaPlusCircle, FaTrashAlt, FaFilePdf } from 'react-icons/fa';
 import { FiTrendingUp, FiClock } from 'react-icons/fi';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
 import Button from '../components/ui/Button';
 import GoalProgressChart from '../components/charts/GoalProgressChart';
+import { exportToPDF } from '../utils/exportUtils';
 import DistributionBarChart from '../components/charts/DistributionBarChart';
 import ProgressLineChart from '../components/charts/ProgressLineChart';
 import styles from './GoalDetailPage.module.css';
@@ -161,6 +162,9 @@ function GoalDetailPage() {
                 <div className={styles.headerActions}>
                     <Button onClick={() => navigate(`/objectives/edit/${id}`)} leftIcon={<FaEdit />} disabled={objective.status === 'ARCHIVED'}>{t('common.edit')}</Button>
                     {isQuantitative && <Button onClick={() => navigate(`/objectives/${id}/update-progress`)} leftIcon={<FaPlusCircle />} disabled={objective.status === 'ARCHIVED'}>{t('goalDetail.buttons.updateProgress')}</Button>}
+                    <Button onClick={() => exportToPDF(objective, i18n.language)} variant="outline" leftIcon={<FaFilePdf />}>
+                        {t('goalDetail.buttons.exportPDF', 'Export PDF')}
+                    </Button>
                     <Button data-cy="delete-objective-button" onClick={handleDelete} variant="destructive" leftIcon={<FaTrashAlt />}>{t('goalDetail.buttons.delete')}</Button>
                 </div>
             </header>

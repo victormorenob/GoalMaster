@@ -104,6 +104,14 @@ const api = {
     createTag: (data) => axiosInstance.post('/tags', data),
     updateTag: (id, data) => axiosInstance.put(`/tags/${id}`, data),
     deleteTag: (id) => axiosInstance.delete(`/tags/${id}`),
+
+    // Streaks
+    getStreak: () => axiosInstance.get('/streak'),
+    updateStreak: () => axiosInstance.post('/streak/update'),
+
+    // Templates
+    getTemplates: (category) => axiosInstance.get('/templates', { params: { category } }),
+    getTemplateById: (id) => axiosInstance.get(`/templates/${id}`),
 };
 
 export default api;

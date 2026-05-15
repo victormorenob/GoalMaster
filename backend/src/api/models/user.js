@@ -65,6 +65,24 @@ module.exports = (sequelize) => {
       defaultValue: 'es',
       field: 'preferencia_idioma'
     },
+    // Gamification fields
+    streakCount: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      defaultValue: 0,
+      field: 'racha_actual'
+    },
+    longestStreak: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      defaultValue: 0,
+      field: 'racha_maxima'
+    },
+    lastActivityDate: {
+      type: DataTypes.DATEONLY,
+      allowNull: true,
+      field: 'ultima_fecha_actividad'
+    },
   }, {
     tableName: 'usuario',
     timestamps: true,

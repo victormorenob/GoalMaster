@@ -58,6 +58,7 @@ require('../api/models/objectives')(sequelizeInstance);
 require('../api/models/progress')(sequelizeInstance);
 require('../api/models/activityLog')(sequelizeInstance);
 require('../api/models/tag')(sequelizeInstance);
+require('../api/models/goalTemplate')(sequelizeInstance);
 
 db.sequelize = sequelizeInstance;
 db.Sequelize = Sequelize;
@@ -98,6 +99,10 @@ async function initializeDatabase() {
             await db.sequelize.sync();
         }
         
+        // Seed goal templates if table is empty
+        const { seedTemplates } = require('../api/models/goalTemplate');
+        await seedTemplates(sequelizeInstance);
+
         isInitialized = true;
         console.log('[DB] Database initialization completed.');
 

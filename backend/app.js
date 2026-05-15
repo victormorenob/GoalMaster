@@ -20,6 +20,9 @@ const dashboardRoutes = require('./src/api/routes/dashboardRoutes');
 const analysisRoutes = require('./src/api/routes/analysisRoutes');
 const profileRoutes = require('./src/api/routes/profileRoutes');
 const settingsRoutes = require('./src/api/routes/settingsRoutes');
+const tagRoutes = require('./src/api/routes/tagRoutes');
+const streakRoutes = require('./src/api/routes/streakRoutes');
+const templateRoutes = require('./src/api/routes/templateRoutes');
 
 const app = express();
 
@@ -76,6 +79,8 @@ app.use('/api/analysis', require('./src/api/routes/analysisRoutes'));
 app.use('/api/profile', require('./src/api/routes/profileRoutes'));
 app.use('/api/settings', require('./src/api/routes/settingsRoutes'));
 app.use('/api/tags', require('./src/api/routes/tagRoutes'));
+app.use('/api/streak', require('./src/api/routes/streakRoutes'));
+app.use('/api/templates', require('./src/api/routes/templateRoutes'));
 
 // Endpoint raíz de la API
 app.get('/api', (req, res) => {
