@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'react-toastify';
 import api from '../services/apiService';
@@ -13,7 +14,6 @@ import FormGroup from '../components/ui/FormGroup';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
 import TagBadge from '../components/tags/TagBadge';
 import { exportToCSV, exportToJSON } from '../utils/exportUtils';
-import styles from './MyObjectivesPage.module.css';
 
 const INITIAL_DISPLAY_LIMIT = 6;
 
@@ -36,6 +36,16 @@ const SORT_BY_OPTIONS = [
     { value: "progressDesc", key: "myObjectives.sort.progressDesc" },
     { value: "dateAsc", key: "myObjectives.sort.dateAsc" },
 ];
+
+const containerVariants = {
+    hidden: { opacity: 0 },
+    show: { opacity: 1, transition: { staggerChildren: 0.06 } },
+};
+
+const cardVariants = {
+    hidden: { opacity: 0, y: 20 },
+    show: { opacity: 1, y: 0, transition: { duration: 0.3, ease: 'easeOut' } },
+};
 
 function MyObjectivesPage() {
     const { t } = useTranslation();
@@ -75,7 +85,6 @@ function MyObjectivesPage() {
         fetchObjectives();
     }, [fetchObjectives]);
 
-    // Fetch user tags for filter
     useEffect(() => {
         const fetchTags = async () => {
             try {
@@ -124,16 +133,23 @@ function MyObjectivesPage() {
 
     const objectivesToRender = showAllObjectives ? objectives : objectives.slice(0, INITIAL_DISPLAY_LIMIT);
 
+    const filtersSidebarClasses = `bg-[var(--card)] p-6 rounded-[var(--radius-lg)] border border-[var(--border)] flex flex-col gap-5 fixed top-0 left-0 h-full w-[280px] z-[1010] transition-transform duration-300 ease-in-out shadow-[4px_0_15px_rgba(0,0,0,0.1)] overflow-y-auto md:sticky md:top-2 md:h-fit md:transform-none md:z-[1] md:shadow-none md:rounded-[var(--radius-lg)] ${isFiltersOpen ? 'translate-x-0' : '-translate-x-full'}`;
+
     return (
-        <div className={styles.myObjectivesLayout}>
-            <div className={styles.pageHeader}>
-                <h1>{t('pageTitles.myObjectives')}</h1>
-                <div className={styles.headerActions}>
-                    <Button 
-                        variant="outline" 
-                        size="icon" 
+        <motion.div
+            className="p-6 flex flex-col gap-6 w-full h-full overflow-hidden box-border"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.2 }}
+        >
+            <div className="flex justify-between items-center flex-shrink-0">
+                <h1 className="text-[1.75rem] text-[var(--heading-color,var(--foreground))] m-0 font-semibold">{t('pageTitles.myObjectives')}</h1>
+                <div className="flex items-center gap-3">
+                    <Button
+                        variant="outline"
+                        size="icon"
                         onClick={() => setIsFiltersOpen(!isFiltersOpen)}
-                        className={styles.mobileFilterButton}
+                        className="flex md:hidden"
                         aria-label={t('myObjectives.toggleFilters')}
                     >
                         <FaFilter />
@@ -164,9 +180,9 @@ function MyObjectivesPage() {
                     </Button>
                 </div>
             </div>
-            
-            <div className={styles.mainContentGrid}>
-                <aside className={`${styles.filtersSidebar} ${isFiltersOpen ? styles.filtersSidebarOpen : ''}`}>
+
+            <div className="grid grid-cols-1 gap-6 flex-grow min-h-0 overflow-hidden md:grid-cols-[260px_1fr] md:gap-8">
+                <aside className={filtersSidebarClasses}>
                     <FormGroup label={t('myObjectives.labels.search')} htmlFor="search-term">
                         <Input type="text" id="search-term" name="searchTerm" placeholder={t('myObjectives.searchPlaceholder')} value={filters.searchTerm} onChange={handleFilterChange} />
                     </FormGroup>
@@ -191,51 +207,62 @@ function MyObjectivesPage() {
                             {SORT_BY_OPTIONS.map(option => (<option key={option.value} value={option.value}>{t(option.key)}</option>))}
                         </Input>
                     </FormGroup>
-                    <FormGroup className={styles.checkboxGroup}>
-                        <input data-cy="include-archived-checkbox" type="checkbox" id="include-archived" name="includeArchived" className={styles.hiddenCheckbox} checked={filters.includeArchived} onChange={handleFilterChange} />
-                        <label htmlFor="include-archived" className={styles.checkboxLabel}>{t('myObjectives.labels.includeArchived')}</label>
+                    <FormGroup className="flex items-center pt-2 gap-2">
+                        <input data-cy="include-archived-checkbox" type="checkbox" id="include-archived" name="includeArchived" className="absolute opacity-0 w-5 h-5 cursor-pointer" checked={filters.includeArchived} onChange={handleFilterChange} />
+                        <label htmlFor="include-archived" className="text-sm text-[var(--foreground)] cursor-pointer flex items-center gap-[0.6rem]">{t('myObjectives.labels.includeArchived')}</label>
                     </FormGroup>
                 </aside>
-                
-                <main className={styles.objectivesArea}>
+
+                <main className="flex flex-col overflow-y-auto min-h-0 pr-2">
                     {isLoading && (
-                         <div className={styles.centeredStatus}><LoadingSpinner size="large" text={t('loaders.loadingObjectives')} /></div>
+                         <div className="flex flex-col items-center justify-center text-center p-12 h-full flex-grow"><LoadingSpinner size="large" text={t('loaders.loadingObjectives')} /></div>
                     )}
                     {error && (
-                         <div className={styles.centeredStatus}><p className={styles.errorMessage}>{t('common.errorPrefix', { error })}</p><Button onClick={fetchObjectives} variant="outline">{t('common.retryLoad')}</Button></div>
+                         <div className="flex flex-col items-center justify-center text-center p-12 h-full flex-grow"><p className="text-[var(--destructive)]">{t('common.errorPrefix', { error })}</p><Button onClick={fetchObjectives} variant="outline">{t('common.retryLoad')}</Button></div>
                     )}
-                    {objectives.length === 0 && (
-                        <div className={styles.centeredStatus}>
-                            <p className={styles.noGoalsMessage}>{filters.searchTerm || filters.category !== 'all' || filters.includeArchived ? t('myObjectives.noResults') : t('myObjectives.noObjectives')}</p>
+                    {objectives.length === 0 && !isLoading && !error && (
+                        <div className="flex flex-col items-center justify-center text-center p-12 h-full flex-grow">
+                            <p className="text-lg text-[var(--muted-foreground)]">{filters.searchTerm || filters.category !== 'all' || filters.includeArchived ? t('myObjectives.noResults') : t('myObjectives.noObjectives')}</p>
                         </div>
                     )}
                     {objectives.length > 0 && (
                         <>
-                            <div className={styles.goalsGrid}>
+                            <motion.div
+                                className="grid gap-6 grid-cols-[repeat(auto-fit,minmax(320px,1fr))]"
+                                variants={containerVariants}
+                                initial="hidden"
+                                animate="show"
+                            >
                                 {objectivesToRender.map((objective) => (
-                                    <ObjetivoCard 
-                                        key={objective.id} 
-                                        objective={objective} 
-                                        onObjectiveArchived={handleObjectiveArchived}
-                                        onObjectiveUnarchived={handleObjectiveUnarchived}
-                                    />
+                                    <motion.div key={objective.id} variants={cardVariants}>
+                                        <ObjetivoCard
+                                            objective={objective}
+                                            onObjectiveArchived={handleObjectiveArchived}
+                                            onObjectiveUnarchived={handleObjectiveUnarchived}
+                                        />
+                                    </motion.div>
                                 ))}
-                            </div>
+                            </motion.div>
                             {objectives.length > INITIAL_DISPLAY_LIMIT && !showAllObjectives && (
-                                <div className={styles.viewMoreContainer}>
-                                    <Button className={styles.toggleViewButton} onClick={() => setShowAllObjectives(true)} variant="outline">
+                                <motion.div
+                                    className="flex justify-center mt-6 pb-4"
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    transition={{ delay: 0.3 }}
+                                >
+                                    <Button onClick={() => setShowAllObjectives(true)} variant="outline">
                                         {t('myObjectives.viewMore', { count: objectives.length - INITIAL_DISPLAY_LIMIT, total: objectives.length })}
                                     </Button>
-                                </div>
+                                </motion.div>
                             )}
                         </>
                     )}
                 </main>
             </div>
 
-            {isFiltersOpen && <div className={styles.overlay} onClick={() => setIsFiltersOpen(false)} />}
+            {isFiltersOpen && <div className="fixed inset-0 bg-black/40 z-[1000] block md:hidden" onClick={() => setIsFiltersOpen(false)} />}
             {showExportMenu && <div className="fixed inset-0 z-10" onClick={() => setShowExportMenu(false)} />}
-        </div>
+        </motion.div>
     );
 }
 

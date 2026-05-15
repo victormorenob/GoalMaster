@@ -1,7 +1,5 @@
-// frontend/app/src/components/pages/AnalysisPage.js
-
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import styles from './AnalysisPage.module.css';
+import { motion } from 'framer-motion';
 import api from '../services/apiService';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
 import Button from '../components/ui/Button';
@@ -29,9 +27,19 @@ const statusNameToKeyMap = {
     'ARCHIVED': 'status.archived',
 };
 
+const containerVariants = {
+    hidden: { opacity: 0 },
+    show: { opacity: 1, transition: { staggerChildren: 0.08 } },
+};
+
+const panelVariants = {
+    hidden: { opacity: 0, y: 20 },
+    show: { opacity: 1, y: 0, transition: { duration: 0.35, ease: 'easeOut' } },
+};
+
 function AnalysisPage() {
     const { t } = useTranslation();
-    
+
     const [summaryStats, setSummaryStats] = useState({
         totalObjectives: 0, activeObjectives: 0, completedObjectives: 0,
         averageProgress: 0, categoryCount: 0, categories: [],
@@ -40,7 +48,7 @@ function AnalysisPage() {
 
     const [rawCategoryDistribution, setRawCategoryDistribution] = useState([]);
     const [rawObjectiveStatus, setRawObjectiveStatus] = useState([]);
-    
+
     const [rawMonthlyProgress, setRawMonthlyProgress] = useState({ labels: [], datasets: [] });
 
     const [rawObjectivesProgressData, setRawObjectivesProgressData] = useState([]);
@@ -120,7 +128,7 @@ function AnalysisPage() {
                 if (activeTab === 'general') tabDataPromise = fetchAllGeneralDataAPI(timePeriod);
                 else if (activeTab === 'byObjective') tabDataPromise = fetchObjectivesTabDataAPI(timePeriod);
                 else if (activeTab === 'byCategory') tabDataPromise = fetchCategoriesTabDataAPI(timePeriod);
-                
+
                 if (tabDataPromise) {
                      const results = await tabDataPromise;
                      if(isMounted) {
@@ -152,7 +160,7 @@ function AnalysisPage() {
         loadData();
         return () => { isMounted = false; };
     }, [activeTab, timePeriod, fetchAllGeneralDataAPI, fetchObjectivesTabDataAPI, fetchCategoriesTabDataAPI, t]);
-    
+
     const categoryDistribution = useMemo(() =>
         (rawCategoryDistribution || []).map((item, idx) => ({ ...item, name: t(categoryNameToKeyMap[item.name] || item.name), color: getCategoryColor(item.name, idx, summaryStats.categories) }))
     , [rawCategoryDistribution, getCategoryColor, summaryStats.categories, t]);
@@ -160,7 +168,7 @@ function AnalysisPage() {
     const objectiveStatus = useMemo(() =>
         (rawObjectiveStatus || []).map((item) => ({ ...item, name: t(statusNameToKeyMap[item.name] || item.name), color: getStatusColorForChart(item.name) }))
     , [rawObjectiveStatus, getStatusColorForChart, t]);
-    
+
     const objectivesProgressData = useMemo(() =>
         (rawObjectivesProgressData || []).map((item, idx) => ({ ...item, color: getCategoryColor(item.category, idx, summaryStats.categories) }))
     , [rawObjectivesProgressData, getCategoryColor, summaryStats.categories]);
@@ -171,7 +179,7 @@ function AnalysisPage() {
 
     const coloredTopProgressObjectives = useMemo(() =>
         (topProgressObjectives || []).map((obj, idx) => {
-            const originalCategoryKey = obj.tipo_objetivo; 
+            const originalCategoryKey = obj.tipo_objetivo;
             const translationKey = categoryNameToKeyMap[originalCategoryKey] || originalCategoryKey;
             return { ...obj, tipo_objetivo: t(translationKey), color: getCategoryColor(originalCategoryKey, idx, summaryStats.categories) };
         })
@@ -199,91 +207,101 @@ function AnalysisPage() {
 
     const renderCurrentTabContent = () => {
         const translatedTabName = t(`analysis.tabs.${activeTab}`);
-        if (isLoading) return <div className={styles.centeredStatus}><LoadingSpinner size="large" text={t('loaders.loadingTab', { tab: translatedTabName })} /></div>;
-        if (error) return <div className={styles.centeredStatus}><p className={styles.errorMessage}>{error}</p><Button onClick={() => { const p = timePeriod; setTimePeriod(''); setTimeout(() => setTimePeriod(p), 0);}} className={styles.retryButton}>{t('common.retry')}</Button></div>;
+        if (isLoading) return <div className="flex flex-col items-center justify-center p-12 text-center min-h-[300px] flex-grow"><LoadingSpinner size="large" text={t('loaders.loadingTab', { tab: translatedTabName })} /></div>;
+        if (error) return <div className="flex flex-col items-center justify-center p-12 text-center min-h-[300px] flex-grow"><p className="text-[var(--destructive)] mb-4">{error}</p><Button onClick={() => { const p = timePeriod; setTimePeriod(''); setTimeout(() => setTimePeriod(p), 0);}} className="!mt-0">{t('common.retry')}</Button></div>;
 
         switch (activeTab) {
             case 'general':
-                return (<>
-                    <section className={styles.donutChartsRow}>
-                        <div className={styles.sectionWrapper}>
-                            <h3 className={styles.chartTitle}>{t('analysis.chartTitles.categoryDistribution')}</h3>
-                            <span className={styles.chartSubtitle}>{t('analysis.chartTitles.categoryDistributionSubtitle')}</span>
-                            <div className={styles.chartContainer}>{categoryDistribution.length > 0 ? <CategoryDonutChart data={categoryDistribution} /> : <p className={styles.noDataText}>{t('analysis.noDetailedObjectives')}</p>}</div>
+                return (<motion.div variants={containerVariants} initial="hidden" animate="show">
+                    <motion.section variants={panelVariants} className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                        <div className="bg-[var(--card,#ffffff)] p-6 rounded-[var(--radius-lg,12px)] border border-[var(--border-light,#e9ecef)] shadow-[var(--shadow-sm)] flex flex-col">
+                            <h3 className="text-lg font-semibold text-[var(--heading-color,var(--foreground))] m-0 block mb-[0.25rem]">{t('analysis.chartTitles.categoryDistribution')}</h3>
+                            <span className="text-sm text-[var(--muted-foreground)] m-0 block mb-5">{t('analysis.chartTitles.categoryDistributionSubtitle')}</span>
+                            <div className="flex flex-col min-h-[280px] flex-grow relative">{categoryDistribution.length > 0 ? <CategoryDonutChart data={categoryDistribution} /> : <p className="flex-grow flex items-center justify-center text-sm text-[var(--muted-foreground)] min-h-[100px]">{t('analysis.noDetailedObjectives')}</p>}</div>
                         </div>
-                        <div className={styles.sectionWrapper}>
-                            <h3 className={styles.chartTitle}>{t('analysis.chartTitles.objectiveStatus')}</h3>
-                            <span className={styles.chartSubtitle}>{t('analysis.chartTitles.objectiveStatusSubtitle')}</span>
-                            <div className={styles.chartContainer}>{objectiveStatus.length > 0 ? <ObjectiveStatusChart data={objectiveStatus} /> : <p className={styles.noDataText}>{t('charts.noStatusData')}</p>}</div>
+                        <div className="bg-[var(--card,#ffffff)] p-6 rounded-[var(--radius-lg,12px)] border border-[var(--border-light,#e9ecef)] shadow-[var(--shadow-sm)] flex flex-col">
+                            <h3 className="text-lg font-semibold text-[var(--heading-color,var(--foreground))] m-0 block mb-[0.25rem]">{t('analysis.chartTitles.objectiveStatus')}</h3>
+                            <span className="text-sm text-[var(--muted-foreground)] m-0 block mb-5">{t('analysis.chartTitles.objectiveStatusSubtitle')}</span>
+                            <div className="flex flex-col min-h-[280px] flex-grow relative">{objectiveStatus.length > 0 ? <ObjectiveStatusChart data={objectiveStatus} /> : <p className="flex-grow flex items-center justify-center text-sm text-[var(--muted-foreground)] min-h-[100px]">{t('charts.noStatusData')}</p>}</div>
                         </div>
-                    </section>
-                    <section className={styles.sectionWrapper}>
-                        <h3 className={styles.chartTitle}>{t('analysis.chartTitles.monthlyProgress')}</h3>
-                        <span className={styles.chartSubtitle}>{t('analysis.chartTitles.monthlyProgressSubtitle')}</span>
-                        <div className={`${styles.chartContainer} ${styles.chartContainerFullWidth}`}>
+                    </motion.section>
+                    <motion.section variants={panelVariants} className="bg-[var(--card,#ffffff)] p-6 rounded-[var(--radius-lg,12px)] border border-[var(--border-light,#e9ecef)] shadow-[var(--shadow-sm)] flex flex-col">
+                        <h3 className="text-lg font-semibold text-[var(--heading-color,var(--foreground))] m-0 block mb-[0.25rem]">{t('analysis.chartTitles.monthlyProgress')}</h3>
+                        <span className="text-sm text-[var(--muted-foreground)] m-0 block mb-5">{t('analysis.chartTitles.monthlyProgressSubtitle')}</span>
+                        <div className="flex flex-col min-h-[280px] flex-grow relative min-h-[200px]">
                             {(rawMonthlyProgress?.datasets?.length > 0) ? (
                                 <MonthlyProgressChart data={rawMonthlyProgress} />
                             ) : (
-                                <p className={styles.noDataText}>{t('analysis.noDataMessages.monthlyProgress')}</p>
+                                <p className="flex-grow flex items-center justify-center text-sm text-[var(--muted-foreground)] min-h-[100px]">{t('analysis.noDataMessages.monthlyProgress')}</p>
                             )}
                         </div>
-                    </section>
-                </>);
+                    </motion.section>
+                </motion.div>);
             case 'byCategory':
                 return (
-                    <>
-                        <section className={styles.sectionWrapper}>
-                            <h3 className={styles.chartTitle}>{t('analysis.chartTitles.categoryAverageProgress')}</h3>
-                            <span className={styles.chartSubtitle}>{t('analysis.chartTitles.categoryAverageProgressSubtitle')}</span>
-                            <div className={`${styles.chartContainer} ${styles.chartContainerFullWidth}`}>{categoryAverageProgress.length > 0 ? <CategoryAverageProgressBarChart data={categoryAverageProgress} /> : <p className={styles.noDataText}>{t('analysis.noDataMessages.categoryAverageProgress')}</p>}</div>
-                        </section>
-                        <section className={styles.categoriesDetailGrid}>{coloredDetailedObjectivesByCategory.length > 0 ? coloredDetailedObjectivesByCategory.map((catData, index) => (<CategoryObjectivesCard key={catData.categoryName || index} categoryName={catData.categoryName} objectiveCount={catData.objectiveCount} objectives={catData.objectives} color={catData.color}/>)) : (!isLoading && <div className={styles.sectionWrapper}><p className={styles.noDataText}>{t('analysis.noDetailedObjectives')}</p></div>)}</section>
-                    </>
+                    <motion.div variants={containerVariants} initial="hidden" animate="show">
+                        <motion.section variants={panelVariants} className="bg-[var(--card,#ffffff)] p-6 rounded-[var(--radius-lg,12px)] border border-[var(--border-light,#e9ecef)] shadow-[var(--shadow-sm)] flex flex-col">
+                            <h3 className="text-lg font-semibold text-[var(--heading-color,var(--foreground))] m-0 block mb-[0.25rem]">{t('analysis.chartTitles.categoryAverageProgress')}</h3>
+                            <span className="text-sm text-[var(--muted-foreground)] m-0 block mb-5">{t('analysis.chartTitles.categoryAverageProgressSubtitle')}</span>
+                            <div className="flex flex-col min-h-[280px] flex-grow relative min-h-[200px]">{categoryAverageProgress.length > 0 ? <CategoryAverageProgressBarChart data={categoryAverageProgress} /> : <p className="flex-grow flex items-center justify-center text-sm text-[var(--muted-foreground)] min-h-[100px]">{t('analysis.noDataMessages.categoryAverageProgress')}</p>}</div>
+                        </motion.section>
+                        <motion.section variants={panelVariants} className="grid grid-cols-1 gap-6 lg:grid-cols-2">{coloredDetailedObjectivesByCategory.length > 0 ? coloredDetailedObjectivesByCategory.map((catData, index) => (<CategoryObjectivesCard key={catData.categoryName || index} categoryName={catData.categoryName} objectiveCount={catData.objectiveCount} objectives={catData.objectives} color={catData.color}/>)) : (!isLoading && <div className="bg-[var(--card,#ffffff)] p-6 rounded-[var(--radius-lg,12px)] border border-[var(--border-light,#e9ecef)] shadow-[var(--shadow-sm)] flex flex-col"><p className="flex-grow flex items-center justify-center text-sm text-[var(--muted-foreground)] min-h-[100px]">{t('analysis.noDetailedObjectives')}</p></div>)}</motion.section>
+                    </motion.div>
                 );
             case 'byObjective':
-                return (<>
-                    <section className={styles.sectionWrapper}>
-                        <h3 className={styles.chartTitle}>{t('analysis.chartTitles.objectiveProgress')}</h3>
-                        <span className={styles.chartSubtitle}>{t('analysis.chartTitles.objectiveProgressSubtitle')}</span>
-                        <div className={`${styles.chartContainer} ${styles.chartContainerFullWidth}`}>{objectivesProgressData.length > 0 ? <ObjectiveProgressBarChart data={objectivesProgressData} /> : <p className={styles.noDataText}>{t('analysis.noDataMessages.objectiveProgress')}</p>}</div>
-                    </section>
-                    <section className={styles.rankedObjectivesGrid}>{coloredTopProgressObjectives.length > 0 || coloredLowProgressObjectives.length > 0 ? (<><RankedObjectivesList title={t('analysis.chartTitles.topProgress')} objectives={coloredTopProgressObjectives} noDataMessage={t('analysis.noDataMessages.topProgress')} /><RankedObjectivesList title={t('analysis.chartTitles.lowProgress')} objectives={coloredLowProgressObjectives} noDataMessage={t('analysis.noDataMessages.lowProgress')} /></>) : (!isLoading && <div className={styles.sectionWrapper}><p className={styles.noDataText}>{t('analysis.noDataMessages.rankedObjectives')}</p></div>)}</section>
-                </>);
+                return (<motion.div variants={containerVariants} initial="hidden" animate="show">
+                    <motion.section variants={panelVariants} className="bg-[var(--card,#ffffff)] p-6 rounded-[var(--radius-lg,12px)] border border-[var(--border-light,#e9ecef)] shadow-[var(--shadow-sm)] flex flex-col">
+                        <h3 className="text-lg font-semibold text-[var(--heading-color,var(--foreground))] m-0 block mb-[0.25rem]">{t('analysis.chartTitles.objectiveProgress')}</h3>
+                        <span className="text-sm text-[var(--muted-foreground)] m-0 block mb-5">{t('analysis.chartTitles.objectiveProgressSubtitle')}</span>
+                        <div className="flex flex-col min-h-[280px] flex-grow relative min-h-[200px]">{objectivesProgressData.length > 0 ? <ObjectiveProgressBarChart data={objectivesProgressData} /> : <p className="flex-grow flex items-center justify-center text-sm text-[var(--muted-foreground)] min-h-[100px]">{t('analysis.noDataMessages.objectiveProgress')}</p>}</div>
+                    </motion.section>
+                    <motion.section variants={panelVariants} className="grid grid-cols-1 gap-6 md:grid-cols-2">{coloredTopProgressObjectives.length > 0 || coloredLowProgressObjectives.length > 0 ? (<><RankedObjectivesList title={t('analysis.chartTitles.topProgress')} objectives={coloredTopProgressObjectives} noDataMessage={t('analysis.noDataMessages.topProgress')} /><RankedObjectivesList title={t('analysis.chartTitles.lowProgress')} objectives={coloredLowProgressObjectives} noDataMessage={t('analysis.noDataMessages.lowProgress')} /></>) : (!isLoading && <div className="bg-[var(--card,#ffffff)] p-6 rounded-[var(--radius-lg,12px)] border border-[var(--border-light,#e9ecef)] shadow-[var(--shadow-sm)] flex flex-col"><p className="flex-grow flex items-center justify-center text-sm text-[var(--muted-foreground)] min-h-[100px]">{t('analysis.noDataMessages.rankedObjectives')}</p></div>)}</motion.section>
+                </motion.div>);
             default:
-                return <div className={styles.sectionWrapper}><p>{t('analysis.selectTabPrompt')}</p></div>;
+                return <div className="bg-[var(--card,#ffffff)] p-6 rounded-[var(--radius-lg,12px)] border border-[var(--border-light,#e9ecef)] shadow-[var(--shadow-sm)] flex flex-col"><p>{t('analysis.selectTabPrompt')}</p></div>;
         }
     };
 
     return (
-        <div className={styles.analysisPageContainer}>
-            <div className={styles.pageHeader}>
-                <h1 className={styles.pageTitle}>{t('pageTitles.analysisTrends')}</h1>
-                <div className={styles.timeFilterContainer}>
-                    <Input type="select" id="time-period-filter" value={timePeriod} onChange={(e) => setTimePeriod(e.target.value)} className={styles.timeFilterSelect}>
+        <motion.div
+            className="px-8 py-6 m-0 w-full flex flex-col gap-6 flex-grow"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.2 }}
+        >
+            <div className="flex justify-between items-center flex-wrap gap-4 mb-2">
+                <h1 className="text-[1.75rem] text-[var(--heading-color,var(--foreground))] m-0 font-semibold">{t('pageTitles.analysisTrends')}</h1>
+                <div>
+                    <Input type="select" id="time-period-filter" value={timePeriod} onChange={(e) => setTimePeriod(e.target.value)} className="min-w-[160px]">
                         {timePeriodOptions.map(option => (<option key={option.value} value={option.value}>{t(option.key)}</option>))}
                     </Input>
                 </div>
             </div>
 
-            <section className={styles.statsRow}>
-                <StatsCard title={t('analysis.stats.totalObjectives')} value={summaryStats.totalObjectives.toString()} ><p className={styles.statsDetailText}>{t('analysis.stats.active')}: {summaryStats.activeObjectives}</p><p className={styles.statsDetailText}>{t('analysis.stats.completed')}: {summaryStats.completedObjectives}</p></StatsCard>
-                <StatsCard title={t('analysis.stats.averageProgress')} value={`${Math.round(summaryStats.averageProgress)}%`} />
-                <StatsCard title={t('analysis.stats.categories')} value={summaryStats.categoryCount.toString()}>
-                    <div className={styles.categoryListInCard}>
-                        {summaryStats.categories.slice(0, 3).map((cat, index) => (<span key={cat.name} className={styles.categoryChip} style={{ backgroundColor: getCategoryColor(cat.name, index, summaryStats.categories) }}>{t(categoryNameToKeyMap[cat.name] || cat.name)}</span>))}
-                        {summaryStats.categories.length > 3 && <span className={styles.categoryChipMore}>{t('analysis.stats.moreCategories', { count: summaryStats.categories.length - 3 })}</span>}
+            <motion.section
+                className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 mb-4"
+                variants={containerVariants}
+                initial="hidden"
+                animate="show"
+            >
+                <motion.div variants={panelVariants}><StatsCard title={t('analysis.stats.totalObjectives')} value={summaryStats.totalObjectives.toString()} ><p className="text-xs text-[var(--muted-foreground)] m-[0.1rem_0_0_0] leading-normal">{t('analysis.stats.active')}: {summaryStats.activeObjectives}</p><p className="text-xs text-[var(--muted-foreground)] m-[0.1rem_0_0_0] leading-normal">{t('analysis.stats.completed')}: {summaryStats.completedObjectives}</p></StatsCard></motion.div>
+                <motion.div variants={panelVariants}><StatsCard title={t('analysis.stats.averageProgress')} value={`${Math.round(summaryStats.averageProgress)}%`} /></motion.div>
+                <motion.div variants={panelVariants}><StatsCard title={t('analysis.stats.categories')} value={summaryStats.categoryCount.toString()}>
+                    <div className="flex flex-wrap gap-[0.4rem] mt-2">
+                        {summaryStats.categories.slice(0, 3).map((cat, index) => (<span key={cat.name} className="text-xs px-2 py-[0.2rem] rounded-[var(--radius)] text-white font-medium capitalize" style={{ backgroundColor: getCategoryColor(cat.name, index, summaryStats.categories) }}>{t(categoryNameToKeyMap[cat.name] || cat.name)}</span>))}
+                        {summaryStats.categories.length > 3 && <span className="text-xs px-[0.3rem] py-[0.2rem] text-[var(--muted-foreground)]">{t('analysis.stats.moreCategories', { count: summaryStats.categories.length - 3 })}</span>}
                     </div>
-                </StatsCard>
-                <StatsCard title={t('analysis.stats.trend')} value={summaryStats.trend?.textKey ? t(summaryStats.trend.textKey) : '...'} ><p className={styles.statsDetailTextSmall}>{dynamicTrendSubtitle}</p></StatsCard>
-            </section>
+                </StatsCard></motion.div>
+                <motion.div variants={panelVariants}><StatsCard title={t('analysis.stats.trend')} value={summaryStats.trend?.textKey ? t(summaryStats.trend.textKey) : '...'} ><p className="text-xs text-[var(--muted-foreground)] mt-[0.3rem] leading-tight">{dynamicTrendSubtitle}</p></StatsCard></motion.div>
+            </motion.section>
 
-            <div className={styles.tabsContainer}>
-                <Button onClick={() => setActiveTab('general')} className={`${styles.tabButton} ${activeTab === 'general' ? styles.activeTabButton : ''}`} >{t('analysis.tabs.general')}</Button>
-                <Button onClick={() => setActiveTab('byCategory')} className={`${styles.tabButton} ${activeTab === 'byCategory' ? styles.activeTabButton : ''}`} >{t('analysis.tabs.byCategory')}</Button>
-                <Button onClick={() => setActiveTab('byObjective')} className={`${styles.tabButton} ${activeTab === 'byObjective' ? styles.activeTabButton : ''}`} >{t('analysis.tabs.byObjective')}</Button>
+            <div className="inline-flex items-center bg-[var(--accent)] rounded-[var(--radius-lg,0.75rem)] p-[0.3rem] border border-[var(--border)] mb-8 max-w-max">
+                <Button onClick={() => setActiveTab('general')} className={`bg-transparent !border-none !m-0 !shadow-none px-4 py-2 rounded-[var(--radius-md,0.5rem)] font-semibold text-sm text-[var(--muted-foreground)] transition-all duration-200 hover:!bg-[var(--muted)] hover:!text-[var(--foreground)] ${activeTab === 'general' ? '!bg-[var(--card)] !text-[var(--foreground)] !shadow-[var(--shadow-sm)] !font-bold' : ''}`} >{t('analysis.tabs.general')}</Button>
+                <Button onClick={() => setActiveTab('byCategory')} className={`bg-transparent !border-none !m-0 !shadow-none px-4 py-2 rounded-[var(--radius-md,0.5rem)] font-semibold text-sm text-[var(--muted-foreground)] transition-all duration-200 hover:!bg-[var(--muted)] hover:!text-[var(--foreground)] ${activeTab === 'byCategory' ? '!bg-[var(--card)] !text-[var(--foreground)] !shadow-[var(--shadow-sm)] !font-bold' : ''}`} >{t('analysis.tabs.byCategory')}</Button>
+                <Button onClick={() => setActiveTab('byObjective')} className={`bg-transparent !border-none !m-0 !shadow-none px-4 py-2 rounded-[var(--radius-md,0.5rem)] font-semibold text-sm text-[var(--muted-foreground)] transition-all duration-200 hover:!bg-[var(--muted)] hover:!text-[var(--foreground)] ${activeTab === 'byObjective' ? '!bg-[var(--card)] !text-[var(--foreground)] !shadow-[var(--shadow-sm)] !font-bold' : ''}`} >{t('analysis.tabs.byObjective')}</Button>
             </div>
-            <div className={styles.tabContent}>{renderCurrentTabContent()}</div>
-        </div>
+            <div className="flex flex-col gap-8">{renderCurrentTabContent()}</div>
+        </motion.div>
     );
 }
 

@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'react-toastify';
 import api from '../services/apiService';
 
 import ObjetivosForm from '../components/objetivos/ObjetivosForm';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
-import styles from './EditGoalPage.module.css';
 
 function EditGoalPage() {
     const { id } = useParams();
@@ -26,13 +26,13 @@ function EditGoalPage() {
             setLoading(true);
             try {
                 const response = await api.getObjectiveById(id);
-                
+
                 const objective = response?.data?.objective;
-                
+
                 if (!objective) {
                     throw new Error(t('errors.objectiveNotFound'));
                 }
-                
+
                 setObjective(objective);
             } catch (err) {
                 setError(err.message || t('errors.objectiveLoadError'));
@@ -45,7 +45,6 @@ function EditGoalPage() {
         fetchObjective();
     }, [id, navigate, t]);
 
-    // El handler ahora recibe el payload ya preparado por ObjetivosForm
     const handleEditObjective = async (formData) => {
         try {
             await api.updateObjective(id, formData);
@@ -57,29 +56,47 @@ function EditGoalPage() {
     };
 
     const handleCancelEdit = () => {
-        navigate('/mis-objetivos'); // Better to go back to the details page
+        navigate('/mis-objetivos');
     };
 
     if (loading) {
-        return <div className={styles.loadingState}><LoadingSpinner size="large" text={t('loaders.loadingObjectiveForEdit')} /></div>;
+        return <div className="text-center text-lg text-[var(--color-muted-foreground)] p-8 bg-[var(--muted)] rounded-[var(--radius)] mt-8"><LoadingSpinner size="large" text={t('loaders.loadingObjectiveForEdit')} /></div>;
     }
 
     if (error) {
-        return <div className={styles.errorState}>{error}</div>;
+        return <div className="text-center text-lg text-[var(--destructive)] p-8 bg-[var(--destructive-soft-bg)] rounded-[var(--radius)] mt-8 border border-[var(--destructive)]">{error}</div>;
     }
 
     return (
-        <div className={styles.editGoalContainer}>
-            <h1 className={styles.pageTitle}>{t('pageTitles.editObjective')}</h1>
+        <motion.div
+            className="max-w-[800px] mx-auto px-4 pt-8 pb-0 w-full overflow-y-hidden"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, ease: 'easeOut' }}
+        >
+            <motion.h1
+                className="text-[1.8rem] text-[var(--foreground)] m-0 mb-6 text-center"
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.25, delay: 0.1 }}
+            >
+                {t('pageTitles.editObjective')}
+            </motion.h1>
             {objective && (
-                <ObjetivosForm
-                    initialData={objective}
-                    onSubmit={handleEditObjective}
-                    isEditMode={true}
-                    onCancel={handleCancelEdit}
-                />
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3, delay: 0.15 }}
+                >
+                    <ObjetivosForm
+                        initialData={objective}
+                        onSubmit={handleEditObjective}
+                        isEditMode={true}
+                        onCancel={handleCancelEdit}
+                    />
+                </motion.div>
             )}
-        </div>
+        </motion.div>
     );
 }
 

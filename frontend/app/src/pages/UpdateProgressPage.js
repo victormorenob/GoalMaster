@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import api from '../services/apiService';
 import { toast } from 'react-toastify';
-import styles from './UpdateProgressPage.module.css';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
 import Button from '../components/ui/Button';
 import { format, parseISO, isValid } from 'date-fns';
@@ -16,7 +16,7 @@ function UpdateProgressPage() {
     const [goalData, setGoalData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    
+
     const fetchGoalDetails = useCallback(async () => {
         setLoading(true); setError(null);
         try {
@@ -35,38 +35,48 @@ function UpdateProgressPage() {
     useEffect(() => {
         if (objectiveId) fetchGoalDetails();
     }, [objectiveId, fetchGoalDetails]);
-    
-    if (loading) return (<div className={styles.updateProgressPage}><LoadingSpinner size='large' text={t('loaders.loadingObjectiveForEdit')}/></div>);
-    if (error && !goalData) return (<div className={`${styles.updateProgressPage} ${styles.updateProgressPageError}`}><p>{error}</p><Button onClick={() => navigate('/')}>{t('common.backToDashboard')}</Button></div>);
-    if (!goalData) return (<div className={styles.updateProgressPage}><p>{t('errors.objectiveNotFound')}</p><Button onClick={() => navigate('/')}>{t('common.backToDashboard')}</Button></div>);
-    
+
+    if (loading) return (<div className="flex justify-center items-start bg-[var(--background)]"><LoadingSpinner size='large' text={t('loaders.loadingObjectiveForEdit')}/></div>);
+    if (error && !goalData) return (<div className="flex justify-center items-start bg-[var(--background)] text-center p-8 text-[var(--destructive)] font-medium"><p>{error}</p><Button onClick={() => navigate('/')}>{t('common.backToDashboard')}</Button></div>);
+    if (!goalData) return (<div className="flex justify-center items-start bg-[var(--background)]"><p>{t('errors.objectiveNotFound')}</p><Button onClick={() => navigate('/')}>{t('common.backToDashboard')}</Button></div>);
+
     if (goalData.status === 'ARCHIVED') {
-        return ( 
-            <div className={styles.updateProgressPage}>
-                <div className={styles.nonQuantitativeMessage}>
-                    <h2 className={styles.nonQuantitativeMessageTitle}>{t('updateProgressPage.titleArchived', { name: goalData.name })}</h2>
-                    <p className={styles.nonQuantitativeMessageText}>{t('updateProgressPage.archivedError')}</p>
-                    <div className={styles.nonQuantitativeMessageActions}>
+        return (
+            <motion.div
+                className="flex justify-center items-start bg-[var(--background)]"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
+            >
+                <div className="bg-[var(--card)] border border-[var(--border)] rounded-[var(--radius)] p-8 w-full max-w-[600px] shadow-[0_4px_12px_rgba(0,0,0,0.08)] text-center text-[var(--foreground)] flex flex-col items-center gap-5">
+                    <h2 className="text-[1.5rem] mb-4 text-[var(--primary)]">{t('updateProgressPage.titleArchived', { name: goalData.name })}</h2>
+                    <p className="text-base leading-normal mb-6">{t('updateProgressPage.archivedError')}</p>
+                    <div className="flex justify-center gap-[0.8rem]">
                         <Button onClick={() => navigate(`/objectives/${objectiveId}`)} variant="secondary">{t('updateProgressPage.backToObjective')}</Button>
                     </div>
                 </div>
-            </div>
+            </motion.div>
         );
     }
 
     if (goalData.targetValue === null || isNaN(Number(goalData.targetValue))) {
-        return ( 
-            <div className={styles.updateProgressPage}>
-                <div className={`${styles.nonQuantitativeMessage}`}>
-                    <h2 className={styles.nonQuantitativeMessageTitle}>{t('updateProgressPage.title', { name: goalData.name })}</h2>
-                    <p className={styles.nonQuantitativeMessageText}>{t('updateProgressPage.notQuantitative')}</p>
-                    <p className={styles.nonQuantitativeMessageText}>{t('updateProgressPage.notQuantitativeSuggestion')}</p>
-                    <div className={styles.nonQuantitativeMessageActions}>
+        return (
+            <motion.div
+                className="flex justify-center items-start bg-[var(--background)]"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
+            >
+                <div className="bg-[var(--card)] border border-[var(--border)] rounded-[var(--radius)] p-8 w-full max-w-[600px] shadow-[0_4px_12px_rgba(0,0,0,0.08)] text-center text-[var(--foreground)] flex flex-col items-center gap-5">
+                    <h2 className="text-[1.5rem] mb-4 text-[var(--primary)]">{t('updateProgressPage.title', { name: goalData.name })}</h2>
+                    <p className="text-base leading-normal mb-6">{t('updateProgressPage.notQuantitative')}</p>
+                    <p className="text-base leading-normal mb-6">{t('updateProgressPage.notQuantitativeSuggestion')}</p>
+                    <div className="flex justify-center gap-[0.8rem]">
                         <Button onClick={() => navigate(`/objectives/${objectiveId}`)} variant="secondary">{t('updateProgressPage.backToObjective')}</Button>
                         <Button onClick={() => navigate(`/objectives/edit/${objectiveId}`)}>{t('common.edit')}</Button>
                     </div>
                 </div>
-            </div>
+            </motion.div>
         );
     }
 
@@ -107,7 +117,7 @@ function QuantitativeUpdateForm({ goalData }) {
         e.preventDefault();
         setIsSubmitting(true); setError(null);
         if (newProgressValue.trim() === '') { toast.error(t('toast.progressUpdate.valueRequiredError')); setIsSubmitting(false); return; }
-        
+
         const valueToUpdate = parseFloat(newProgressValue);
         if (isNaN(valueToUpdate)) { toast.error(t('toast.progressUpdate.invalidValueError')); setIsSubmitting(false); return; }
 
@@ -146,43 +156,74 @@ function QuantitativeUpdateForm({ goalData }) {
         let valueToShow = newProgressValue !== '' && !isNaN(parseFloat(newProgressValue)) ? parseFloat(newProgressValue) : Number(goalData.currentValue ?? goalData.initialValue ?? 0);
         return valueToShow.toFixed(1);
     }, [newProgressValue, goalData]);
-    
+
     return (
-        <div className={styles.updateProgressPage}>
-            <div className={styles.updateProgressCard}>
-                <div className={styles.updateProgressHeader}>
-                    <h1 className={styles.goalTitle}>{goalData.name}</h1>
-                    <p className={styles.goalDescription}>{goalData.description || t('common.noDescription')}</p>
+        <motion.div
+            className="flex justify-center items-start bg-[var(--background)]"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, ease: 'easeOut' }}
+        >
+            <motion.div
+                className="bg-[var(--card)] border border-[var(--border)] rounded-[var(--radius)] p-8 w-full max-w-[500px] shadow-[0_4px_12px_rgba(0,0,0,0.08)] flex flex-col gap-6"
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.3, delay: 0.1 }}
+            >
+                <div className="text-center mb-4">
+                    <h1 className="text-[1.8rem] text-[var(--foreground)] mb-2 font-bold">{goalData.name}</h1>
+                    <p className="text-sm text-[var(--muted-foreground)] mb-4">{goalData.description || t('common.noDescription')}</p>
                 </div>
-                <div className={styles.progressSection}>
-                    <h2 className={styles.sectionHeading}>{t('updateProgressPage.progressPreviewTitle')}</h2>
-                    <div className={styles.progressBarContainer}>
-                        <div className={styles.progressBarHeader}><span className={styles.progressBarLabel}>{t('updateProgressPage.progressLabel')}</span><span className={styles.progressBarPercentage}>{Math.round(progressPercentage)}%</span></div>
-                        <div className={styles.progressBar}><div className={`${styles.progressBarFill} ${progressPercentage < 33 ? styles.progressFillLow : progressPercentage < 66 ? styles.progressFillMedium : styles.progressFillHigh}`} style={{ width: `${progressPercentage}%` }}></div></div>
+                <motion.div
+                    className="bg-[var(--background)] border border-[var(--border)] rounded-[var(--radius)] px-6 py-4 flex flex-col items-center gap-2"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3, delay: 0.15 }}
+                >
+                    <h2 className="text-lg text-[var(--foreground)] font-semibold mb-2 text-center w-full">{t('updateProgressPage.progressPreviewTitle')}</h2>
+                    <div className="w-full mb-4">
+                        <div className="flex justify-between items-center mb-2">
+                            <span className="text-sm text-[var(--muted-foreground)] font-medium">{t('updateProgressPage.progressLabel')}</span>
+                            <span className="text-xl font-bold text-[var(--primary)]">{Math.round(progressPercentage)}%</span>
+                        </div>
+                        <div className="w-full h-2 bg-[var(--muted)] rounded overflow-hidden">
+                            <motion.div
+                                className={`h-full rounded ${progressPercentage < 33 ? 'bg-[var(--destructive)]' : progressPercentage < 66 ? 'bg-[var(--warning)]' : 'bg-[var(--success)]'}`}
+                                initial={{ width: 0 }}
+                                animate={{ width: `${progressPercentage}%` }}
+                                transition={{ duration: 0.6, ease: 'easeOut' }}
+                            />
+                        </div>
                     </div>
-                    <div className={styles.progressDetails}>
-                        <div className={styles.detailItem}><span className={styles.detailLabel}>{t('updateProgressPage.newValueLabel')}</span><span className={styles.detailValue}>{displayCurrentValue} {goalData.unit || ''}</span></div>
-                        <div className={styles.detailItem}><span className={styles.detailLabel}>{t('updateProgressPage.targetValueLabel')}</span><span className={styles.detailValue}>{Number(goalData.targetValue || 0).toFixed(1)} {goalData.unit || ''}</span></div>
+                    <div className="flex justify-around w-full mt-4 gap-4 bg-[var(--border)] p-4 rounded-lg">
+                        <div className="flex flex-col items-start text-center flex-1">
+                            <span className="text-sm text-[var(--muted-foreground)] mb-[0.2rem]">{t('updateProgressPage.newValueLabel')}</span>
+                            <span className="text-lg font-semibold text-[var(--foreground)]">{displayCurrentValue} {goalData.unit || ''}</span>
+                        </div>
+                        <div className="flex flex-col items-start text-center flex-1">
+                            <span className="text-sm text-[var(--muted-foreground)] mb-[0.2rem]">{t('updateProgressPage.targetValueLabel')}</span>
+                            <span className="text-lg font-semibold text-[var(--foreground)]">{Number(goalData.targetValue || 0).toFixed(1)} {goalData.unit || ''}</span>
+                        </div>
                     </div>
-                    <p className={styles.lastUpdateInfo}>{t('updateProgressPage.lastUpdateInfo')}<span className={styles.lastUpdateDate}>{lastUpdateDate}</span></p>
-                </div>
-                <form onSubmit={handleSubmit} className={styles.updateForm}>
-                    <div className={styles.formGroup}>
-                        <label htmlFor="newProgressValue" className={styles.formLabel}>{t('updateProgressPage.newProgressValueLabel')}</label>
-                        <input type="text" id="newProgressValue" inputMode="decimal" className={styles.formInput} value={newProgressValue} onChange={handleValueChange} placeholder={t('updateProgressPage.newProgressValuePlaceholder', { unit: goalData.unit || 'unidades' })} autoFocus />
+                    <p className="text-xs text-[var(--muted-foreground)] mt-4">{t('updateProgressPage.lastUpdateInfo')}<span className="font-medium text-[var(--foreground)]">{lastUpdateDate}</span></p>
+                </motion.div>
+                <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+                    <div className="flex flex-col gap-2">
+                        <label htmlFor="newProgressValue" className="text-sm font-semibold text-[var(--foreground)]">{t('updateProgressPage.newProgressValueLabel')}</label>
+                        <input type="text" id="newProgressValue" inputMode="decimal" className="px-4 py-3 border border-[var(--border)] rounded-[var(--radius)] text-base text-[var(--foreground)] w-full box-border bg-[var(--background)] focus:outline-none focus:border-[var(--primary)] focus:shadow-[0_0_0_2px_color-mix(in_srgb,var(--primary)_20%,transparent)] placeholder:text-[var(--muted-foreground)]" value={newProgressValue} onChange={handleValueChange} placeholder={t('updateProgressPage.newProgressValuePlaceholder', { unit: goalData.unit || 'unidades' })} autoFocus />
                     </div>
-                    <div className={styles.formGroup}>
-                        <label htmlFor="notes" className={styles.formLabel}>{t('updateProgressPage.notesLabel')}</label>
-                        <textarea id="notes" className={styles.formTextarea} value={notes} onChange={(e) => setNotes(e.target.value)} placeholder={t('updateProgressPage.notesPlaceholder')} rows="4"></textarea>
+                    <div className="flex flex-col gap-2">
+                        <label htmlFor="notes" className="text-sm font-semibold text-[var(--foreground)]">{t('updateProgressPage.notesLabel')}</label>
+                        <textarea id="notes" className="px-4 py-3 border border-[var(--border)] rounded-[var(--radius)] text-base text-[var(--foreground)] w-full box-border bg-[var(--background)] resize-y min-h-[80px] focus:outline-none focus:border-[var(--primary)] focus:shadow-[0_0_0_2px_color-mix(in_srgb,var(--primary)_20%,transparent)] placeholder:text-[var(--muted-foreground)]" value={notes} onChange={(e) => setNotes(e.target.value)} placeholder={t('updateProgressPage.notesPlaceholder')} rows="4"></textarea>
                     </div>
-                    {error && <p className={styles.formErrorMessage}>{error}</p>}
-                    <div className={styles.formActions}>
+                    {error && <p className="text-[var(--destructive)] text-sm">{error}</p>}
+                    <div className="flex justify-between gap-[0.8rem] mt-4">
                         <Button type="button" onClick={() => navigate(`/objectives/${objectiveId}`)} variant="secondary" disabled={isSubmitting}>{t('common.cancel')}</Button>
                         <Button type="submit" disabled={isSubmitting}>{isSubmitting ? t('common.saving') : t('updateProgressPage.saveButton')}</Button>
                     </div>
                 </form>
-            </div>
-        </div>
+            </motion.div>
+        </motion.div>
     );
 }
 

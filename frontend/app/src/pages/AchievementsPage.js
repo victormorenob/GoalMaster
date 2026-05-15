@@ -1,10 +1,21 @@
 // frontend/app/src/pages/AchievementsPage.js
 import React, { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import api from '../services/apiService';
 import AchievementList from '../components/gamification/AchievementList';
 import LevelBadge from '../components/gamification/LevelBadge';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
+
+const containerVariants = {
+    hidden: { opacity: 0 },
+    show: { opacity: 1, transition: { staggerChildren: 0.1 } },
+};
+
+const sectionVariants = {
+    hidden: { opacity: 0, y: 20 },
+    show: { opacity: 1, y: 0, transition: { duration: 0.35, ease: 'easeOut' } },
+};
 
 function AchievementsPage() {
     const { t } = useTranslation();
@@ -31,10 +42,8 @@ function AchievementsPage() {
                     ? profileStatsRes.value?.data
                     : null;
 
-                // Count total progress entries from all objectives
                 let totalProgressCount = 0;
                 for (const obj of objectives) {
-                    // If objectives have progressEntries included
                     if (obj.progressEntries) {
                         totalProgressCount += obj.progressEntries.length;
                     }
@@ -70,34 +79,39 @@ function AchievementsPage() {
     }
 
     return (
-        <div className="max-w-4xl mx-auto p-4 sm:p-6">
-            <div className="mb-6">
-                <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100">
+        <motion.div
+            className="max-w-4xl mx-auto p-4 sm:p-6"
+            variants={containerVariants}
+            initial="hidden"
+            animate="show"
+        >
+            <motion.div className="mb-6" variants={sectionVariants}>
+                <h1 className="text-2xl font-bold text-[var(--foreground)]">
                     {t('achievements.title', 'Achievements & Progress')}
                 </h1>
-                <p className="text-gray-500 dark:text-gray-400 mt-1">
+                <p className="text-[var(--muted-foreground)] mt-1">
                     {t('achievements.subtitle', 'Track your milestones and level up')}
                 </p>
-            </div>
+            </motion.div>
 
             {/* Level & XP Section */}
             {statsData && (
-                <div className="mb-8">
-                    <h2 className="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-3">
+                <motion.div className="mb-8" variants={sectionVariants}>
+                    <h2 className="text-lg font-semibold text-[var(--foreground)] mb-3">
                         {t('achievements.levelAndXP', 'Level & XP')}
                     </h2>
                     <LevelBadge stats={statsData} />
-                </div>
+                </motion.div>
             )}
 
             {/* Achievements Section */}
-            <div>
-                <h2 className="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-3">
+            <motion.div variants={sectionVariants}>
+                <h2 className="text-lg font-semibold text-[var(--foreground)] mb-3">
                     {t('achievements.badges', 'Badges & Achievements')}
                 </h2>
                 <AchievementList userData={achievementData} />
-            </div>
-        </div>
+            </motion.div>
+        </motion.div>
     );
 }
 

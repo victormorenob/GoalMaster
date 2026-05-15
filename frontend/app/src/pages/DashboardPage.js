@@ -1,10 +1,10 @@
 // frontend/app/src/pages/DashboardPage.js
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { DndContext, closestCenter } from '@dnd-kit/core';
 import { SortableContext, useSortable, verticalListSortingStrategy, arrayMove } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import styles from './DashboardPage.module.css';
 import api from '../services/apiService';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'react-toastify';
@@ -39,6 +39,16 @@ const STATUS_MAP = {
 const WIDGET_IDS = ['stats', 'streak', 'recentObjectives', 'recentActivity'];
 const STORAGE_KEY = 'goalmaster_dashboard_widget_order';
 
+const containerVariants = {
+    hidden: { opacity: 0 },
+    show: { opacity: 1, transition: { staggerChildren: 0.1 } },
+};
+
+const widgetVariants = {
+    hidden: { opacity: 0, y: 20 },
+    show: { opacity: 1, y: 0, transition: { duration: 0.35, ease: 'easeOut' } },
+};
+
 function SortableWidget({ id, children }) {
     const {
         attributes,
@@ -56,12 +66,17 @@ function SortableWidget({ id, children }) {
     };
 
     return (
-        <div ref={setNodeRef} style={style} className="relative group">
+        <motion.div
+            ref={setNodeRef}
+            style={style}
+            className="relative group"
+            variants={widgetVariants}
+        >
             <div {...attributes} {...listeners} className="absolute top-2 right-2 z-10">
                 <DragHandle />
             </div>
             {children}
-        </div>
+        </motion.div>
     );
 }
 
@@ -76,7 +91,6 @@ function DashboardPage() {
     const [error, setError] = useState(null);
     const hasBeenRedirectedRef = useRef(false);
 
-    // Widget order from localStorage
     const [widgetOrder, setWidgetOrder] = useState(() => {
         try {
             const saved = localStorage.getItem(STORAGE_KEY);
@@ -144,15 +158,17 @@ function DashboardPage() {
     }, []);
 
     const renderStatusList = () => (
-        <ul className={styles.statusList}>
+        <ul className="list-none p-0 mt-3 text-sm">
             {Object.entries(summaryData.statusCounts || {}).map(([status, count]) => {
                 const statusInfo = STATUS_MAP[status];
                 if (!statusInfo || count === 0) return null;
                 return (
-                    <li key={status} className={styles.statusItem}>
-                        <span className={styles.statusDot} style={{ backgroundColor: statusInfo.color }} />
-                        <span className={styles.statusName}>{t(statusInfo.key, status)}</span>
-                        <span className={styles.statusCount}>{count}</span>
+                    <li key={status} className="flex items-center justify-between py-[0.35rem]">
+                        <span className="flex items-center gap-2 flex-grow text-[var(--muted-foreground)]">
+                            <span className="w-2 h-2 rounded-full inline-block flex-shrink-0" style={{ backgroundColor: statusInfo.color }} />
+                            {t(statusInfo.key, status)}
+                        </span>
+                        <span className="font-semibold text-[var(--foreground)] min-w-[20px] text-right">{count}</span>
                     </li>
                 );
             })}
@@ -160,13 +176,13 @@ function DashboardPage() {
     );
 
     if (loading) {
-        return <div className={styles.dashboardLoadingState}><LoadingSpinner size="large" text={t('loaders.loadingDashboard')} /></div>;
+        return <div className="flex flex-col items-center justify-center p-12 text-center h-full box-border text-[var(--muted-foreground)]"><LoadingSpinner size="large" text={t('loaders.loadingDashboard')} /></div>;
     }
 
     if (error) {
         return (
-            <div className={styles.dashboardErrorState}>
-                <p className={styles.errorMessageText}>{t('common.errorPrefix', { error })}</p>
+            <div className="flex flex-col items-center justify-center p-12 text-center h-full box-border text-[var(--muted-foreground)]">
+                <p className="text-[var(--destructive)] mb-6 text-lg">{t('common.errorPrefix', { error })}</p>
                 <Button onClick={fetchDashboardData} variant="secondary">{t('common.retry')}</Button>
             </div>
         );
@@ -178,9 +194,14 @@ function DashboardPage() {
         switch (widgetId) {
             case 'stats':
                 return (
-                    <section className={styles.statsRowContainer}>
-                        <StatsCard title={t('dashboard.stats.totalObjectives')} value={String(summaryData.totalObjectives)} linkTo="/my-objectives">
-                            {summaryData.totalObjectives > 0 ? renderStatusList() : <p className={styles.noStatusData}>{t('dashboard.stats.noObjectives')}</p>}
+                    <motion.section
+                        className="grid grid-cols-[repeat(auto-fit,minmax(240px,1fr))] gap-6 flex-shrink-0"
+                        variants={containerVariants}
+                        initial="hidden"
+                        animate="show"
+                    >
+                        <StatsCard title={t('dashboard.stats.totalObjectives')} value={String(summaryData.totalObjectives)} linkTo="/mis-objetivos">
+                            {summaryData.totalObjectives > 0 ? renderStatusList() : <p className="text-sm text-[var(--muted-foreground)] mt-2">{t('dashboard.stats.noObjectives')}</p>}
                         </StatsCard>
                         <StatsCard title={t('dashboard.stats.averageProgress')} value={summaryData.averageProgress} valueDescription="%" decimalPlacesToShow={0}>
                             <ProgressBar percentage={summaryData.averageProgress} />
@@ -189,21 +210,21 @@ function DashboardPage() {
                         <StatsCard title={t('dashboard.stats.categories')} linkTo="/analysis">
                             <CategoryDonutChart data={categoryChartData} />
                         </StatsCard>
-                    </section>
+                    </motion.section>
                 );
             case 'streak':
                 return <StreakIndicator />;
             case 'recentObjectives':
                 return (
-                    <div className={styles.sectionCard}>
-                        <h3 className={styles.sectionTitle}>{t('dashboard.sections.keyObjectives')}</h3>
+                    <div className="bg-[var(--card)] rounded-[var(--radius-lg)] border border-[var(--border)] p-5 flex flex-col overflow-y-auto min-h-0 shadow-[var(--shadow-sm)]">
+                        <h3 className="text-xl font-semibold text-[var(--foreground)] m-0 mb-4">{t('dashboard.sections.keyObjectives')}</h3>
                         <RecentObjectivesList objectives={recentObjectives} />
                     </div>
                 );
             case 'recentActivity':
                 return (
-                    <div className={styles.sectionCard}>
-                        <h3 className={styles.sectionTitle}>{t('dashboard.sections.recentActivity')}</h3>
+                    <div className="bg-[var(--card)] rounded-[var(--radius-lg)] border border-[var(--border)] p-5 flex flex-col overflow-y-auto min-h-0 shadow-[var(--shadow-sm)]">
+                        <h3 className="text-xl font-semibold text-[var(--foreground)] m-0 mb-4">{t('dashboard.sections.recentActivity')}</h3>
                         <RecentActivityFeed activities={recentActivities} />
                     </div>
                 );
@@ -215,13 +236,18 @@ function DashboardPage() {
     return (
         <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
             <SortableContext items={widgetOrder} strategy={verticalListSortingStrategy}>
-                <div className={styles.dashboardPageLayout}>
+                <motion.div
+                    className="flex flex-col gap-6 bg-[var(--background)] h-full overflow-hidden box-border p-6"
+                    variants={containerVariants}
+                    initial="hidden"
+                    animate="show"
+                >
                     {widgetOrder.map(widgetId => (
                         <SortableWidget key={widgetId} id={widgetId}>
                             {renderWidget(widgetId)}
                         </SortableWidget>
                     ))}
-                </div>
+                </motion.div>
             </SortableContext>
         </DndContext>
     );

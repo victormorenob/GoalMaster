@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import styles from './SettingsPage.module.css';
+import { motion } from 'framer-motion';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
 import FormGroup from '../components/ui/FormGroup';
@@ -12,6 +12,16 @@ import { useTranslation } from 'react-i18next';
 import useNotifications from '../hooks/useNotifications';
 import { exportToCSV, exportToJSON } from '../utils/exportUtils';
 import api from '../services/apiService';
+
+const containerVariants = {
+    hidden: { opacity: 0 },
+    show: { opacity: 1, transition: { staggerChildren: 0.08 } },
+};
+
+const sectionVariants = {
+    hidden: { opacity: 0, y: 20 },
+    show: { opacity: 1, y: 0, transition: { duration: 0.35, ease: 'easeOut' } },
+};
 
 function SettingsPage() {
     const { settings, updateSettings, isLoadingSettings, applyTemporarySettings } = useSettings();
@@ -109,7 +119,6 @@ function SettingsPage() {
             await updateSettings(localSettingsData);
             toast.success(t('toast.settingsSaveSuccess'));
         } catch (err) {
-            // Error toast handled by context or interceptor
         } finally {
             setIsSaving(false);
         }
@@ -251,30 +260,38 @@ function SettingsPage() {
     }, []);
 
     if (isLoadingSettings) {
-        return <div className={styles.centeredStatus}><LoadingSpinner size="large" text={t('loaders.loadingSettings')} /></div>;
+        return <div className="flex flex-col items-center justify-center min-h-[300px] text-center text-[var(--muted-foreground)] p-8"><LoadingSpinner size="large" text={t('loaders.loadingSettings')} /></div>;
     }
 
+    const sectionCardClasses = 'bg-[var(--card)] p-6 rounded-[var(--radius-lg)] border border-[var(--border)] shadow-[var(--shadow-sm)] flex flex-col';
+    const cardHeaderToggleClasses = 'flex justify-between items-center pb-4 border-b border-[var(--border-light)] cursor-pointer mb-4';
+    const formSectionClasses = 'flex flex-col gap-4';
+
     return (
-        <div className={styles.settingsPageContainer}>
-            <div className={styles.pageHeader}>
-                <h1 className={styles.pageTitle}>{t('settingsPage.accountSettingsTitle')}</h1>
+        <motion.div
+            className="p-6 flex flex-col gap-6 w-full box-border"
+            variants={containerVariants}
+            initial="hidden"
+            animate="show"
+        >
+            <div className="flex justify-between items-center flex-wrap gap-4 mb-2">
+                <h1 className="text-[1.75rem] text-[var(--heading-color,var(--foreground))] m-0 font-semibold">{t('settingsPage.accountSettingsTitle')}</h1>
             </div>
 
             {/* Notifications Section */}
-            <section className={styles.settingsCard}>
-                <div className={styles.cardHeaderWithToggle} onClick={() => toggleSection('notifications')} role="button" tabIndex={0}>
-                    <h2 className={styles.cardTitle}><FaBell className="inline mr-2" /> {t('settingsPage.notifications.title', 'Notifications')}</h2>
-                    {openSections.notifications ? <FaChevronUp className={styles.toggleIconOpen} /> : <FaChevronDown className={styles.toggleIcon} />}
+            <motion.section variants={sectionVariants} className={sectionCardClasses}>
+                <div className={cardHeaderToggleClasses} onClick={() => toggleSection('notifications')} role="button" tabIndex={0}>
+                    <h2 className="text-[1.3rem] font-semibold text-[var(--foreground)] m-0"><FaBell className="inline mr-2" /> {t('settingsPage.notifications.title', 'Notifications')}</h2>
+                    {openSections.notifications ? <FaChevronUp className="text-[var(--muted-foreground)] transition-transform duration-300" /> : <FaChevronDown className="text-[var(--muted-foreground)] transition-transform duration-300" />}
                 </div>
                 {openSections.notifications && (
-                    <div className={styles.formSection}>
-                        <p className={styles.cardSubtitle}>{t('settingsPage.notifications.subtitle', 'Manage your notification preferences')}</p>
-                        
-                        {/* Notification permission status */}
-                        <div className={styles.actionRow}>
-                            <div className={styles.actionDescription}>
-                                <strong>{t('settingsPage.notifications.browserPermission', 'Browser Notification Permission')}</strong>
-                                <p>
+                    <div className={formSectionClasses}>
+                        <p className="text-sm text-[var(--muted-foreground)] mb-4 block">{t('settingsPage.notifications.subtitle', 'Manage your notification preferences')}</p>
+
+                        <div className="flex flex-wrap justify-between items-center gap-4 pb-6 not:last:border-b not:last:border-[var(--border)]">
+                            <div className="flex-grow mr-4">
+                                <strong className="block text-base font-semibold text-[var(--foreground)] mb-1">{t('settingsPage.notifications.browserPermission', 'Browser Notification Permission')}</strong>
+                                <p className="text-sm text-[var(--muted-foreground)] m-0 max-w-[60ch]">
                                     {notifPermission === 'granted'
                                         ? t('settingsPage.notifications.permissionGranted', 'Permission granted ✓')
                                         : notifPermission === 'denied'
@@ -284,7 +301,7 @@ function SettingsPage() {
                                 </p>
                             </div>
                             {notifPermission !== 'granted' && notifPermission !== 'denied' && (
-                                <div className={styles.actionButtonContainer}>
+                                <div className="flex-shrink-0">
                                     <Button variant="secondary" onClick={requestPermission} leftIcon={<FaBell />}>
                                         {t('settingsPage.notifications.enableButton', 'Enable Notifications')}
                                     </Button>
@@ -292,11 +309,10 @@ function SettingsPage() {
                             )}
                         </div>
 
-                        {/* Daily reminder toggle */}
-                        <div className={styles.actionRow}>
-                            <div className={styles.actionDescription}>
-                                <strong>{t('settingsPage.notifications.dailyReminder', 'Daily Reminder')}</strong>
-                                <p>{t('settingsPage.notifications.dailyReminderDesc', 'Get a reminder to log your progress every day')}</p>
+                        <div className="flex flex-wrap justify-between items-center gap-4 pb-6 not:last:border-b not:last:border-[var(--border)]">
+                            <div className="flex-grow mr-4">
+                                <strong className="block text-base font-semibold text-[var(--foreground)] mb-1">{t('settingsPage.notifications.dailyReminder', 'Daily Reminder')}</strong>
+                                <p className="text-sm text-[var(--muted-foreground)] m-0 max-w-[60ch]">{t('settingsPage.notifications.dailyReminderDesc', 'Get a reminder to log your progress every day')}</p>
                             </div>
                             <div className="flex items-center gap-2">
                                 {reminderEnabled ? (
@@ -325,17 +341,17 @@ function SettingsPage() {
                         </div>
                     </div>
                 )}
-            </section>
+            </motion.section>
 
-            <section className={styles.settingsCard}>
-                <div className={styles.cardHeaderWithToggle} onClick={() => toggleSection('appearance')} role="button" tabIndex={0}>
-                    <h2 className={styles.cardTitle}>{t('settingsPage.appearance.title')}</h2>
-                    {openSections.appearance ? <FaChevronUp className={styles.toggleIconOpen} /> : <FaChevronDown className={styles.toggleIcon} />}
+            <motion.section variants={sectionVariants} className={sectionCardClasses}>
+                <div className={cardHeaderToggleClasses} onClick={() => toggleSection('appearance')} role="button" tabIndex={0}>
+                    <h2 className="text-[1.3rem] font-semibold text-[var(--foreground)] m-0">{t('settingsPage.appearance.title')}</h2>
+                    {openSections.appearance ? <FaChevronUp className="text-[var(--muted-foreground)] transition-transform duration-300" /> : <FaChevronDown className="text-[var(--muted-foreground)] transition-transform duration-300" />}
                 </div>
                 {openSections.appearance && (
                     <>
-                        <p className={styles.cardSubtitle}>{t('settingsPage.appearance.subtitle')}</p>
-                        <div className={styles.formSection}>
+                        <p className="text-sm text-[var(--muted-foreground)] mb-4 block">{t('settingsPage.appearance.subtitle')}</p>
+                        <div className={formSectionClasses}>
                             <FormGroup label={t('settingsPage.appearance.themeLabel')} htmlFor="theme-preference">
                                 <Input type="select" id="theme-preference" name="themePreference" value={localSettingsData.themePreference || 'system'} onChange={handleInputChange}>
                                     <option value="light">{t('theme.light')}</option>
@@ -359,18 +375,18 @@ function SettingsPage() {
                         </div>
                     </>
                 )}
-            </section>
+            </motion.section>
 
-            <section className={styles.settingsCard}>
-                <div className={styles.cardHeaderWithToggle} onClick={() => toggleSection('changePassword')} role="button" tabIndex={0}>
-                    <h2 className={styles.cardTitle}>{t('settingsPage.password.title')}</h2>
-                    {openSections.changePassword ? <FaChevronUp className={styles.toggleIconOpen} /> : <FaChevronDown className={styles.toggleIcon} />}
+            <motion.section variants={sectionVariants} className={sectionCardClasses}>
+                <div className={cardHeaderToggleClasses} onClick={() => toggleSection('changePassword')} role="button" tabIndex={0}>
+                    <h2 className="text-[1.3rem] font-semibold text-[var(--foreground)] m-0">{t('settingsPage.password.title')}</h2>
+                    {openSections.changePassword ? <FaChevronUp className="text-[var(--muted-foreground)] transition-transform duration-300" /> : <FaChevronDown className="text-[var(--muted-foreground)] transition-transform duration-300" />}
                 </div>
                 {openSections.changePassword && (
                     <>
-                        <p className={styles.cardSubtitle}>{t('settingsPage.password.subtitle')}</p>
+                        <p className="text-sm text-[var(--muted-foreground)] mb-4 block">{t('settingsPage.password.subtitle')}</p>
                         <form onSubmit={handleChangePassword}>
-                            <div className={styles.formSection}>
+                            <div className={formSectionClasses}>
                                 <FormGroup label={t('settingsPage.password.currentLabel')} htmlFor="current-password">
                                     <Input type={showCurrentPassword ? "text" : "password"} id="current-password" name="currentPassword" value={currentPassword} onChange={handlePasswordInputChange} actionIcon={showCurrentPassword ? <FaEyeSlash /> : <FaEye />} onActionClick={() => setShowCurrentPassword(!showCurrentPassword)} actionIconAriaLabel={t(showCurrentPassword ? 'settingsPage.password.toggleAria.hideCurrent' : 'settingsPage.password.toggleAria.showCurrent')} autoComplete="current-password" />
                                 </FormGroup>
@@ -380,44 +396,42 @@ function SettingsPage() {
                                 <FormGroup label={t('settingsPage.password.confirmLabel')} htmlFor="confirm-new-password">
                                     <Input type={showConfirmNewPassword ? "text" : "password"} id="confirm-new-password" name="confirmNewPassword" value={confirmNewPassword} onChange={handlePasswordInputChange} actionIcon={showConfirmNewPassword ? <FaEyeSlash /> : <FaEye />} onActionClick={() => setShowConfirmNewPassword(!showConfirmNewPassword)} actionIconAriaLabel={t(showConfirmNewPassword ? 'settingsPage.password.toggleAria.hideConfirm' : 'settingsPage.password.toggleAria.showConfirm')} autoComplete="new-password" />
                                 </FormGroup>
-                                {passwordFormError && <p className={`${styles.formErrorMessage} ${styles.sectionFormError}`}>{passwordFormError}</p>}
-                                <div className={styles.passwordChangeActions}>
+                                {passwordFormError && <p className="text-[var(--destructive)] text-sm mt-2 text-left">{passwordFormError}</p>}
+                                <div className="flex justify-end mt-2">
                                     <Button type="submit" variant="primary" isLoading={isSavingPassword} disabled={isSavingPassword}>{t('settingsPage.password.changeButton')}</Button>
                                 </div>
                             </div>
                         </form>
                     </>
                 )}
-            </section>
+            </motion.section>
 
-            <section className={styles.settingsCard}>
-                <div className={styles.cardHeaderWithToggle} onClick={() => toggleSection('dataAccount')} role="button" tabIndex={0}>
-                    <h2 className={styles.cardTitle}>{t('settingsPage.data.title')}</h2>
-                    {openSections.dataAccount ? <FaChevronUp className={styles.toggleIconOpen} /> : <FaChevronDown className={styles.toggleIcon} />}
+            <motion.section variants={sectionVariants} className={sectionCardClasses}>
+                <div className={cardHeaderToggleClasses} onClick={() => toggleSection('dataAccount')} role="button" tabIndex={0}>
+                    <h2 className="text-[1.3rem] font-semibold text-[var(--foreground)] m-0">{t('settingsPage.data.title')}</h2>
+                    {openSections.dataAccount ? <FaChevronUp className="text-[var(--muted-foreground)] transition-transform duration-300" /> : <FaChevronDown className="text-[var(--muted-foreground)] transition-transform duration-300" />}
                 </div>
 
                 {openSections.dataAccount && (
-                    <div className={styles.formSection}>
-                        {/* Export Data - JSON */}
-                        <div className={styles.actionRow}>
-                            <div className={styles.actionDescription}>
-                                <strong>{t('settingsPage.data.exportLabel')}</strong>
-                                <p>{t('settingsPage.data.exportDescription')}</p>
+                    <div className={formSectionClasses}>
+                        <div className="flex flex-wrap justify-between items-center gap-4 pb-6 not:last:border-b not:last:border-[var(--border)]">
+                            <div className="flex-grow mr-4">
+                                <strong className="block text-base font-semibold text-[var(--foreground)] mb-1">{t('settingsPage.data.exportLabel')}</strong>
+                                <p className="text-sm text-[var(--muted-foreground)] m-0 max-w-[60ch]">{t('settingsPage.data.exportDescription')}</p>
                             </div>
-                            <div className={styles.actionButtonContainer}>
+                            <div className="flex-shrink-0">
                                 <Button variant="secondary" onClick={handleExportData} isLoading={isProcessingDataAction} disabled={isProcessingDataAction} leftIcon={<FaDownload />} >
                                     {t('settingsPage.data.exportButton')}
                                 </Button>
                             </div>
                         </div>
 
-                        {/* Export Objectives as CSV */}
-                        <div className={styles.actionRow}>
-                            <div className={styles.actionDescription}>
-                                <strong>{t('settingsPage.data.exportCSV', 'Export Objectives as CSV')}</strong>
-                                <p>{t('settingsPage.data.exportCSVDesc', 'Download your objectives as a CSV file')}</p>
+                        <div className="flex flex-wrap justify-between items-center gap-4 pb-6 not:last:border-b not:last:border-[var(--border)]">
+                            <div className="flex-grow mr-4">
+                                <strong className="block text-base font-semibold text-[var(--foreground)] mb-1">{t('settingsPage.data.exportCSV', 'Export Objectives as CSV')}</strong>
+                                <p className="text-sm text-[var(--muted-foreground)] m-0 max-w-[60ch]">{t('settingsPage.data.exportCSVDesc', 'Download your objectives as a CSV file')}</p>
                             </div>
-                            <div className={styles.actionButtonContainer}>
+                            <div className="flex-shrink-0 flex gap-2">
                                 <Button variant="secondary" onClick={handleExportCSV} isLoading={isProcessingDataAction} disabled={isProcessingDataAction} leftIcon={<FaFileExport />}>
                                     CSV
                                 </Button>
@@ -427,26 +441,25 @@ function SettingsPage() {
                             </div>
                         </div>
 
-                        {/* Delete Account */}
-                        <div className={`${styles.actionRow} ${styles.actionRowDestructive}`}>
-                            <div className={styles.actionDescription}>
-                                <strong>{t('settingsPage.data.deleteLabel')}</strong>
-                                <p>{t('settingsPage.data.deleteDescription')}</p>
+                        <div className="flex flex-wrap justify-between items-center gap-4 pb-6 border-[var(--destructive-soft-bg,#fecaca)]">
+                            <div className="flex-grow mr-4">
+                                <strong className="block text-base font-semibold text-[var(--destructive)] mb-1">{t('settingsPage.data.deleteLabel')}</strong>
+                                <p className="text-sm text-[var(--muted-foreground)] m-0 max-w-[60ch]">{t('settingsPage.data.deleteDescription')}</p>
                             </div>
-                            <div className={styles.actionButtonContainer}>
+                            <div className="flex-shrink-0">
                                 <Button variant="destructive" onClick={handleDeleteAccount} isLoading={isProcessingDataAction} disabled={isProcessingDataAction} leftIcon={<FaTrash />} >
                                     {t('settingsPage.data.deleteButton')}
                                 </Button>
                             </div>
                         </div>
-                        
-                        {dataAccountError && <p className={`${styles.formErrorMessage} ${styles.sectionFormError}`}>{dataAccountError}</p>}
+
+                        {dataAccountError && <p className="text-[var(--destructive)] text-sm mt-2 text-left">{dataAccountError}</p>}
                     </div>
                 )}
-            </section>
+            </motion.section>
             <div>
             {isDirty && (
-                    <div className={styles.globalActionsContainer}>
+                    <div className="flex justify-end items-center gap-4 ml-auto">
                         <Button variant="secondary" onClick={handleRevertChanges} disabled={isSaving}>
                             {t('common.revert')}
                         </Button>
@@ -456,7 +469,7 @@ function SettingsPage() {
                     </div>
                 )}
             </div>
-        </div>
+        </motion.div>
     );
 }
 
