@@ -5,14 +5,14 @@ const dotenv = require('dotenv');
 
 const env = process.env.NODE_ENV || 'development';
 
-// Determina la ruta del archivo .env según el entorno
+// Determine the .env file path based on the environment
 const envPath = env === 'test' 
     ? path.resolve(__dirname, '../../../.env.test') 
     : path.resolve(__dirname, '../../.env');
 
 dotenv.config({ path: envPath });
 
-// Carga las variables de entorno específicas del entorno actual
+// Load environment-specific configuration variables
 const dbConfig = {
     name: process.env.NODE_ENV === 'test' ? process.env.DB_NAME_TEST : process.env.DB_NAME,
     user: process.env.NODE_ENV === 'test' ? process.env.DB_USER_TEST : process.env.DB_USER,
@@ -22,16 +22,16 @@ const dbConfig = {
     port: process.env.NODE_ENV === 'test' ? process.env.DB_PORT_TEST : process.env.DB_PORT,
 };
 
-// Valida que todas las variables de configuración necesarias estén presentes
+// Validate that all required configuration variables are present
 if (Object.values(dbConfig).some(value => value === undefined)) {
-    console.error(`[DB] ERROR: Faltan variables de entorno para la base de datos en el entorno "${env}".`);
-    console.error(`[DB] Asegúrese de que el archivo ${envPath} esté completo.`);
+    console.error(`[DB] ERROR: Missing environment variables for database in environment "${env}".`);
+    console.error(`[DB] Make sure the file ${envPath} is complete.`);
     process.exit(1);
 }
 
 const dbPortInt = parseInt(dbConfig.port, 10);
 if (isNaN(dbPortInt)) {
-    console.error(`[DB] ERROR: El puerto de la base de datos "${dbConfig.port}" no es un número válido.`);
+    console.error(`[DB] ERROR: Database port "${dbConfig.port}" is not a valid number.`);
     process.exit(1);
 }
 
@@ -51,8 +51,8 @@ const sequelizeInstance = new Sequelize(
     }
 );
 
-// --- Carga de Modelos ---
-// Los modelos se adjuntarán a `sequelizeInstance.models` al ser importados
+// --- Model Loading ---
+// Models will be attached to `sequelizeInstance.models` when imported
 require('../api/models/user')(sequelizeInstance);
 require('../api/models/objectives')(sequelizeInstance);
 require('../api/models/progress')(sequelizeInstance);
@@ -61,11 +61,11 @@ require('../api/models/activityLog')(sequelizeInstance);
 db.sequelize = sequelizeInstance;
 db.Sequelize = Sequelize;
 
-// Asigna los modelos al objeto `db` para fácil acceso
+// Assign models to the `db` object for easy access
 Object.assign(db, sequelizeInstance.models);
 
-// --- Asociaciones de Modelos ---
-// Ejecuta el método `associate` de cada modelo si existe
+// --- Model Associations ---
+// Execute the `associate` method on each model if it exists
 Object.values(sequelizeInstance.models)
     .filter(model => typeof model.associate === 'function')
     .forEach(model => model.associate(sequelizeInstance.models));
@@ -77,32 +77,32 @@ async function initializeDatabase() {
         return;
     }
     try {
-        console.log(`[DB] Autenticando con la base de datos '${dbConfig.name}'...`);
+        console.log(`[DB] Authenticating with database '${dbConfig.name}'...`);
         await db.sequelize.authenticate();
-        console.log(`[DB] Conexión a '${dbConfig.name}' establecida.`);
+        console.log(`[DB] Connection to '${dbConfig.name}' established.`);
 
-        // Lógica de sincronización controlada por variables de entorno
+        // Sync logic controlled by environment variables
         const forceSync = process.env.DB_FORCE_SYNC === 'true';
-        // 'alter' se activa si DB_ALTER_SYNC es true, o en desarrollo si no se está forzando.
+        // 'alter' is activated if DB_ALTER_SYNC is true, or in development if not force syncing.
         const alterSync = process.env.DB_ALTER_SYNC === 'true' || (env === 'development' && !forceSync);
 
         if (forceSync) {
-            console.warn('[DB] Sincronizando base de datos con { force: true } - ¡SE PERDERÁN TODOS LOS DATOS!');
+            console.warn('[DB] Syncing database with { force: true } - ALL DATA WILL BE LOST!');
             await db.sequelize.sync({ force: true });
         } else if (alterSync) {
-            console.log('[DB] Sincronizando base de datos con { alter: true }...');
+            console.log('[DB] Syncing database with { alter: true }...');
             await db.sequelize.sync({ alter: true });
         } else {
-            console.log('[DB] Sincronizando base de datos (sync estándar)...');
+            console.log('[DB] Syncing database (standard sync)...');
             await db.sequelize.sync();
         }
         
         isInitialized = true;
-        console.log('[DB] Inicialización de base de datos completada.');
+        console.log('[DB] Database initialization completed.');
 
     } catch (error) {
-        console.error(`[DB] Error de conexión/sincronización con la base de datos '${dbConfig.name}':`, error);
-        throw error; // Relanzar para que el proceso principal lo maneje
+        console.error(`[DB] Error connecting/syncing with database '${dbConfig.name}':`, error);
+        throw error; // Rethrow so the main process handles it
     }
 }
 

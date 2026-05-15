@@ -2,24 +2,28 @@
 const AppError = require('./AppError');
 
 /**
- * Extrae el ID de usuario autenticado de la petición.
- * @param {object} req - Objeto de la petición de Express.
- * @returns {number} El ID del usuario.
+ * Extracts the authenticated user ID from the request.
+ * @param {object} req - The Express request object.
+ * @returns {number} The user ID.
+ * @throws {AppError} If the user ID is not found.
  */
 const getAuthUserId = (req) => {
     const userId = req.user?.id;
     if (!userId) {
-        throw new AppError('Error de autenticación: ID de usuario no encontrado.', 401);
+        throw new AppError('Authentication error: user ID not found.', 401);
     }
     return userId;
 };
 
 /**
- * Crea un controlador estándar que maneja la lógica común de llamar a un servicio.
- * @param {Function} serviceFunction - La función del servicio a ejecutar.
- * @param {Array<'userId'|'params'|'query'|'body'>} params - Los parámetros que se pasarán a la función de servicio.
+ * Creates a standard controller that handles common service-calling logic.
+ * @param {Function} serviceFunction - The service function to execute.
+ * @param {Array<'userId'|'params'|'query'|'body'>} params - The parameters to pass to the service function.
+ * @param {object} [options] - Optional configuration.
+ * @param {number} [options.statusCode=200] - HTTP status code for the response.
  */
-exports.createController = (serviceFunction, params = ['userId']) => {
+exports.createController = (serviceFunction, params = ['userId'], options = {}) => {
+    const { statusCode = 200 } = options;
     return async (req, res, next) => {
         try {
             const args = [];
@@ -29,8 +33,12 @@ exports.createController = (serviceFunction, params = ['userId']) => {
             if (params.includes('body')) args.push(req.body);
 
             const result = await serviceFunction(...args);
-            
-            res.status(200).json({
+
+            if (statusCode === 204) {
+                return res.status(204).send();
+            }
+
+            res.status(statusCode).json({
                 status: 'success',
                 data: result
             });

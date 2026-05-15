@@ -125,22 +125,22 @@ ObjectiveForm.propTypes = {
         targetValue: isQuantitative ? parseFloat(data.targetValue) : null,
     };
         
-        // El caso especial: progressData solo se añade si 'currentValue' ha sido modificado
+        // Special case: progressData is only added if 'currentValue' has been modified
         if (isEditMode && dirtyFields.currentValue) {
             payload.progressData = {
                 value: isQuantitative ? parseFloat(data.currentValue) : 0,
                 notes: 'Valor actualizado desde la pantalla de edición.'
             };
         } else if (!isEditMode) {
-             // En modo creación, siempre se envían estos valores
+             // In creation mode, these values are always sent
             payload.initialValue = isQuantitative ? parseFloat(data.initialValue) : null;
             payload.currentValue = payload.initialValue;
-            // Pasamos el resto de los datos que no están en dirtyFields pero son necesarios
+            // Pass the rest of the data that is not in dirtyFields but is necessary
             payload.name = data.name;
             payload.category = data.category;
         }
 
-        // Si no hay campos modificados, no hacemos nada (excepto si es creación)
+        // If no fields were modified, do nothing (except for creation)
         if (isEditMode && Object.keys(payload).length === 0) {
             toast.info("No se han detectado cambios.");
             setLoading(false);

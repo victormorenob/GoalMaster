@@ -1,5 +1,6 @@
-// backend/src/api/models/objective.js
+// backend/src/api/models/objectives.js
 const { DataTypes } = require('sequelize');
+const { ALLOWED_CATEGORIES, ALLOWED_STATUSES, PREVIOUS_STATUSES } = require('../../shared/constants');
 
 /**
  * Defines the Objective model.
@@ -25,7 +26,7 @@ module.exports = (sequelize) => {
             field: 'descripcion'
         },
         category: {
-            type: DataTypes.ENUM('HEALTH', 'FINANCE', 'PERSONAL_DEV', 'RELATIONSHIPS', 'CAREER', 'OTHER'),
+            type: DataTypes.ENUM(...ALLOWED_CATEGORIES),
             allowNull: false,
             field: 'tipo_objetivo'
         },
@@ -64,17 +65,17 @@ module.exports = (sequelize) => {
             field: 'fecha_fin'
         },
         status: {
-            type: DataTypes.ENUM('PENDING', 'IN_PROGRESS', 'COMPLETED', 'ARCHIVED', 'FAILED'),
+            type: DataTypes.ENUM(...ALLOWED_STATUSES),
             defaultValue: 'PENDING',
             allowNull: false,
             field: 'estado'
         },
         previousStatus: {
-            type: DataTypes.ENUM('PENDING', 'IN_PROGRESS', 'COMPLETED', 'FAILED'), // Sin 'ARCHIVED'
+            type: DataTypes.ENUM(...PREVIOUS_STATUSES),
             allowNull: true,
             defaultValue: null,
             field: 'estado_anterior',
-            comment: 'Almacena el estado anterior del objetivo al ser archivado.'
+            comment: 'Stores the previous status before the objective was archived.'
         },
         userId: {
             type: DataTypes.INTEGER,

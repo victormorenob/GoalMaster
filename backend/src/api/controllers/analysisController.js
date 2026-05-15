@@ -37,7 +37,7 @@ exports.getDetailedObjectivesByCategory = createController(
     ['userId', 'query']
 );
 
-// NUEVO: Controlador añadido para el gráfico de progreso por objetivo.
+// Controller added for the per-objective progress chart.
 exports.getObjectivesProgressChartData = createController(
     (userId, query) => analysisService.getObjectivesProgressChartData(userId, query.period),
     ['userId', 'query']

@@ -8,7 +8,7 @@ export const ROUTE_PATHS = {
     SETTINGS: '/settings',
     LOGIN: '/login',
     REGISTER: '/register',
-    // Rutas dinámicas
+    // Dynamic routes
     EDIT_OBJECTIVE: '/objectives/edit/:id',
     VIEW_OBJECTIVE: '/objectives/:id',
     UPDATE_PROGRESS: '/objectives/:id/update-progress',

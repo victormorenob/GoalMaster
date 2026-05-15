@@ -63,7 +63,7 @@ export const SettingsProvider = ({ children }) => {
                     await i18n.changeLanguage(mergedSettings.language);
                 }
             } catch (error) {
-                console.error("SettingsContext: Error al cargar la configuración del usuario:", error);
+                console.error("SettingsContext: Error loading user settings:", error);
                 toast.error(i18n.t('toast.settingsLoadError')); // Usamos i18n.t()
                 setSettings(defaultSettings);
                 applyThemeToDocument(defaultSettings.themePreference);
@@ -114,7 +114,7 @@ export const SettingsProvider = ({ children }) => {
             await apiService.updateUserSettings(settingsToUpdate);
             return true;
         } catch (error) {
-            console.error("SettingsContext: Error al guardar la configuración:", error);
+            console.error("SettingsContext: Error saving settings:", error);
             toast.error(error.message || i18n.t('toast.settingsSaveError'));
             loadUserSettings();
             throw error;

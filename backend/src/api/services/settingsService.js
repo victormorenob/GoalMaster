@@ -14,7 +14,7 @@ class SettingsService {
      */
     async fetchUserSettings(userId) {
         const user = await User.findByPk(userId, {
-            attributes: ['themePreference', 'languagePreference'] // Añadir más preferencias aquí si existen
+            attributes: ['themePreference', 'languagePreference'] // Add more preferences here if they exist
         });
         if (!user) {
             throw new AppError('Usuario no encontrado al buscar configuración.', 404);
@@ -34,8 +34,8 @@ class SettingsService {
             throw new AppError('Usuario no encontrado para actualizar configuración.', 404);
         }
         
-        // Con claves consistentes entre frontend y backend, el mapeo ya no es necesario.
-        // Se asume que `settingsData` contiene claves como `themePreference`, `languagePreference`.
+        // With consistent keys between frontend and backend, mapping is no longer needed.
+        // It is assumed that `settingsData` contains keys like `themePreference`, `languagePreference`.
         await user.update(settingsData);
         await ActivityLog.create({
             userId,
@@ -63,7 +63,7 @@ class SettingsService {
             throw new AppError('La contraseña actual es incorrecta.', 400);
         }
 
-        // El hook 'beforeUpdate' en el modelo User se encargará de hashear la nueva contraseña.
+        // The 'beforeUpdate' hook in the User model will handle hashing the new password.
         user.password = newPassword;
         await user.save();
         await ActivityLog.create({
@@ -86,7 +86,7 @@ class SettingsService {
                 { 
                     model: Objective, 
                     as: 'objectives',
-                    // Incluimos los Progress DENTRO de cada Objective
+                    // Include Progress WITHIN each Objective
                     include: [{
                         model: Progress,
                         as: 'progressEntries'
@@ -128,7 +128,7 @@ class SettingsService {
                 userId,
                 activityType: 'USER_ACCOUNT_DELETED',
                 descriptionKey: 'activityLog.accountDeleted',
-                additionalDetails: { username: user.username } // Guardamos el nombre de usuario
+                additionalDetails: { username: user.username } // Store the username for reference
             }, { transaction });
             await user.destroy({ transaction });
             await transaction.commit();

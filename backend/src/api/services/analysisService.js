@@ -48,7 +48,7 @@ class AnalysisService {
                     as: 'progressEntries',
                     where: { entryDate: { [Op.lte]: endDate } },
                     required: false,
-                    // Añadimos 'id' como segundo criterio para desempates en el mismo día.
+                    // Add 'id' as a secondary sort criterion for tie-breaking on the same day.
                     order: [['entryDate', 'DESC'], ['id', 'DESC']],
                 }],
             });
@@ -92,7 +92,7 @@ class AnalysisService {
                     const progressesForMonth = activeObjectivesInMonth.map(obj => {
                         const entries = obj.progressEntries || [];
                         const validEntries = entries.filter(p => new Date(p.entryDate) <= endOfMonth);
-                        const latestEntry = validEntries[0]; // Tomamos el primero
+                        const latestEntry = validEntries[0]; // Take the first one
                         
                         const progressValue = latestEntry ? latestEntry.value : obj.initialValue;
                         return calculateProgressPercentage({ ...obj, currentValue: progressValue });

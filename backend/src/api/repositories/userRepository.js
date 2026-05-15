@@ -7,7 +7,7 @@ const db = require('../../config/database');
  */
 class UserRepository {
     constructor() {
-        this.model = db.User; // Usa el modelo refactorizado
+        this.model = db.User; // Uses the refactored model
     }
 
     /**

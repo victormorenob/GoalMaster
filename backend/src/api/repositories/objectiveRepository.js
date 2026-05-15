@@ -20,17 +20,17 @@ class ObjectiveRepository {
     async findAll(userId, filters = {}) {
         const whereClause = { userId };
 
-        // Filtro para incluir o excluir objetivos archivados
+        // Filter to include or exclude archived objectives
         if (String(filters.includeArchived).toLowerCase() !== 'true') {
             whereClause.status = { [Op.not]: 'ARCHIVED' };
         }
         
-        // Filtro por categoría
+        // Filter by category
         if (filters.category && filters.category !== 'all') {
             whereClause.category = filters.category;
         }
 
-        // Filtro por término de búsqueda en nombre o descripción
+        // Filter by search term in name or description
         if (filters.searchTerm) {
             whereClause[Op.or] = [
                 { name: { [Op.like]: `%${filters.searchTerm}%` } },
@@ -38,8 +38,8 @@ class ObjectiveRepository {
             ];
         }
         
-        // Lógica de ordenación por campos de la base de datos
-        let orderClause = [['updatedAt', 'DESC']]; // Orden por defecto
+        // Sorting logic based on database fields
+        let orderClause = [['updatedAt', 'DESC']]; // Default sort order
         const sortByMapping = {
             recent: [['updatedAt', 'DESC']],
             oldest: [['updatedAt', 'ASC']],
@@ -50,7 +50,7 @@ class ObjectiveRepository {
         if (filters.sortBy && sortByMapping[filters.sortBy]) {
             orderClause = sortByMapping[filters.sortBy];
         }
-        // Nota: La ordenación por progreso calculado se maneja en la capa de servicio.
+        // Note: Sorting by calculated progress is handled in the service layer.
 
         return this.model.findAll({ 
             where: whereClause,

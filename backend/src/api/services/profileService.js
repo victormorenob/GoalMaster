@@ -39,18 +39,18 @@ class ProfileService {
             throw new AppError('Usuario no encontrado para actualizar.', 404); //
         }
 
-        user.username = profileData.username ?? user.username; //
-        user.phone = profileData.phone ?? user.phone; //
-        user.location = profileData.location ?? user.location; //
-        user.bio = profileData.bio ?? user.bio; //
+        user.username = profileData.username ?? user.username;
+        user.phone = profileData.phone ?? user.phone;
+        user.location = profileData.location ?? user.location;
+        user.bio = profileData.bio ?? user.bio;
         
         if (newAvatarFile) {
-            const newAvatarUrl = `/uploads/avatars/${newAvatarFile.filename}`; //
+            const newAvatarUrl = `/uploads/avatars/${newAvatarFile.filename}`;
             const oldAvatarUrl = user.avatarUrl;
             
-            user.avatarUrl = newAvatarUrl; //
+            user.avatarUrl = newAvatarUrl;
 
-            if (oldAvatarUrl && oldAvatarUrl.includes('/uploads/avatars/')) { //
+            if (oldAvatarUrl && oldAvatarUrl.includes('/uploads/avatars/')) {
                 try {
                     const oldFileName = path.basename(oldAvatarUrl);
                     const oldAvatarPath = path.join(AVATAR_UPLOAD_DIR, oldFileName);
@@ -58,13 +58,13 @@ class ProfileService {
                         await fs.unlink(oldAvatarPath);
                     }
                 } catch (e) {
-                    console.error(`[ProfileService] No se pudo eliminar el avatar antiguo: ${e.message}`);
+                    console.error(`[ProfileService] Could not delete old avatar: ${e.message}`);
                 }
             }
         }
 
-        await user.save(); //
-        return user.toJSON(); //
+        await user.save();
+        return user.toJSON();
     }
 }
 

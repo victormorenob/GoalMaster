@@ -10,7 +10,7 @@ const axiosInstance = axios.create({
 
 let isSessionExpiredMessageShown = false;
 
-// Interceptor para añadir el token de autenticación a las cabeceras
+// Interceptor to add the authentication token to headers
 axiosInstance.interceptors.request.use(
     (config) => {
         const token = localStorage.getItem("token");

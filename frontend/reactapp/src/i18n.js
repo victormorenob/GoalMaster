@@ -5,34 +5,34 @@ import HttpApi from 'i18next-http-backend';
 import LanguageDetector from 'i18next-browser-languagedetector';
 
 i18n
-  // Carga traducciones desde una URL (ej. /locales/es/translation.json)
+  // Load translations from a URL (e.g. /locales/es/translation.json)
   .use(HttpApi)
-  // Detecta automáticamente el idioma del usuario desde el navegador, localStorage, etc.
+  // Automatically detect the user's language from browser, localStorage, etc.
   .use(LanguageDetector)
-  // Pasa la instancia de i18n a react-i18next para su uso en componentes
+  // Pass the i18n instance to react-i18next for use in components
   .use(initReactI18next)
   .init({
-    // Idioma a usar si el idioma detectado no está disponible
+    // Language to use if the detected language is not available
     fallbackLng: 'es',
-    // Lista de idiomas soportados
+    // List of supported languages
     supportedLngs: ['es', 'en'],
-    // Namespace por defecto a cargar
+    // Default namespace to load
     defaultNS: 'translation',
-    // Opciones para el backend que carga los archivos JSON
+    // Options for the backend that loads JSON files
     backend: {
       loadPath: '/locales/{{lng}}/{{ns}}.json',
     },
-    // Opciones para la detección de idioma
+    // Language detection options
     detection: {
       order: ['localStorage', 'cookie', 'navigator', 'htmlTag'],
       caches: ['localStorage', 'cookie'],
     },
-    // Permite que React use Suspense para la carga asíncrona de traducciones
+    // Allows React to use Suspense for async translation loading
     react: {
       useSuspense: true,
     },
     interpolation: {
-        // React ya protege contra ataques XSS, por lo que no es necesario escaparlo dos veces.
+        // React already protects against XSS attacks, so double escaping is not needed.
         escapeValue: false,
     }
   });

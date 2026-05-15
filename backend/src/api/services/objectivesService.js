@@ -135,7 +135,7 @@ class ObjectivesService {
                 const messages = error.errors ? error.errors.map(e => e.message).join('. ') : error.message;
                 throw new AppError(`Error de validación o de referencia: ${messages}`, 400);
             }
-            console.error('Error no manejado en createObjective:', error);
+            console.error('Unhandled error in createObjective:', error);
             throw new AppError('Error al crear el objetivo.', 500, error);
         }
     }

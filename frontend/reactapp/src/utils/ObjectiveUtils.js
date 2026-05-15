@@ -23,10 +23,10 @@ const statusInfoMap = {
 };
 
 export const getStatusInfo = (status, t) => {
-    // Si el estado no está en el mapa, crea un fallback
+    // If the status is not in the map, create a fallback
     const info = statusInfoMap[status] || { 
         key: `status.${status?.toLowerCase()}`, 
-        // Genera la clase dinámicamente: 'status' + 'In_progress' -> 'statusInProgress'
+        // Generate the class dynamically: 'status' + 'In_progress' -> 'statusInProgress'
         className: `status${status?.charAt(0).toUpperCase() + status?.slice(1).toLowerCase().replace(/_([a-z])/g, g => g[1].toUpperCase())}`
     };
     

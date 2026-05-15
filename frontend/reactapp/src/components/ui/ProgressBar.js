@@ -7,7 +7,7 @@ const ProgressBar = ({ percentage }) => {
     const { t } = useTranslation();
     const clampedPercentage = Math.max(0, Math.min(100, parseFloat(percentage) || 0));
 
-    // Lógica para determinar el texto, el icono y la CLASE CSS del estado
+    // Logic to determine the text, icon, and CSS CLASS for the status
     const { statusText, StatusIcon, statusClass } = useMemo(() => {
         if (clampedPercentage >= 75) {
             return {

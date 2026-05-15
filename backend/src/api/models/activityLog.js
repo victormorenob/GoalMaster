@@ -22,7 +22,7 @@ module.exports = (sequelize) => {
         },
         objectiveId: {
             type: DataTypes.INTEGER,
-            allowNull: true, // Permite nulos para que 'ON DELETE SET NULL' funcione
+            allowNull: true, // Allows null so 'ON DELETE SET NULL' works
             references: { model: 'objetivo', key: 'id' },
             field: 'id_objetivo'
         },
@@ -57,7 +57,7 @@ module.exports = (sequelize) => {
     }, {
         tableName: 'registroActividad',
         timestamps: true,
-        updatedAt: false, // Log entries should be immutable
+        updatedAt: false, // Activity log entries are immutable
         underscored: true,
         indexes: [
             { fields: ['id_usuario'] },
@@ -75,7 +75,7 @@ module.exports = (sequelize) => {
         ActivityLog.belongsTo(models.Objective, {
             foreignKey: 'objectiveId',
             as: 'objective',
-            onDelete: 'SET NULL', // Si se borra un objetivo, la referencia aquí se vuelve nula pero el log persiste.
+            onDelete: 'SET NULL', // If an objective is deleted, the reference becomes null but the log persists.
             onUpdate: 'CASCADE'
         });
     };

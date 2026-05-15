@@ -5,7 +5,7 @@ import { es, enUS } from 'date-fns/locale'; // Importa los locales que soportas
 const locales = {
   es: es,
   en: enUS,
-  // Puedes añadir más mapeos de idioma a locales de date-fns aquí
+  // You can add more language-to-date-fns-locale mappings here
 };
 
 // Mapeo de las preferencias de formato del usuario a los strings de formato de date-fns
@@ -16,11 +16,11 @@ const userFormatToDateFnsFormat = {
 };
 
 /**
- * Formatea una cadena de fecha (preferiblemente ISO 8601) según las preferencias del usuario.
+ * Formats a date string (preferably ISO 8601) according to user preferences.
  * @param {string | Date} dateInput - La fecha a formatear (cadena ISO o objeto Date).
  * @param {string} userFormatPreference - La preferencia de formato del usuario (ej. 'DD/MM/YYYY').
  * @param {string} langPreference - La preferencia de idioma del usuario (ej. 'es', 'en').
- * @returns {string} La fecha formateada o 'N/A' si la entrada es inválida.
+ * @returns {string} The formatted date or 'N/A' if the input is invalid.
  */
 export const formatDateByPreference = (dateInput, userFormatPreference, langPreference = 'es') => {
   if (!dateInput || !userFormatPreference) {
@@ -28,18 +28,18 @@ export const formatDateByPreference = (dateInput, userFormatPreference, langPref
   }
 
   const formatString = userFormatToDateFnsFormat[userFormatPreference] || userFormatPreference;
-  const localeToUse = locales[langPreference] || locales.es; // Fallback a español
+  const localeToUse = locales[langPreference] || locales.es; // Fallback to Spanish
 
   try {
     // Si dateInput ya es un objeto Date, no necesita parseISO.
-    // Si es una cadena, parseISO es más robusto para formatos estándar.
+    // If it is a string, parseISO is more robust for standard formats.
     const dateObject = typeof dateInput === 'string' ? parseISO(dateInput) : dateInput;
 
     if (!isValid(dateObject)) {
-        // console.warn(`Fecha inválida proporcionada a formatDateByPreference: ${dateInput}`);
-        // Si la fecha no es ISO, pero podría ser ya un formato específico, intenta mostrarla
-        // o devuelve N/A de forma más estricta. Por ahora, devolvemos la entrada.
-        // Considera que si ya viene formateada y no es ISO, parseISO fallará.
+        // console.warn(`Invalid date provided to formatDateByPreference: ${dateInput}`);
+        // If the date is not ISO but might be a specific format, try to display it
+        // or return N/A more strictly. For now, return the input.
+        // Note that if it's already formatted and not ISO, parseISO will fail.
         return typeof dateInput === 'string' ? dateInput.split('T')[0] : 'Fecha Inv.'; 
     }
 

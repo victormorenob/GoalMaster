@@ -17,7 +17,7 @@ const activityIcons = {
     OBJECTIVE_DELETED: <FaTrashAlt style={{ color: 'var(--destructive)' }} />,
     OBJECTIVE_STATUS_CHANGED: <FaEdit style={{ color: 'var(--warning)' }} />,
     OBJECTIVE_ARCHIVED: <FaArchive style={{ color: 'var(--muted-foreground)' }} />,
-    OBJECTIVE_UNARCHIVED: <FaUndo style={{ color: 'var(--info)' }} />, // He añadido FaUndo, asegúrate de importarlo también
+    OBJECTIVE_UNARCHIVED: <FaUndo style={{ color: 'var(--info)' }} />, // I added FaUndo, make sure to import it too
     USER_SETTINGS_UPDATED: <FaCog style={{ color: 'var(--primary)' }} />,
     USER_PASSWORD_CHANGED: <FaKey style={{ color: 'var(--warning)' }} />,
     USER_DATA_EXPORTED: <FaDownload style={{ color: 'var(--info)' }} />,
@@ -25,7 +25,7 @@ const activityIcons = {
     DEFAULT: <FaHistory style={{ color: 'var(--muted-foreground)' }} />
 };
 
-// --- NUEVA FUNCIÓN HELPER ---
+// --- NEW HELPER FUNCTION ---
 /**
  * Convierte un string en formato ENUM (ej. 'IN_PROGRESS') a camelCase (ej. 'inProgress').
  * @param {string} str - El string a convertir.

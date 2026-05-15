@@ -4,13 +4,12 @@ import Button from './Button';
 import { useTranslation } from 'react-i18next';
 
 /**
- * Un diálogo modal accesible para confirmar acciones del usuario.
- * Implementa "focus trapping" y cierre con la tecla Escape.
- * @param {boolean} isOpen - Controla la visibilidad del diálogo.
- * @param {function} onClose - Función a llamar para cerrar el diálogo.
- * @param {function} onConfirm - Función a llamar cuando el usuario confirma la acción.
- * @param {string} title - El título del diálogo.
- * @param {string} message - El mensaje o pregunta del diálogo.
+ * An accessible modal dialog for confirming user actions.
+ * @param {boolean} isOpen - Controls dialog visibility.
+ * @param {function} onClose - Function to call to close the dialog.
+ * @param {function} onConfirm - Function to call when the user confirms.
+ * @param {string} title - The dialog title.
+ * @param {string} message - The dialog message or question.
  */
 
 function ConfirmationDialog({

@@ -1,14 +1,14 @@
 // frontend/reactapp/src/components/auth/ProtectedRoute.js
 import React from "react";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
-import { useAuth } from "../../context/AuthContext"; // Asegúrate que la ruta es correcta
+import { useAuth } from "../../context/AuthContext"; // Make sure the path is correct
 import LoadingSpinner from "../ui/LoadingSpinner"; 
 
 const ProtectedRoute = () => {
     const { isAuthenticated, isLoading } = useAuth(); // Se usa 'isLoading' del AuthContext
-    const location = useLocation(); // Hook para obtener la ubicación actual
+    const location = useLocation(); // Hook to get the current location
 
-    // Muestra un indicador de carga mientras se verifica el estado de autenticación inicial
+    // Show a loading indicator while verifying initial authentication state
     if (isLoading) {
         return (
             <div style={{ 
@@ -23,14 +23,14 @@ const ProtectedRoute = () => {
         );
     }
 
-    // Si el usuario no está autenticado (y la carga ha terminado), redirige a la página de login
+    // If the user is not authenticated (and loading has finished), redirect to login page
     if (!isAuthenticated) {
         // Se pasa 'state={{ from: location }}' para que, tras un login exitoso,
-        // se pueda redirigir al usuario de vuelta a la página que intentaba acceder.
+        // so the user can be redirected back to the page they were trying to access.
         return <Navigate to="/login" state={{ from: location }} replace />;
     }
 
-    // Si el usuario está autenticado, renderiza el contenido de la ruta anidada (Outlet)
+    // If the user is authenticated, render the nested route content (Outlet)
     return <Outlet />;
 };
 

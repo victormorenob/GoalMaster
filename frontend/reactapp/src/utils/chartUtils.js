@@ -1,9 +1,8 @@
 // frontend/reactapp/src/utils/chartUtils.js
 
 /**
- * Devuelve un objeto de opciones por defecto para gráficos de tipo Dona (Doughnut).
- * @param {function} t - La función de traducción de i18next.
- * @returns {object} Objeto de opciones para Chart.js.
+ * Returns default options for Doughnut charts.
+ * @param {function} t - The i18next translation function.
  */
 export const getDefaultDonutOptions = (t) => ({
     responsive: true,
@@ -30,8 +29,8 @@ export const getDefaultDonutOptions = (t) => ({
 });
 
 /**
- * Devuelve un objeto de opciones por defecto para gráficos de barras horizontales.
- * @param {function} t - La función de traducción de i18next.
+ * Returns default options for horizontal bar charts.
+ * @param {function} t - The i18next translation function.
  * @param {string} xAxisLabel - La etiqueta para el eje X (horizontal).
  * @returns {object} Objeto de opciones para Chart.js.
  */

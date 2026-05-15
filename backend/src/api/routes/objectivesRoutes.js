@@ -6,12 +6,12 @@ const { validateCreateObjective, validateUpdateObjective } = require('../../midd
 const authMiddleware = require('../../middlewares/authMiddleware');
 
 router.param('id', (req, res, next, id) => {
-    // Si el ID proporcionado NO es una secuencia de uno o más dígitos...
+    // If the provided ID is NOT a sequence of one or more digits...
     if (!/^\d+$/.test(id)) {
-        // ...respondemos inmediatamente con un error y detenemos la ejecución.
+        // ...respond immediately with an error and stop execution.
         return res.status(400).json({ status: 'fail', message: 'El ID del objetivo debe ser un número válido.' });
     }
-    // Si es un número válido, continuamos a la siguiente función (el controlador).
+    // If it is a valid number, continue to the next function (the controller).
     next();
 });
 
