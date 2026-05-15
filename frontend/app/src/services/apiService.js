@@ -6,6 +6,7 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:3001
 
 const axiosInstance = axios.create({
     baseURL: API_BASE_URL,
+    timeout: 15000, // 15s timeout — prevents hanging if backend is down
 });
 
 let isSessionExpiredMessageShown = false;

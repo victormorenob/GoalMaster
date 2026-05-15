@@ -43,7 +43,7 @@ export const SettingsProvider = ({ children }) => {
         let themeToApply = themePreference;
 
         if (themePreference === 'system') {
-            const systemPrefersDark = window.matchMedia('(prefers-color-scheme: white)').matches;
+            const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
             themeToApply = systemPrefersDark ? 'dark' : 'light';
         }
         
@@ -54,6 +54,8 @@ export const SettingsProvider = ({ children }) => {
     const loadUserSettings = useCallback(async () => {
         if (isAuthenticated && user?.id) {
             setIsLoadingSettings(true);
+            // Safety timeout: force loading to end after 10s no matter what
+            const safetyTimer = setTimeout(() => setIsLoadingSettings(false), 10000);
             try {
                 const response = await apiService.getUserSettings();
                 const mergedSettings = { ...defaultSettings, ...(response?.preferences || {}) };
@@ -68,6 +70,7 @@ export const SettingsProvider = ({ children }) => {
                 setSettings(defaultSettings);
                 applyThemeToDocument(defaultSettings.themePreference);
             } finally {
+                clearTimeout(safetyTimer);
                 setIsLoadingSettings(false);
                 setIsApplyingTheme(false);
             }
