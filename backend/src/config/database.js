@@ -57,6 +57,7 @@ require('../api/models/user')(sequelizeInstance);
 require('../api/models/objectives')(sequelizeInstance);
 require('../api/models/progress')(sequelizeInstance);
 require('../api/models/activityLog')(sequelizeInstance);
+require('../api/models/tag')(sequelizeInstance);
 
 db.sequelize = sequelizeInstance;
 db.Sequelize = Sequelize;
