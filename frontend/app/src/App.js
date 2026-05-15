@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
+import { AnimatePresence, motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { SettingsProvider, useSettings } from './context/SettingsContext';
@@ -26,6 +27,14 @@ import AchievementsPage from './pages/AchievementsPage';
 import AppHeader from './layouts/AppHeader';
 import Sidebar from './layouts/SideBar/SideBar';
 import FullPageLoader from './components/ui/FullPageLoader';
+import ChatPanel from './components/ai/ChatPanel';
+
+const pageTransition = {
+    initial: { opacity: 0, y: 20 },
+    animate: { opacity: 1, y: 0 },
+    exit: { opacity: 0, y: -20 },
+    transition: { duration: 0.2, ease: 'easeInOut' },
+};
 
 // The main component that contains routing and layout logic
 function AppContent() {
@@ -46,21 +55,29 @@ function AppContent() {
                 <div className="main-layout-content">
                     <AppHeader onMenuClick={() => setSidebarOpen(!isSidebarOpen)} />
                     <main className="main-content-area">
-                        <Routes>
-                            <Route path="/dashboard" element={<DashboardPage />} />
-                            <Route path="/mis-objetivos" element={<MyObjectivesPage />} />
-                            <Route path="/objectives/new" element={<CreateGoalPage />} />
-                            <Route path="/objectives/edit/:id" element={<EditGoalPage />} />
-                            <Route path="/objectives/:id/update-progress" element={<UpdateProgressPage />} />
-                            <Route path="/objectives/:id" element={<GoalDetailPage />} />
-                            <Route path="/analisis" element={<AnalysisPage />} />
-                            <Route path="/profile" element={<ProfilePage />} />
-                            <Route path="/logros" element={<AchievementsPage />} />
-                            <Route path="/settings" element={<SettingsPage />} />
-                            <Route path="*" element={<Navigate to="/dashboard" replace />} />
-                        </Routes>
+                        <AnimatePresence mode="wait">
+                            <motion.div
+                                key={location.pathname}
+                                {...pageTransition}
+                            >
+                                <Routes location={location}>
+                                    <Route path="/dashboard" element={<DashboardPage />} />
+                                    <Route path="/mis-objetivos" element={<MyObjectivesPage />} />
+                                    <Route path="/objectives/new" element={<CreateGoalPage />} />
+                                    <Route path="/objectives/edit/:id" element={<EditGoalPage />} />
+                                    <Route path="/objectives/:id/update-progress" element={<UpdateProgressPage />} />
+                                    <Route path="/objectives/:id" element={<GoalDetailPage />} />
+                                    <Route path="/analisis" element={<AnalysisPage />} />
+                                    <Route path="/profile" element={<ProfilePage />} />
+                                    <Route path="/logros" element={<AchievementsPage />} />
+                                    <Route path="/settings" element={<SettingsPage />} />
+                                    <Route path="*" element={<Navigate to="/dashboard" replace />} />
+                                </Routes>
+                            </motion.div>
+                        </AnimatePresence>
                     </main>
                 </div>
+                <ChatPanel />
                 {isSidebarOpen && (
                     <button
                         className="sidebarOverlay"
@@ -76,11 +93,18 @@ function AppContent() {
     return (
         <div className="App">
             <main className="main-centered-auth">
-                <Routes>
-                    <Route path="/login" element={<LoginPage />} />
-                    <Route path="/register" element={<RegisterPage />} />
-                    <Route path="*" element={<Navigate to="/login" replace />} />
-                </Routes>
+                <AnimatePresence mode="wait">
+                    <motion.div
+                        key={location.pathname}
+                        {...pageTransition}
+                    >
+                        <Routes location={location}>
+                            <Route path="/login" element={<LoginPage />} />
+                            <Route path="/register" element={<RegisterPage />} />
+                            <Route path="*" element={<Navigate to="/login" replace />} />
+                        </Routes>
+                    </motion.div>
+                </AnimatePresence>
             </main>
         </div>
     );
