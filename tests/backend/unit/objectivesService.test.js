@@ -1,14 +1,11 @@
 // Usamos rutas relativas CORRECTAS
 jest.mock('../../../backend/src/config/database');
 jest.mock('../../../backend/src/api/repositories/objectiveRepository');
-jest.mock('../../../backend/src/api/repositories/progressRepository');
-jest.mock('../../../backend/src/api/repositories/activityLogRepository');
 
 const objectivesService = require('../../../backend/src/api/services/objectivesService');
 const objectiveRepository = require('../../../backend/src/api/repositories/objectiveRepository');
-const progressRepository = require('../../../backend/src/api/repositories/progressRepository');
-const activityLogRepository = require('../../../backend/src/api/repositories/activityLogRepository');
 const db = require('../../../backend/src/config/database');
+const { Progress, ActivityLog } = db;
 
 describe('ObjectivesService', () => {
   const mockTransaction = {
@@ -31,8 +28,8 @@ describe('ObjectivesService', () => {
     await objectivesService.createObjective(objectiveData, 1);
 
     expect(objectiveRepository.create).toHaveBeenCalled();
-    expect(progressRepository.create).toHaveBeenCalled(); 
-    expect(activityLogRepository.create).toHaveBeenCalled();
+    expect(Progress.create).toHaveBeenCalled(); 
+    expect(ActivityLog.create).toHaveBeenCalled();
     expect(mockTransaction.commit).toHaveBeenCalled();
   });
 });
