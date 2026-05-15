@@ -48,11 +48,11 @@ Chain strategy: pending
 
 ## Phase 4: Rename frontend/app (Batch 4)
 
-- [ ] 4.1 Move `frontend/reactapp/` → `frontend/app/` (mkdir + mv)
-- [ ] 4.2 Update `README.md` — replace `frontend/reactapp` with `frontend/app` in install instructions (2 references)
-- [ ] 4.3 Update file-header path comments in all 25 frontend JS files: `frontend/reactapp/` → `frontend/app/`
+- [x] 4.1 Move `frontend/reactapp/` → `frontend/app/` (mkdir + mv)
+- [x] 4.2 Update `README.md` — replace `frontend/reactapp` with `frontend/app` in install instructions (2 references)
+- [x] 4.3 Update file-header path comments in all 36 frontend JS/CSS files: `frontend/reactapp/` → `frontend/app/`
 
 ## Phase 5: Frontend Tests (Batch 5)
 
-- [ ] 5.1 Create `frontend/app/src/components/ui/Button.test.js` — test render with variants, onClick fires handler, disabled prevents onClick
-- [ ] 5.2 Create `frontend/app/src/components/objetivos/StatsCard.test.js` — test render with data, number formatting, empty/null state
+- [x] 5.1 Create `frontend/app/src/components/ui/Button.test.js` — test render with variants, onClick fires handler, disabled prevents onClick
+- [x] 5.2 Create `frontend/app/src/components/objetivos/StatsCard.test.js` — test render with data, number formatting, empty/null state
