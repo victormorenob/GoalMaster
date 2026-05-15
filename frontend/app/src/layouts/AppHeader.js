@@ -7,12 +7,15 @@ import styles from './AppHeader.module.css';
 import buttonStyles from '../components/ui/Button.module.css';
 import { useTranslation } from 'react-i18next';
 import { ROUTE_PATHS } from '../utils/routePaths';
+import usePWA from '../hooks/usePWA';
+import { FaDownload } from 'react-icons/fa';
 
 const AppHeader = ({ onMenuClick }) => {
     const { user, logout } = useAuth();
     const { t } = useTranslation();
     const navigate = useNavigate();
     const location = useLocation();
+    const { isInstallable, install } = usePWA();
 
     const getHeaderTitle = (pathname) => {
         const titleMap = {
@@ -40,6 +43,15 @@ const AppHeader = ({ onMenuClick }) => {
         navigate(ROUTE_PATHS.LOGIN, { replace: true });
     };
 
+    const handleInstall = async () => {
+        try {
+            await install();
+            toast.success(t('toast.appInstalled'));
+        } catch {
+            toast.error(t('toast.installError'));
+        }
+    };
+
     return (
         <header className={styles.header}>
             <div className={styles.leftContent}>
@@ -52,6 +64,18 @@ const AppHeader = ({ onMenuClick }) => {
             </div>
             {user && (
                 <div className={styles.rightContent}>
+                    {isInstallable && (
+                        <button
+                            onClick={handleInstall}
+                            className={`${buttonStyles.buttonSecondary} ${buttonStyles.secondary}`}
+                            aria-label={t('pwa.installApp')}
+                            title={t('pwa.installApp')}
+                            style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}
+                        >
+                            <FaDownload />
+                            {t('pwa.installApp')}
+                        </button>
+                    )}
                     <span className={styles.userInfo}>
                         {t('header.greeting', { name: user.username || t('common.userFallback') })}
                     </span>
