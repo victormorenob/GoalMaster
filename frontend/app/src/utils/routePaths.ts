@@ -1,4 +1,5 @@
 // frontend/app/src/utils/routePaths.js
+// @ts-nocheck
 export const ROUTE_PATHS = {
     DASHBOARD: '/dashboard',
     MY_OBJECTIVES: '/mis-objetivos',

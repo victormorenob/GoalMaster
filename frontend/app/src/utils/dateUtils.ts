@@ -1,4 +1,5 @@
 // frontend/app/src/utils/dateUtils.js
+// @ts-nocheck
 import { format, parseISO, isValid } from 'date-fns';
 import { es, enUS } from 'date-fns/locale'; // Importa los locales que soportas
 

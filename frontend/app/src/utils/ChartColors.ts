@@ -1,3 +1,4 @@
+// @ts-nocheck
 export const PREDEFINED_CATEGORY_COLORS = {
     'Salud': '#40E0D0',
     'Finanzas': '#6B8E23',

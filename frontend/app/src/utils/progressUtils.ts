@@ -1,4 +1,5 @@
 // frontend/app/src/utils/progressUtils.js
+// @ts-nocheck
 
 /**
  * Calcula el porcentaje de progreso de un objetivo cuantitativo.

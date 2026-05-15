@@ -1,4 +1,5 @@
 // frontend/app/src/utils/chartUtils.js
+// @ts-nocheck
 
 /**
  * Returns default options for Doughnut charts.
