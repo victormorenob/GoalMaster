@@ -1,23 +1,34 @@
 import React from 'react';
-import styles from './FormGroup.module.css';
+import { motion, AnimatePresence } from 'framer-motion';
 
 // Generic component to group a label, input, and error message
-// Esto ayuda a estandarizar la estructura de los campos de formulario.
 function FormGroup({
-    label, // Texto de la etiqueta (string)
-    htmlFor, // El 'id' del input asociado (string)
-    required, // Indica si el campo es obligatorio (boolean)
-    error, // Validation error message to display (string or null/undefined)
-    children // El/los elementos input, select, textarea u otro control de formulario (nodos React)
+    label,
+    htmlFor,
+    required,
+    error,
+    children
 }) {
     return (
-        <div className={styles.formGroup}>
-            <label htmlFor={htmlFor} className={styles.formLabel}>
+        <div className="mb-2 flex flex-col gap-[0.3rem]">
+            <label htmlFor={htmlFor} className="block mb-0 text-base font-semibold text-[var(--foreground)]">
                 {label}
-                {required && <span className={styles.formRequired}>*</span>}
+                {required && <span className="text-[var(--destructive)] ml-1">*</span>}
             </label>
             {children}
-            {error && <p className={styles.formErrorInline}>{error}</p>}
+            <AnimatePresence mode="wait">
+                {error && (
+                    <motion.p
+                        className="text-[var(--destructive)] text-sm mt-1 mb-0"
+                        initial={{ opacity: 0, y: -5, height: 0 }}
+                        animate={{ opacity: 1, y: 0, height: 'auto' }}
+                        exit={{ opacity: 0, y: -5, height: 0 }}
+                        transition={{ duration: 0.2 }}
+                    >
+                        {error}
+                    </motion.p>
+                )}
+            </AnimatePresence>
         </div>
     );
 }
