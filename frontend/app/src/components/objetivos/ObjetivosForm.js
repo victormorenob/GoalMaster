@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useForm, Controller } from "react-hook-form";
 import FormGroup from "../ui/FormGroup";
 import Input from "../ui/Input";
@@ -10,6 +10,8 @@ import { toast } from 'react-toastify';
 import { useTranslation } from "react-i18next";
 import { FaInfoCircle } from 'react-icons/fa';
 import PropTypes from 'prop-types';
+import TagSelector from '../tags/TagSelector';
+import api from '../../services/apiService';
 
 function ObjectiveForm({
     initialData = null,
@@ -30,6 +32,24 @@ ObjectiveForm.propTypes = {
 };
     const { t } = useTranslation();
     const [loading, setLoading] = useState(false);
+    const [availableTags, setAvailableTags] = useState([]);
+    const [selectedTags, setSelectedTags] = useState(
+        Array.isArray(initialData?.tags) ? initialData.tags : []
+    );
+
+    // Fetch available tags for the selector
+    useEffect(() => {
+        const fetchTags = async () => {
+            try {
+                const response = await api.getTags();
+                setAvailableTags(response?.data?.tags || []);
+            } catch {
+                // Silently fail — tags are optional
+                setAvailableTags([]);
+            }
+        };
+        fetchTags();
+    }, []);
 
     const {
         register,
@@ -89,6 +109,7 @@ ObjectiveForm.propTypes = {
                 status: initialData.status || 'PENDING',
                 isLowerBetter: initialData.isLowerBetter === true,
             });
+            setSelectedTags(Array.isArray(initialData.tags) ? initialData.tags : []);
         } else {
             reset({
                 name: '',
@@ -103,6 +124,7 @@ ObjectiveForm.propTypes = {
                 status: 'PENDING',
                 isLowerBetter: false,
             });
+            setSelectedTags([]);
         }
     }, [initialData, reset]);
 
@@ -120,6 +142,7 @@ ObjectiveForm.propTypes = {
         startDate: data.startDate ? format(data.startDate, 'yyyy-MM-dd') : null,
         endDate: data.endDate ? format(data.endDate, 'yyyy-MM-dd') : null,
         isLowerBetter: data.isLowerBetter,
+        tags: selectedTags.length > 0 ? selectedTags : null,
         // Valores cuantitativos solo si es de ese tipo
         initialValue: isQuantitative ? parseFloat(data.initialValue || 0) : null,
         targetValue: isQuantitative ? parseFloat(data.targetValue) : null,
@@ -155,6 +178,7 @@ ObjectiveForm.propTypes = {
                     initialValue: '', currentValue: '', unit: '',
                     startDate: null, endDate: null, status: 'PENDING', isLowerBetter: false,
                 });
+                setSelectedTags([]);
             }
         } finally {
             setLoading(false);
@@ -199,6 +223,14 @@ ObjectiveForm.propTypes = {
                             data-cy="objective-description-input" type="textarea" id="description" placeholder={t('objectivesForm.descriptionPlaceholder')}
                             {...register("description")}
                             disabled={loading} isError={!!errors.description}
+                        />
+                    </FormGroup>
+
+                    <FormGroup label={t('objectivesForm.tagsLabel')} htmlFor="tags">
+                        <TagSelector
+                            availableTags={availableTags}
+                            selectedTags={selectedTags}
+                            onChange={setSelectedTags}
                         />
                     </FormGroup>
 

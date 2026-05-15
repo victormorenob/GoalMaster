@@ -11,6 +11,7 @@ import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
 import FormGroup from '../components/ui/FormGroup';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
+import TagBadge from '../components/tags/TagBadge';
 import styles from './MyObjectivesPage.module.css';
 
 const INITIAL_DISPLAY_LIMIT = 6;
@@ -43,11 +44,13 @@ function MyObjectivesPage() {
     const [objectives, setObjectives] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [userTags, setUserTags] = useState([]);
     const [filters, setFilters] = useState({
         searchTerm: '',
         category: 'all',
         sortBy: 'recent',
         includeArchived: false,
+        tags: '',
     });
     const [showAllObjectives, setShowAllObjectives] = useState(false);
 
@@ -69,6 +72,19 @@ function MyObjectivesPage() {
     useEffect(() => {
         fetchObjectives();
     }, [fetchObjectives]);
+
+    // Fetch user tags for filter
+    useEffect(() => {
+        const fetchTags = async () => {
+            try {
+                const response = await api.getTags();
+                setUserTags(response?.data?.tags || []);
+            } catch {
+                setUserTags([]);
+            }
+        };
+        fetchTags();
+    }, []);
 
     const handleFilterChange = (e) => {
         const { name, value, type, checked } = e.target;
@@ -124,6 +140,17 @@ function MyObjectivesPage() {
                             {CATEGORY_OPTIONS.map(option => (<option key={option.value} value={option.value}>{t(option.key)}</option>))}
                         </Input>
                     </FormGroup>
+                    {userTags.length > 0 && (
+                        <FormGroup label={t('myObjectives.labels.tags')} htmlFor="filter-tags">
+                            <Input type="select" id="filter-tags" name="tags" value={filters.tags} onChange={handleFilterChange}>
+                                <option value="">{t('myObjectives.categories.all')}</option>
+                                {userTags.map(tag => (
+                                    <option key={tag.id} value={tag.name}>{tag.name}</option>
+                                ))}
+                            </Input>
+                        </FormGroup>
+                    )}
+
                     <FormGroup label={t('myObjectives.labels.sortBy')} htmlFor="sort-by">
                         <Input type="select" id="sort-by" name="sortBy" value={filters.sortBy} onChange={handleFilterChange}>
                             {SORT_BY_OPTIONS.map(option => (<option key={option.value} value={option.value}>{t(option.key)}</option>))}

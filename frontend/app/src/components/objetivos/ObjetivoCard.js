@@ -11,6 +11,7 @@ import Button from '../ui/Button';
 import { FaEdit, FaEye, FaArchive, FaUndo, FaCalendarAlt } from 'react-icons/fa';
 import { formatDateByPreference } from '../../utils/dateUtils';
 import { useSettings } from '../../context/SettingsContext';
+import TagBadge from '../tags/TagBadge';
 
 const categoryKeyMap = {
     HEALTH: "health",
@@ -90,6 +91,14 @@ function ObjetivoCard({ objective, onObjectiveArchived, onObjectiveUnarchived })
 
                 {objective.description && <p className={styles.cardDescription}>{objective.description}</p>}
                 
+                {objective.tags && objective.tags.length > 0 && (
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem', marginTop: '0.25rem' }}>
+                        {objective.tags.map((tag) => (
+                            <TagBadge key={tag} name={tag} size="small" />
+                        ))}
+                    </div>
+                )}
+                
                 {hasQuantitativeValues && (
                     <div className={styles.progressContainer}>
                         <div className={styles.progressHeader}>
@@ -152,6 +161,7 @@ ObjetivoCard.propTypes = {
         targetValue: PropTypes.number,
         currentValue: PropTypes.number,
         unit: PropTypes.string,
+        tags: PropTypes.arrayOf(PropTypes.string),
         updatedAt: PropTypes.string.isRequired,
     }).isRequired,
     onObjectiveArchived: PropTypes.func,
