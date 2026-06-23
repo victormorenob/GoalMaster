@@ -1,4 +1,4 @@
-// backend/app.js
+﻿// backend/app.js
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
@@ -13,6 +13,7 @@ const fs = require('fs');
 const AppError = require('./src/utils/AppError');
 const errorHandler = require('./src/middlewares/errorHandler');
 const { apiLimiter } = require('./src/middlewares/rateLimitMiddleware');
+const authMiddleware = require('./src/middlewares/authMiddleware');
 
 const app = express();
 
@@ -44,6 +45,7 @@ try {
 } catch (e) {
     console.error("[API Docs] Error al cargar swagger.yaml:", e.message);
 }
+
 
 app.use('/api/auth', require('./src/api/routes/authRoutes'));
 app.use('/api/users', require('./src/api/routes/userRoutes'));

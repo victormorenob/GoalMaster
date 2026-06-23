@@ -1,6 +1,10 @@
 const objectiveRepository = require('../repositories/objectiveRepository');
+const progressRepository = require('../repositories/progressRepository');
+const activityLogRepository = require('../repositories/activityLogRepository');
 const db = require('../../config/database');
 const AppError = require('../../utils/AppError');
+const { STATUS_TRANSITIONS } = require('../../shared/constants');
+const streakService = require('./streakService');
 
 const { Objective, Progress, ActivityLog } = db;
 
@@ -47,14 +51,43 @@ const checkAndUpdateOverdueStatus = (objectiveJson) => {
     return objectiveJson;
 };
 
+const assertValidStatusTransition = (currentStatus, newStatus) => {
+    if (!newStatus || newStatus === currentStatus) return;
+    const allowed = STATUS_TRANSITIONS[currentStatus];
+    if (!allowed || !allowed.includes(newStatus)) {
+        throw new AppError(`Transición de estado no permitida: ${currentStatus} → ${newStatus}.`, 400);
+    }
+};
+
+const applyAutoCompletion = (objectiveJson) => {
+    if (objectiveJson.progressPercentage >= 100 && !['ARCHIVED', 'FAILED'].includes(objectiveJson.status)) {
+        objectiveJson.status = 'COMPLETED';
+    }
+    return objectiveJson;
+};
+
+const parseTags = (tagsStr) => {
+    if (!tagsStr || typeof tagsStr !== 'string') return [];
+    return tagsStr.split(',').map(t => t.trim()).filter(Boolean);
+};
+
+const serializeTags = (tags) => {
+    if (!tags) return null;
+    if (Array.isArray(tags)) return tags.map(t => t.trim()).filter(Boolean).join(',') || null;
+    if (typeof tags === 'string') return parseTags(tags).join(',') || null;
+    return null;
+};
+
 const processObjectiveForResponse = (objective) => {
     let objectiveJson = objective.toJSON();
     objectiveJson = checkAndUpdateOverdueStatus(objectiveJson);
     objectiveJson.progressPercentage = calculateProgressPercentage(objectiveJson);
+    objectiveJson = applyAutoCompletion(objectiveJson);
     
     objectiveJson.initialValue = objectiveJson.initialValue != null ? +objectiveJson.initialValue : null;
     objectiveJson.currentValue = objectiveJson.currentValue != null ? +objectiveJson.currentValue : null;
     objectiveJson.targetValue = objectiveJson.targetValue != null ? +objectiveJson.targetValue : null;
+    objectiveJson.tags = parseTags(objectiveJson.tags);
     
     return objectiveJson;
 };
@@ -65,6 +98,13 @@ class ObjectivesService {
         const objectives = await objectiveRepository.findAll(userId, filters);
         
         let processedObjectives = objectives.map(processObjectiveForResponse);
+
+        if (filters.tags) {
+            const filterTags = Array.isArray(filters.tags) ? filters.tags : [filters.tags];
+            processedObjectives = processedObjectives.filter(obj =>
+                obj.tags.some(tag => filterTags.includes(tag))
+            );
+        }
 
         if (filters.sortBy === 'progressAsc') {
             processedObjectives.sort((a, b) => a.progressPercentage - b.progressPercentage);
@@ -101,6 +141,7 @@ class ObjectivesService {
             const dataToCreate = {
                 ...objectiveData,
                 userId,
+                tags: serializeTags(objectiveData.tags),
                 initialValue: isQuantitative ? objectiveData.initialValue : null,
                 targetValue: isQuantitative ? objectiveData.targetValue : null,
                 currentValue: isQuantitative ? objectiveData.initialValue : null,
@@ -109,16 +150,15 @@ class ObjectivesService {
             const newObjective = await objectiveRepository.create(dataToCreate, { transaction });
 
             if (isQuantitative) {
-                await Progress.create({
+                await progressRepository.create({
                     objectiveId: newObjective.id,
-                    userId: userId,
                     entryDate: new Date(),
                     value: newObjective.initialValue,
                     notes: 'Valor inicial del objetivo.'
                 }, { transaction });
             }
 
-            await ActivityLog.create({
+            await activityLogRepository.create({
                 userId,
                 objectiveId: newObjective.id,
                 activityType: 'OBJECTIVE_CREATED',
@@ -157,11 +197,20 @@ class ObjectivesService {
             }
 
             const originalStatus = objective.status;
+
+            if (updateData.status) {
+                assertValidStatusTransition(originalStatus, updateData.status);
+            }
+
             if (updateData.status === 'ARCHIVED' && originalStatus !== 'ARCHIVED') {
                 updateData.previousStatus = originalStatus;
             }
             
             const { progressData, ...objectiveData } = updateData;
+
+            if (objectiveData.tags !== undefined) {
+                objectiveData.tags = serializeTags(objectiveData.tags);
+            }
 
             if (Object.keys(objectiveData).length > 0) {
                 await objective.update(objectiveData, { transaction });
@@ -169,6 +218,11 @@ class ObjectivesService {
 
             if (progressData?.value !== undefined && progressData.value !== null) {
                 await this._logProgressUpdate(objective, progressData, userId, transaction);
+            }
+
+            const progressPct = calculateProgressPercentage(objective);
+            if (progressPct >= 100 && !['COMPLETED', 'ARCHIVED', 'FAILED'].includes(objective.status)) {
+                await objective.update({ status: 'COMPLETED' }, { transaction });
             }
             
             if (originalStatus !== objective.status) {
@@ -194,21 +248,26 @@ class ObjectivesService {
         objective.currentValue = newValue;
         await objective.save({ transaction });
 
-        await Progress.create({
+        await progressRepository.create({
             objectiveId: objective.id,
-            userId: userId,
             entryDate: new Date(),
             value: newValue,
             notes: progressData.notes || null
         }, { transaction });
 
-        await ActivityLog.create({
+        await activityLogRepository.create({
             userId,
             objectiveId: objective.id,
             activityType: 'PROGRESS_UPDATED',
             descriptionKey: 'activityLog.progressUpdated',
             additionalDetails: { objectiveName: objective.name, newValue: newValue, unit: objective.unit || '' }
         }, { transaction });
+
+        try {
+            await streakService.updateStreak(userId);
+        } catch (streakError) {
+            console.error('Error updating streak:', streakError);
+        }
     }
 
     async _logStatusChange(objective, originalStatus, userId, transaction) {
@@ -218,7 +277,7 @@ class ObjectivesService {
             activityType = 'OBJECTIVE_ARCHIVED';
             descriptionKey = 'activityLog.objectiveArchived';
         }
-        await ActivityLog.create({
+        await activityLogRepository.create({
             userId,
             objectiveId: objective.id,
             activityType,
@@ -241,7 +300,7 @@ class ObjectivesService {
             const newStatus = objective.previousStatus || 'PENDING';
             await objective.update({ status: newStatus, previousStatus: null }, { transaction });
 
-            await ActivityLog.create({
+            await activityLogRepository.create({
                 userId,
                 objectiveId: objective.id,
                 activityType: 'OBJECTIVE_UNARCHIVED',
@@ -265,7 +324,7 @@ class ObjectivesService {
             const objective = await objectiveRepository.findById(objectiveId, userId, { transaction });
             if (!objective) throw new AppError('Objetivo no encontrado.', 404);
             
-            await ActivityLog.create({
+            await activityLogRepository.create({
                 userId,
                 objectiveId: objectiveId,
                 activityType: 'OBJECTIVE_DELETED',

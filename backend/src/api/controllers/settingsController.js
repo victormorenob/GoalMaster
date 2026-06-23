@@ -34,7 +34,7 @@ exports.exportUserData = async (req, res, next) => {
 exports.deleteAccount = async (req, res, next) => {
     try {
         const userId = getAuthUserId(req);
-        const result = await settingsService.deleteUserAccount(userId);
+        const result = await settingsService.deleteUserAccount(userId, req.body.password);
         res.status(200).json({ status: 'success', message: result.message });
     } catch (error) {
         next(error);

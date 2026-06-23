@@ -78,3 +78,37 @@ exports.validateUserUpdate = [
 
     handleValidationErrors
 ];
+
+exports.validateProfilePatch = [
+    body('username')
+        .optional()
+        .trim()
+        .isLength({ min: 3, max: 50 }).withMessage('El nombre de usuario debe tener entre 3 y 50 caracteres.'),
+    body('phone')
+        .optional({ nullable: true })
+        .trim()
+        .isLength({ max: 25 }).withMessage('El teléfono no puede superar 25 caracteres.'),
+    body('location')
+        .optional({ nullable: true })
+        .trim()
+        .isLength({ max: 255 }).withMessage('La ubicación no puede superar 255 caracteres.'),
+    body('bio')
+        .optional({ nullable: true })
+        .trim()
+        .isLength({ max: 2000 }).withMessage('La biografía no puede superar 2000 caracteres.'),
+    handleValidationErrors
+];
+
+exports.validateChangePassword = [
+    body('currentPassword')
+        .notEmpty().withMessage('La contraseña actual es obligatoria.'),
+    body('newPassword')
+        .isLength({ min: 8 }).withMessage('La nueva contraseña debe tener al menos 8 caracteres.'),
+    handleValidationErrors
+];
+
+exports.validateDeleteAccount = [
+    body('password')
+        .notEmpty().withMessage('La contraseña es obligatoria para eliminar la cuenta.'),
+    handleValidationErrors
+];
