@@ -22,9 +22,10 @@ const AppHeader = ({ onMenuClick }) => {
             [ROUTE_PATHS.ANALYSIS]: t('pageTitles.analysis'),
             [ROUTE_PATHS.PROFILE]: t('pageTitles.profile'),
             [ROUTE_PATHS.SETTINGS]: t('pageTitles.settings'),
+            [ROUTE_PATHS.ACHIEVEMENTS]: t('pageTitles.achievements', { defaultValue: 'Logros' }),
+            [ROUTE_PATHS.TAGS]: t('pageTitles.tags', { defaultValue: 'Etiquetas' }),
+            [ROUTE_PATHS.ASSISTANT]: t('pageTitles.assistant', { defaultValue: 'Asistente' }),
         };
-        
-        if (titleMap[pathname]) return titleMap[pathname];
         if (matchPath(ROUTE_PATHS.EDIT_OBJECTIVE, pathname)) return t('pageTitles.editObjective');
         if (matchPath(ROUTE_PATHS.UPDATE_PROGRESS, pathname)) return t('pageTitles.updateProgress');
         if (matchPath(ROUTE_PATHS.VIEW_OBJECTIVE, pathname)) return t('pageTitles.objectiveDetails');
@@ -55,7 +56,7 @@ const AppHeader = ({ onMenuClick }) => {
                     <span className={styles.userInfo}>
                         {t('header.greeting', { name: user.username || t('common.userFallback') })}
                     </span>
-                    <button onClick={handleLogout} className={`${buttonStyles.buttonSecondary} ${buttonStyles.secondary}`}>
+                    <button onClick={handleLogout} className={buttonStyles.buttonSecondary}>
                         {t('header.logoutButton')}
                     </button>
                 </div>

@@ -4,6 +4,22 @@ import styles from './Button.module.css'; // Make sure the path is correct
 import { useTranslation } from 'react-i18next';
 // Optional: import LoadingSpinner from './LoadingSpinner'; // If you want a spinner inside the button
 
+const VARIANT_CLASS_MAP = {
+    primary: 'button',
+    secondary: 'buttonSecondary',
+    outline: 'buttonOutline',
+    buttonOutline: 'buttonOutline',
+    destructive: 'destructive',
+    ghost: 'buttonSubtle',
+    link: 'buttonLink',
+};
+
+const SIZE_CLASS_MAP = {
+    small: 'buttonSmall',
+    medium: '',
+    large: 'buttonLarge',
+};
+
 const Button = ({
     children,
     className = '',      // External class
@@ -19,14 +35,15 @@ const Button = ({
 }) => {
     const { t } = useTranslation();
 
-    // Build CSS classes dynamically
+    const variantKey = VARIANT_CLASS_MAP[variant] ?? 'button';
+    const sizeKey = SIZE_CLASS_MAP[size] ?? '';
+
     const buttonClass = [
-        styles.button,
-        styles[variant] || styles.primary,  // Variant class (with fallback)
-        styles[size] || styles.medium,      // Size class (with fallback)
-        isLoading ? styles.loading : '',    // Optional class when loading
-        className,                           // External classes passed as prop
-    ].filter(Boolean).join(' ').trim();     // filter(Boolean) removes empty classes, trim removes spaces
+        styles[variantKey],
+        sizeKey ? styles[sizeKey] : '',
+        isLoading ? styles.loading : '',
+        className,
+    ].filter(Boolean).join(' ');
 
     return (
         <button
