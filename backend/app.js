@@ -12,8 +12,20 @@ const fs = require('fs');
 
 const AppError = require('./src/utils/AppError');
 const errorHandler = require('./src/middlewares/errorHandler');
+<<<<<<< HEAD
 const { apiLimiter } = require('./src/middlewares/rateLimitMiddleware');
 const authMiddleware = require('./src/middlewares/authMiddleware');
+=======
+
+// Importar todas las rutas
+const userRoutes = require('./src/api/routes/userRoutes');
+const objectivesRoutes = require('./src/api/routes/objectivesRoutes');
+const dashboardRoutes = require('./src/api/routes/dashboardRoutes');
+const analysisRoutes = require('./src/api/routes/analysisRoutes');
+const profileRoutes = require('./src/api/routes/profileRoutes');
+const settingsRoutes = require('./src/api/routes/settingsRoutes');
+const aiRoutes = require('./src/api/routes/aiRoutes');
+>>>>>>> master
 
 const app = express();
 
@@ -54,6 +66,7 @@ app.use('/api/dashboard', require('./src/api/routes/dashboardRoutes'));
 app.use('/api/analysis', require('./src/api/routes/analysisRoutes'));
 app.use('/api/profile', require('./src/api/routes/profileRoutes'));
 app.use('/api/settings', require('./src/api/routes/settingsRoutes'));
+app.use('/api/ai', require('./src/api/routes/aiRoutes'));
 
 app.get('/api', (req, res) => {
     res.status(200).json({
