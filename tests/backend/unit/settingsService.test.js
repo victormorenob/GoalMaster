@@ -35,7 +35,7 @@ describe('SettingsService', () => {
   });
 
   it('changeUserPassword debería cambiar la contraseña', async () => {
-    await settingsService.changeUserPassword(userId, 'current', 'new');
+    await settingsService.changeUserPassword(userId, 'current', 'newpassword123');
     expect(User.findByPk).toHaveBeenCalledWith(userId);
     expect(mockUserInstance.comparePassword).toHaveBeenCalledWith('current');
     expect(mockUserInstance.save).toHaveBeenCalled();
