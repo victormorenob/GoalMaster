@@ -21,6 +21,15 @@ Este repositorio contiene el código fuente completo del proyecto, desarrollado 
 *   **Análisis de Rendimiento:** Profundiza en tus datos con gráficos de tendencias mensuales, comparativas entre categorías y rankings de tus objetivos más y menos exitosos.
 *   **Personalización de la Experiencia:** Adapta la aplicación a tus preferencias con soporte para tema claro/oscuro e internacionalización (Español/Inglés).
 *   **Gestión Segura de la Cuenta:** Actualiza tu perfil, cambia tu contraseña y gestiona tus datos con opciones de exportación en JSON y eliminación de cuenta.
+*   **Gamificación:** Rachas, niveles, XP e insignias desbloqueables.
+*   **Etiquetas y plantillas:** Organiza objetivos con etiquetas y créalos más rápido con plantillas predefinidas.
+*   **Asistente IA:** Chat integrado para motivación, ideas y revisión de progreso.
+
+## Diseño y arquitectura (profesionalización)
+
+- **Frontend:** React 18 + Vite, design system con CSS variables + Tailwind v4, animaciones con Framer Motion, rutas protegidas.
+- **Backend:** Express + Sequelize, rate limiting, validación reforzada, avatares autenticados, módulos `/api/tags`, `/api/templates`, `/api/streaks`, `/api/ai`.
+- **Seguridad:** Contraseña obligatoria para eliminar cuenta, validación de perfil/contraseña, `.env.test` con placeholders.
 
 ## 🛠️ Ecosistema Tecnológico
 

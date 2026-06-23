@@ -705,6 +705,74 @@ paths:
     delete:
       tags: [Settings]
       summary: Eliminar la cuenta del usuario
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [password]
+              properties:
+                password:
+                  type: string
       responses:
         '200':
           description: Cuenta eliminada.
+
+  /tags:
+    get:
+      tags: [Tags]
+      summary: Listar etiquetas del usuario
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: Lista de etiquetas
+    post:
+      tags: [Tags]
+      summary: Crear etiqueta
+      security: [{ bearerAuth: [] }]
+      responses:
+        '201':
+          description: Etiqueta creada
+
+  /templates:
+    get:
+      tags: [Templates]
+      summary: Listar plantillas de objetivos
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: Plantillas disponibles
+
+  /streak:
+    get:
+      tags: [Gamification]
+      summary: Obtener racha del usuario
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: Datos de racha
+    post:
+      tags: [Gamification]
+      summary: Actualizar racha tras actividad
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: Racha actualizada
+
+  /ai/chat:
+    post:
+      tags: [AI]
+      summary: Chat con asistente de objetivos
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+      responses:
+        '200':
+          description: Respuesta del asistente
