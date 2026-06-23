@@ -13,6 +13,7 @@ import { FaCalendarAlt, FaFlagCheckered, FaExclamationTriangle, FaEdit, FaPlusCi
 import { FiTrendingUp, FiClock } from 'react-icons/fi';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
 import Button from '../components/ui/Button';
+import ConfirmationDialog from '../components/ui/ConfirmationDialog';
 import GoalProgressChart from '../components/charts/GoalProgressChart';
 import DistributionBarChart from '../components/charts/DistributionBarChart';
 import ProgressLineChart from '../components/charts/ProgressLineChart';
@@ -133,15 +134,17 @@ function GoalDetailPage() {
         return objective.progressEntries.filter(entry => isValid(parseISO(entry.entryDate)) && startOfDay(parseISO(entry.entryDate)) >= startDateFilter);
     }, [objective, timeframe]);
 
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
     const handleDelete = async () => {
-        if (window.confirm(t('confirmationDialog.deleteObjective', { name: objective.name }))) {
-            try {
-                await api.deleteObjective(id);
-                toast.success(t('toast.objectiveDeleteSuccess'));
-                navigate('/my-objectives');
-            } catch (err) {
-                toast.error(err.message || t('toast.objectiveDeleteError'));
-            }
+        try {
+            await api.deleteObjective(id);
+            toast.success(t('toast.objectiveDeleteSuccess'));
+            navigate('/mis-objetivos');
+        } catch (err) {
+            toast.error(err.message || t('toast.objectiveDeleteError'));
+        } finally {
+            setShowDeleteConfirm(false);
         }
     };
     
@@ -162,7 +165,7 @@ function GoalDetailPage() {
                 <div className={styles.headerActions}>
                     <Button onClick={() => navigate(`/objectives/edit/${id}`)} leftIcon={<FaEdit />} disabled={objective.status === 'ARCHIVED'}>{t('common.edit')}</Button>
                     {isQuantitative && <Button onClick={() => navigate(`/objectives/${id}/update-progress`)} leftIcon={<FaPlusCircle />} disabled={objective.status === 'ARCHIVED'}>{t('goalDetail.buttons.updateProgress')}</Button>}
-                    <Button data-cy="delete-objective-button" onClick={handleDelete} variant="destructive" leftIcon={<FaTrashAlt />}>{t('goalDetail.buttons.delete')}</Button>
+                    <Button data-cy="delete-objective-button" onClick={() => setShowDeleteConfirm(true)} variant="destructive" leftIcon={<FaTrashAlt />}>{t('goalDetail.buttons.delete')}</Button>
                 </div>
             </header>
 
@@ -231,6 +234,14 @@ function GoalDetailPage() {
                     </div>
                 </div>
             )}
+            <ConfirmationDialog
+                isOpen={showDeleteConfirm}
+                title={t('confirmationDialog.deleteObjectiveTitle', { defaultValue: 'Eliminar objetivo' })}
+                message={t('confirmationDialog.deleteObjective', { name: objective?.name })}
+                onConfirm={handleDelete}
+                onClose={() => setShowDeleteConfirm(false)}
+                confirmButtonVariant="destructive"
+            />
         </div>
     );
 }

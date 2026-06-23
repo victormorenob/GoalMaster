@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useCallback } from 'react'; // Added useCallback
 import styles from './SettingsPage.module.css';
 import Button from '../components/ui/Button';
+import ConfirmationDialog from '../components/ui/ConfirmationDialog';
 import Input from '../components/ui/Input';
 import FormGroup from '../components/ui/FormGroup';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
@@ -44,6 +45,8 @@ function SettingsPage() {
     const [showCurrentPassword, setShowCurrentPassword] = useState(false);
     const [showNewPassword, setShowNewPassword] = useState(false);
     const [showConfirmNewPassword, setShowConfirmNewPassword] = useState(false);
+    const [deletePassword, setDeletePassword] = useState('');
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
     // Sync local state when context settings change (e.g. on page load or revert)
     useEffect(() => {
@@ -197,14 +200,17 @@ function SettingsPage() {
     }, [t]);
 
     const handleDeleteAccount = useCallback(async () => {
-        if (!window.confirm(t('settingsPage.data.deleteConfirmation'))) {
+        if (!deletePassword) {
+            toast.error(t('formValidation.passwordRequired', { defaultValue: 'Introduce tu contraseña' }));
             return;
         }
         setIsProcessingDataAction(true);
         setDataAccountError(null);
         try {
-            await apiService.deleteAccount();
+            await apiService.deleteAccount(deletePassword);
             toast.success(t('toast.accountDeleted'));
+            setShowDeleteConfirm(false);
+            setDeletePassword('');
             window.dispatchEvent(new CustomEvent('logoutUser', { detail: { reason: 'accountDeleted', notifyBackend: false } }));
         } catch (err) {
             const errorMessage = err.data?.message || err.message || t('toast.deleteAccountError');
@@ -213,7 +219,7 @@ function SettingsPage() {
         } finally {
             setIsProcessingDataAction(false);
         }
-    }, [t]);
+    }, [deletePassword, t]);
 
     const toggleSection = useCallback((sectionName) => {
         setOpenSections(prev => ({ ...prev, [sectionName]: !prev[sectionName] }));
@@ -321,7 +327,7 @@ function SettingsPage() {
                                 <p>{t('settingsPage.data.deleteDescription')}</p>
                             </div>
                             <div className={styles.actionButtonContainer}>
-                                <Button variant="destructive" onClick={handleDeleteAccount} isLoading={isProcessingDataAction} disabled={isProcessingDataAction} leftIcon={<FaTrash />} >
+                                <Button variant="destructive" onClick={() => setShowDeleteConfirm(true)} isLoading={isProcessingDataAction} disabled={isProcessingDataAction} leftIcon={<FaTrash />} >
                                     {t('settingsPage.data.deleteButton')}
                                 </Button>
                             </div>
@@ -343,6 +349,23 @@ function SettingsPage() {
                     </div>
                 )}
             </div>
+            {showDeleteConfirm && (
+                <div className="modal-overlay" role="dialog" aria-modal="true">
+                    <div className="modal-content">
+                        <h3>{t('settingsPage.data.deleteConfirmation')}</h3>
+                        <Input
+                            type="password"
+                            label={t('settingsPage.data.deletePasswordLabel', { defaultValue: 'Contraseña actual' })}
+                            value={deletePassword}
+                            onChange={(e) => setDeletePassword(e.target.value)}
+                        />
+                        <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem' }}>
+                            <Button variant="secondary" onClick={() => { setShowDeleteConfirm(false); setDeletePassword(''); }}>{t('common.cancel')}</Button>
+                            <Button variant="destructive" onClick={handleDeleteAccount} isLoading={isProcessingDataAction}>{t('settingsPage.data.deleteButton')}</Button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

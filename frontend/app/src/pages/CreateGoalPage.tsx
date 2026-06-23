@@ -5,23 +5,29 @@ import { useTranslation } from "react-i18next";
 import { toast } from 'react-toastify';
 import api from "../services/apiService";
 import { useAuth } from "../context/AuthContext";
-
 import ObjetivosForm from "../components/objetivos/ObjetivosForm";
+import TemplateSelector from "../components/templates/TemplateSelector";
 import styles from "./CreateGoalPage.module.css";
 
 function CreateObjectivePage() {
     const { t } = useTranslation();
     const { user } = useAuth();
     const navigate = useNavigate();
+    const [templateData, setTemplateData] = useState(null);
+    const [formKey, setFormKey] = useState(0);
 
-    // El handler ahora recibe el payload ya formateado desde ObjetivosForm
+    const handleTemplateSelect = (data) => {
+        setTemplateData(data);
+        setFormKey(k => k + 1);
+        toast.info(t('templates.applied', { defaultValue: 'Plantilla aplicada al formulario' }));
+    };
+
     const handleObjectiveSubmission = async (payload) => {
         try {
             await api.createObjective(payload);
             toast.success(t('toast.objectiveCreateSuccess'));
             navigate('/dashboard', { replace: true });
         } catch (err) {
-            // The apiService interceptor handles the generic toast
             console.error("Error al crear el objetivo:", err);
         }
     };
@@ -37,7 +43,10 @@ function CreateObjectivePage() {
                 <h2 className={styles.formTitle}>
                     {user?.hasObjectives ? t('createGoalPage.title.new') : t('createGoalPage.title.first')}
                 </h2>
+                <TemplateSelector onSelect={handleTemplateSelect} />
                 <ObjetivosForm
+                    key={formKey}
+                    initialData={templateData}
                     onSubmit={handleObjectiveSubmission}
                     onCancel={handleCancel}
                     isEditMode={false}

@@ -40,14 +40,14 @@ axiosInstance.interceptors.response.use(
             originalRequest._retry = true;
             if (!isSessionExpiredMessageShown) {
                 isSessionExpiredMessageShown = true;
-                toast.error('Tu sesión ha expirado. Por favor, inicia sesión de nuevo.');
+                toast.error('Tu sesiÃ³n ha expirado. Por favor, inicia sesiÃ³n de nuevo.');
                 window.dispatchEvent(new CustomEvent('logoutUser'));
                 setTimeout(() => { isSessionExpiredMessageShown = false; }, 5000);
             }
         }
 
         const errorMessage = data?.message || 
-                             (Array.isArray(data?.errors) ? data.errors.map((e: { msg: string }) => e.msg).join(', ') : 'Ocurrió un error inesperado.');
+                             (Array.isArray(data?.errors) ? data.errors.map((e: { msg: string }) => e.msg).join(', ') : 'OcurriÃ³ un error inesperado.');
         
         const errorToThrow = new Error(errorMessage) as Error & { data: unknown; status: number };
         errorToThrow.data = data;
@@ -98,6 +98,17 @@ const api = {
     changePassword: (data: Record<string, unknown>) => axiosInstance.put('/settings/change-password', data),
     exportUserData: () => axiosInstance.get('/settings/export-data'),
     deleteAccount: () => axiosInstance.delete('/settings/account'),
-};
+
+    // Tags, templates, streak, AI
+    getTags: () => axiosInstance.get('/tags'),
+    createTag: (data: Record<string, unknown>) => axiosInstance.post('/tags', data),
+    updateTag: (id: number | string, data: Record<string, unknown>) => axiosInstance.put(/tags/, data),
+    deleteTag: (id: number | string) => axiosInstance.delete(/tags/),
+
+    getTemplates: (category?: string) => axiosInstance.get('/templates', { params: category ? { category } : {} }),
+    getStreak: () => axiosInstance.get('/streak'),
+    updateStreak: () => axiosInstance.post('/streak/update'),
+    sendChatMessage: (message: string) => axiosInstance.post('/ai/chat', { message }),
+    getAiSuggestions: (context: Record<string, unknown>) => axiosInstance.post('/ai/suggest', { context }),};
 
 export default api;
