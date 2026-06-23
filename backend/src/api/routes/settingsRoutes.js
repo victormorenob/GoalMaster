@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const settingsController = require('../controllers/settingsController');
 const authMiddleware = require('../../middlewares/authMiddleware');
+const { validateChangePassword, validateDeleteAccount } = require('../../middlewares/userValidation');
 
 // All settings routes require authentication
 router.use(authMiddleware);
@@ -11,12 +12,12 @@ router.get('/', settingsController.getSettings);
 router.put('/', settingsController.updateSettings);
 
 // Change password route
-router.put('/change-password', settingsController.changePassword);
+router.put('/change-password', validateChangePassword, settingsController.changePassword);
 
 // Export data route
 router.get('/export-data', settingsController.exportUserData);
 
 // Delete account route
-router.delete('/account', settingsController.deleteAccount);
+router.delete('/account', validateDeleteAccount, settingsController.deleteAccount);
 
 module.exports = router;

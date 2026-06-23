@@ -63,7 +63,10 @@ class SettingsService {
             throw new AppError('La contraseña actual es incorrecta.', 400);
         }
 
-        // The 'beforeUpdate' hook in the User model will handle hashing the new password.
+        if (!newPassword || newPassword.length < 8) {
+            throw new AppError('La nueva contraseña debe tener al menos 8 caracteres.', 400);
+        }
+
         user.password = newPassword;
         await user.save();
         await ActivityLog.create({
@@ -115,13 +118,19 @@ class SettingsService {
      * @param {number} userId - The ID of the user.
      * @returns {Promise<{message: string}>} A confirmation message.
      */
-    async deleteUserAccount(userId) {
+    async deleteUserAccount(userId, password) {
         const transaction = await db.sequelize.transaction();
         try {
             const user = await User.findByPk(userId, { transaction });
             if (!user) {
                 await transaction.rollback();
                 throw new AppError('Usuario no encontrado para eliminar.', 404);
+            }
+
+            const isPasswordValid = await user.comparePassword(password);
+            if (!isPasswordValid) {
+                await transaction.rollback();
+                throw new AppError('Contraseña incorrecta. No se pudo eliminar la cuenta.', 400);
             }
 
             await ActivityLog.create({
