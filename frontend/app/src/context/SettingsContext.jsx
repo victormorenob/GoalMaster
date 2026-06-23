@@ -43,7 +43,7 @@ export const SettingsProvider = ({ children }) => {
         let themeToApply = themePreference;
 
         if (themePreference === 'system') {
-            const systemPrefersDark = window.matchMedia('(prefers-color-scheme: white)').matches;
+            const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
             themeToApply = systemPrefersDark ? 'dark' : 'light';
         }
         
@@ -121,12 +121,19 @@ export const SettingsProvider = ({ children }) => {
         }
     }, [isAuthenticated, settings, loadUserSettings, applyThemeToDocument]);
 
+    const applyTemporarySettings = useCallback((partial) => {
+        if (partial?.themePreference) {
+            applyThemeToDocument(partial.themePreference);
+        }
+    }, [applyThemeToDocument]);
+
     const contextValue = useMemo(() => ({
         settings,
         isLoadingSettings,
         updateSettings,
-        isApplyingTheme
-    }), [settings, isLoadingSettings, updateSettings, isApplyingTheme]);
+        isApplyingTheme,
+        applyTemporarySettings,
+    }), [settings, isLoadingSettings, updateSettings, isApplyingTheme, applyTemporarySettings]);
 
     return (
         <SettingsContext.Provider value={contextValue}>
