@@ -1,4 +1,4 @@
-// backend/app.js
+﻿// backend/app.js
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
@@ -54,6 +54,9 @@ app.use('/api/dashboard', require('./src/api/routes/dashboardRoutes'));
 app.use('/api/analysis', require('./src/api/routes/analysisRoutes'));
 app.use('/api/profile', require('./src/api/routes/profileRoutes'));
 app.use('/api/settings', require('./src/api/routes/settingsRoutes'));
+app.use('/api/tags', require('./src/api/routes/tagRoutes'));
+app.use('/api/streak', require('./src/api/routes/streakRoutes'));
+app.use('/api/templates', require('./src/api/routes/templateRoutes'));
 app.use('/api/ai', require('./src/api/routes/aiRoutes'));
 
 app.get('/api', (req, res) => {
