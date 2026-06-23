@@ -57,6 +57,10 @@ require('../api/models/user')(sequelizeInstance);
 require('../api/models/objectives')(sequelizeInstance);
 require('../api/models/progress')(sequelizeInstance);
 require('../api/models/activityLog')(sequelizeInstance);
+require('../api/models/tag')(sequelizeInstance);
+require('../api/models/goalTemplate')(sequelizeInstance);
+require('../api/models/tag')(sequelizeInstance);
+require('../api/models/goalTemplate')(sequelizeInstance);
 
 db.sequelize = sequelizeInstance;
 db.Sequelize = Sequelize;
@@ -99,6 +103,11 @@ async function initializeDatabase() {
         
         isInitialized = true;
         console.log('[DB] Database initialization completed.');
+
+        const seedTemplates = require('../api/models/goalTemplate').seedTemplates;
+        if (typeof seedTemplates === 'function') {
+            await seedTemplates(sequelizeInstance);
+        }
 
     } catch (error) {
         console.error(`[DB] Error connecting/syncing with database '${dbConfig.name}':`, error);

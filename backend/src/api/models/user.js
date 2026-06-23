@@ -65,6 +65,23 @@ module.exports = (sequelize) => {
       defaultValue: 'es',
       field: 'preferencia_idioma'
     },
+    streakCount: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      defaultValue: 0,
+      field: 'racha_actual'
+    },
+    longestStreak: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      defaultValue: 0,
+      field: 'racha_maxima'
+    },
+    lastActivityDate: {
+      type: DataTypes.DATEONLY,
+      allowNull: true,
+      field: 'ultima_fecha_actividad'
+    },
   }, {
     tableName: 'usuario',
     timestamps: true,
@@ -94,6 +111,7 @@ module.exports = (sequelize) => {
   User.associate = (models) => {
     User.hasMany(models.Objective, { foreignKey: 'userId', as: 'objectives', onDelete: 'CASCADE' });
     User.hasMany(models.ActivityLog, { foreignKey: 'userId', as: 'activityLogs', onDelete: 'CASCADE' });
+    User.hasMany(models.Tag, { foreignKey: 'userId', as: 'tags', onDelete: 'CASCADE' });
   };
 
   /**

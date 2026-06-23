@@ -75,6 +75,10 @@ app.use('/api/dashboard', require('./src/api/routes/dashboardRoutes'));
 app.use('/api/analysis', require('./src/api/routes/analysisRoutes'));
 app.use('/api/profile', require('./src/api/routes/profileRoutes'));
 app.use('/api/settings', require('./src/api/routes/settingsRoutes'));
+app.use('/api/tags', require('./src/api/routes/tagRoutes'));
+app.use('/api/streak', require('./src/api/routes/streakRoutes'));
+app.use('/api/templates', require('./src/api/routes/templateRoutes'));
+app.use('/api/ai', require('./src/api/routes/aiRoutes'));
 
 // Endpoint raíz de la API
 app.get('/api', (req, res) => {
