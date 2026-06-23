@@ -1,5 +1,6 @@
 // backend/src/api/services/profileService.js
 const fs = require('fs').promises;
+const fsSync = require('fs');
 const path = require('path');
 const db = require('../../config/database');
 const { User, Objective } = db;
@@ -45,12 +46,12 @@ class ProfileService {
         user.bio = profileData.bio ?? user.bio;
         
         if (newAvatarFile) {
-            const newAvatarUrl = `/uploads/avatars/${newAvatarFile.filename}`;
+            const newAvatarUrl = `/api/profile/avatar/${newAvatarFile.filename}`;
             const oldAvatarUrl = user.avatarUrl;
             
             user.avatarUrl = newAvatarUrl;
 
-            if (oldAvatarUrl && oldAvatarUrl.includes('/uploads/avatars/')) {
+            if (oldAvatarUrl && (oldAvatarUrl.includes('/uploads/avatars/') || oldAvatarUrl.includes('/api/profile/avatar/'))) {
                 try {
                     const oldFileName = path.basename(oldAvatarUrl);
                     const oldAvatarPath = path.join(AVATAR_UPLOAD_DIR, oldFileName);
@@ -65,6 +66,35 @@ class ProfileService {
 
         await user.save();
         return user.toJSON();
+    }
+
+    async streamAvatar(userId, filename, res) {
+        const safeName = path.basename(filename);
+        if (!/^user-\d+-avatar-/.test(safeName)) {
+            throw new AppError('Nombre de archivo no válido.', 400);
+        }
+
+        const user = await User.findByPk(userId, { attributes: ['avatarUrl'] });
+        if (!user?.avatarUrl || !user.avatarUrl.endsWith(safeName)) {
+            throw new AppError('No tienes permiso para acceder a este avatar.', 403);
+        }
+
+        const filePath = path.join(AVATAR_UPLOAD_DIR, safeName);
+        if (!filePath.startsWith(AVATAR_UPLOAD_DIR)) {
+            throw new AppError('Ruta de archivo no válida.', 400);
+        }
+
+        try {
+            await fs.access(filePath);
+        } catch {
+            throw new AppError('Avatar no encontrado.', 404);
+        }
+
+        const ext = path.extname(safeName).toLowerCase();
+        const mimeTypes = { '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.png': 'image/png', '.gif': 'image/gif', '.webp': 'image/webp' };
+        res.setHeader('Content-Type', mimeTypes[ext] || 'application/octet-stream');
+        res.setHeader('Cache-Control', 'private, max-age=3600');
+        fsSync.createReadStream(filePath).pipe(res);
     }
 }
 
