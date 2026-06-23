@@ -1,23 +1,20 @@
 @import "tailwindcss";
 
-/* frontend/app/src/styles/index.css */
-@import "tailwindcss";
-
 /* Variables CSS para el tema claro (por defecto) */
 :root {
-  /* Colores principales de la nueva especificación */
+  /* Colores principales de la nueva especificaciÃ³n */
   --background: hsl(0, 0%, 100%);                 /* Blanco puro */
   --foreground: hsl(222.2, 84%, 4.9%);           /* Gris muy oscuro para texto */
-  --primary: hsl(245, 79%, 59%);                  /* Azul índigo (#4F46E5) */
+  --primary: hsl(245, 79%, 59%);                  /* Azul Ã­ndigo (#4F46E5) */
   --secondary: hsl(160, 84%, 39%);                /* Verde esmeralda (#10B981) */
 
-  /* Colores de componentes de la nueva especificación */
+  /* Colores de componentes de la nueva especificaciÃ³n */
   --card: hsl(0, 0%, 100%);                       /* Blanco */
   --muted: hsl(210, 40%, 96.1%);                  /* Gris muy claro */
   --border: hsl(214.3, 31.8%, 91.4%);             /* Gris claro para bordes */
   --input: hsl(214.3, 31.8%, 91.4%);              /* Mismo que border */
 
-  /* Colores de primer plano (manteniendo los originales si no se especificó cambio o adaptando) */
+  /* Colores de primer plano (manteniendo los originales si no se especificÃ³ cambio o adaptando) */
   --primary-foreground: hsl(210, 40%, 98%);       /* Texto claro para primario oscuro */
   --secondary-foreground: hsl(210, 40%, 98%);     /* Texto claro para secundario oscuro */
   --card-foreground: hsl(222.2, 84%, 4.9%);       /* Texto oscuro para tarjeta clara */
@@ -25,10 +22,10 @@
   --muted-foreground: hsl(215.4, 16.3%, 46.9%);   /* Texto gris medio para fondos muted */
   --accent-foreground: hsl(222.2, 47.4%, 11.2%);  /* Texto oscuro para fondos accent */
 
-  /* Colores de estado de la nueva especificación */
-  --success: hsl(142, 72%, 29%);                  /* Verde oscuro para éxito */
-  --success-foreground: hsl(210, 40%, 98%);       /* Texto claro para éxito */
-  --warning: hsl(38, 92%, 50%);                   /* Amarillo ámbar (#F59E0B) */
+  /* Colores de estado de la nueva especificaciÃ³n */
+  --success: hsl(142, 72%, 29%);                  /* Verde oscuro para Ã©xito */
+  --success-foreground: hsl(210, 40%, 98%);       /* Texto claro para Ã©xito */
+  --warning: hsl(38, 92%, 50%);                   /* Amarillo Ã¡mbar (#F59E0B) */
   --warning-foreground: hsl(210, 40%, 98%);       /* Texto claro para warning */
   --info: hsl(221, 83%, 53%);                     /* Azul para info - Necesita foreground si se usa con texto */
   --info-foreground: hsl(210, 40%, 98%);          /* Asumiendo texto claro para info */
@@ -41,7 +38,7 @@
   --ring: hsl(245, 79%, 59%);                     /* Mismo que primary */
   --radius: 0.4rem;                              /* Mantenido de tu original */
 
-  /* Colores del Sidebar de la nueva especificación */
+  /* Colores del Sidebar de la nueva especificaciÃ³n */
   --sidebar-background: hsl(0, 0%, 98%);          /* Blanco ligeramente gris */
   --sidebar-foreground: hsl(222.2, 84%, 4.9%);   /* Texto oscuro para sidebar */
   --sidebar-primary: hsl(245, 79%, 59%);          /* Mismo que primary global */
@@ -51,12 +48,12 @@
   --sidebar-border: hsl(220, 13%, 91%);           /* Gris claro para borde de sidebar */
   --sidebar-ring: hsl(245, 79%, 59%);             /* Mismo que ring global */
 
-  /* Mantenidos de tu original (se adaptarán si usan variables de arriba) */
+  /* Mantenidos de tu original (se adaptarÃ¡n si usan variables de arriba) */
   --app-header-height: 59px;
-  --primary-hover: #4338CA; /* Este es el hover original, podría ajustarse si el nuevo primary es muy diferente */
+  --primary-hover: #4338CA; /* Este es el hover original, podrÃ­a ajustarse si el nuevo primary es muy diferente */
   --secondary-hover: #059669; /* Hover original para secundario */
   
-  /* Variables de sombra (no especificadas, podrías añadirlas aquí) */
+  /* Variables de sombra (no especificadas, podrÃ­as aÃ±adirlas aquÃ­) */
   --shadow-xs: 0 1px 2px rgba(0,0,0,0.03);
   --shadow-sm: 0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.03);
   --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
@@ -65,15 +62,15 @@
   --gradient-auth: linear-gradient(135deg, hsl(245 79% 59% / 0.08), hsl(270 60% 70% / 0.12));
   --font-display: "Plus Jakarta Sans", "Inter", sans-serif;
 
-  /* Variables de radio (ejemplos, ya tenías --radius) */
+  /* Variables de radio (ejemplos, ya tenÃ­as --radius) */
   --radius-sm: 0.25rem;
   --radius-md: 0.5rem;
   --radius-lg: 0.75rem;
   --radius-full: 9999px;
 
-  /* Colores específicos de UI que podrías necesitar (ejemplos) */
-  --border-light: hsl(214.3, 31.8%, 85.4%);  /* Un borde un poco más oscuro que el general */
-  --border-ultralight: hsl(214.3, 31.8%, 93.4%); /* Un borde aún más claro */
+  /* Colores especÃ­ficos de UI que podrÃ­as necesitar (ejemplos) */
+  --border-light: hsl(214.3, 31.8%, 85.4%);  /* Un borde un poco mÃ¡s oscuro que el general */
+  --border-ultralight: hsl(214.3, 31.8%, 93.4%); /* Un borde aÃºn mÃ¡s claro */
   --primary-soft-bg: color-mix(in srgb, var(--primary) 20%, var(--background));
   --success-soft-bg: #d1fae5;
   --success-strong-text: #065f46;
@@ -82,9 +79,9 @@
   --warning-background-soft: #fffbeb;
   --warning-foreground-strong: #b45309;
   --warning-border: #fde68a;
-  --hover-bg: #f0f0f0; /* Fondo genérico para hover */
+  --hover-bg: #f0f0f0; /* Fondo genÃ©rico para hover */
 
-  /* Gráficos (se adaptarán si usan variables de arriba) */
+  /* GrÃ¡ficos (se adaptarÃ¡n si usan variables de arriba) */
   --chart-bar-completed-bg: hsla(245, 79%, 59%, 0.7); /* Basado en nuevo --primary */
   --chart-bar-completed-border: var(--primary);
   --chart-bar-remaining-bg: hsla(215.4, 16.3%, 46.9%, 0.6); /* Basado en nuevo --muted-foreground */
@@ -93,13 +90,13 @@
 
 /* Variables CSS para el tema oscuro */
 html[data-theme='dark'] {
-  /* Colores principales de la nueva especificación */
+  /* Colores principales de la nueva especificaciÃ³n */
   --background: hsl(222.2, 84%, 4.9%);           /* Gris muy oscuro */
   --foreground: hsl(210, 40%, 98%);             /* Blanco casi puro */
-  --primary: hsl(245, 79%, 59%);                  /* Mismo azul índigo que en claro */
+  --primary: hsl(245, 79%, 59%);                  /* Mismo azul Ã­ndigo que en claro */
   --secondary: hsl(160, 84%, 39%);                /* Mismo verde esmeralda que en claro */
 
-  /* Colores de componentes de la nueva especificación */
+  /* Colores de componentes de la nueva especificaciÃ³n */
   --card: hsl(217.2, 32.6%, 12%);                 /* Slightly lighter than background for depth */
   --muted: hsl(217.2, 32.6%, 17.5%);              /* Gris oscuro */
   --border: hsl(217.2, 32.6%, 17.5%);             /* Mismo que muted */
@@ -113,10 +110,10 @@ html[data-theme='dark'] {
   --muted-foreground: hsl(215.4, 16.3%, 56.9%);   /* Texto gris claro para fondos muted oscuros */
   --accent-foreground: hsl(210, 40%, 98%);        /* Texto claro para fondos accent oscuros */
 
-  /* Colores de estado de la nueva especificación */
-  --success: hsl(142, 72%, 29%);                  /* Mismo verde oscuro, podría necesitar ajuste para contraste */
+  /* Colores de estado de la nueva especificaciÃ³n */
+  --success: hsl(142, 72%, 29%);                  /* Mismo verde oscuro, podrÃ­a necesitar ajuste para contraste */
   --success-foreground: hsl(210, 40%, 98%);       /* Texto claro */
-  --warning: hsl(38, 92%, 50%);                   /* Mismo amarillo ámbar */
+  --warning: hsl(38, 92%, 50%);                   /* Mismo amarillo Ã¡mbar */
   --warning-foreground: hsl(222.2, 84%, 4.9%);    /* Texto oscuro para warning amarillo */
   --info: hsl(221, 83%, 53%);                     /* Mismo azul */
   --info-foreground: hsl(210, 40%, 98%);          /* Texto claro */
@@ -128,7 +125,7 @@ html[data-theme='dark'] {
   --accent: hsl(217.2, 32.6%, 17.5%);             /* Mismo que muted */
   --ring: hsl(245, 79%, 59%);                     /* Mismo que primary */
 
-  /* Colores del Sidebar de la nueva especificación */
+  /* Colores del Sidebar de la nueva especificaciÃ³n */
   --sidebar-background: hsl(222.2, 84%, 4.9%);    /* Gris muy oscuro */
   --sidebar-foreground: hsl(210, 40%, 98%);     /* Texto claro */
   --sidebar-primary: hsl(245, 79%, 59%);          /* Mismo que primary */
@@ -138,23 +135,23 @@ html[data-theme='dark'] {
   --sidebar-border: hsl(217.2, 32.6%, 17.5%);     /* Mismo que accent y muted */
   --sidebar-ring: hsl(245, 79%, 59%);             /* Mismo que ring */
 
-  /* Hovers (podrían necesitar ajustes si los colores base cambiaron mucho) */
-  --primary-hover: #4338CA; /* Mantenido, pero podría necesitar un tono más claro si el primario oscuro es el mismo que el claro */
+  /* Hovers (podrÃ­an necesitar ajustes si los colores base cambiaron mucho) */
+  --primary-hover: #4338CA; /* Mantenido, pero podrÃ­a necesitar un tono mÃ¡s claro si el primario oscuro es el mismo que el claro */
   --secondary-hover: #059669; /* Mantenido */
 
-  /* Variables de sombra para tema oscuro (a menudo más sutiles o diferentes) */
-  --shadow-xs: 0 1px 2px rgba(0,0,0,0.1); /* Ejemplo de sombra más oscura/densa */
+  /* Variables de sombra para tema oscuro (a menudo mÃ¡s sutiles o diferentes) */
+  --shadow-xs: 0 1px 2px rgba(0,0,0,0.1); /* Ejemplo de sombra mÃ¡s oscura/densa */
   --shadow-sm: 0 2px 4px rgba(0,0,0,0.15), 0 1px 2px rgba(0,0,0,0.1);
   --shadow-md: 0 4px 8px -1px rgba(0,0,0,0.2), 0 2px 4px -1px rgba(0,0,0,0.15);
   --shadow-lg: 0 10px 20px -3px rgba(0,0,0,0.25), 0 4px 8px -2px rgba(0,0,0,0.2);
 
 
-  /* Colores específicos de UI para tema oscuro */
+  /* Colores especÃ­ficos de UI para tema oscuro */
   --border-light: hsl(217.2, 32.6%, 27.5%); 
   --border-ultralight: hsl(217.2, 32.6%, 22.5%);
   --primary-soft-bg: color-mix(in srgb, var(--primary) 20%, var(--background));
   --success-soft-bg: rgba(52, 211, 153, 0.15);
-  --success-strong-text: #A7F3D0; /* Texto claro para fondos de éxito oscuros */
+  --success-strong-text: #A7F3D0; /* Texto claro para fondos de Ã©xito oscuros */
   --destructive-soft-bg: rgba(248, 113, 113, 0.15);
   --destructive-extra-soft-bg: rgba(248, 113, 113, 0.1);
   --warning-background-soft: rgba(251, 191, 36, 0.1);
@@ -163,7 +160,7 @@ html[data-theme='dark'] {
   --hover-bg: hsl(217.2, 32.6%, 20.5%);
 
 
-  /* Gráficos */
+  /* GrÃ¡ficos */
   --chart-bar-completed-bg: hsla(245, 79%, 59%, 0.7); /* Usa el --primary del tema oscuro */
   --chart-bar-completed-border: var(--primary);
   --chart-bar-remaining-bg: hsla(215.4, 16.3%, 56.9%, 0.6); /* Usa el --muted-foreground del tema oscuro */
@@ -219,14 +216,14 @@ a {
 }
 
 a:hover {
-  /* text-decoration: none; */ /* Podrías querer mantener el subrayado o solo cambiar color */
-  color: var(--primary-hover, var(--primary)); /* Añade fallback a primary si hover no está definido */
+  /* text-decoration: none; */ /* PodrÃ­as querer mantener el subrayado o solo cambiar color */
+  color: var(--primary-hover, var(--primary)); /* AÃ±ade fallback a primary si hover no estÃ¡ definido */
 }
 
 /* --- LAYOUT CLASSES --- */
-/* ... (El resto de tus clases de layout y utilidades como .App, .main-layout-content, etc. no necesitan cambios de color aquí si usan las variables CSS) ... */
-/* Revisa si alguna de estas clases de layout tiene colores hardcodeados y cámbialos a variables. */
-/* Por ejemplo, .formContainer tenía un box-shadow fijo, ahora debería usar var(--shadow-md) o similar */
+/* ... (El resto de tus clases de layout y utilidades como .App, .main-layout-content, etc. no necesitan cambios de color aquÃ­ si usan las variables CSS) ... */
+/* Revisa si alguna de estas clases de layout tiene colores hardcodeados y cÃ¡mbialos a variables. */
+/* Por ejemplo, .formContainer tenÃ­a un box-shadow fijo, ahora deberÃ­a usar var(--shadow-md) o similar */
 
 .App {
   display: flex;
@@ -308,7 +305,7 @@ a:hover {
   left: -100%;
   width: 100%;
   height: 100%;
-  /* Para tema oscuro, un brillo oscuro no se verá. Podría ser color-mix(in srgb, var(--foreground) 10%, transparent) */
+  /* Para tema oscuro, un brillo oscuro no se verÃ¡. PodrÃ­a ser color-mix(in srgb, var(--foreground) 10%, transparent) */
   background: rgba(255, 255, 255, 0.2); 
   transform: skewX(-15deg);
   transition: all 700ms ease;
@@ -371,7 +368,7 @@ html[data-theme='dark'] .btn-shine::after {
   background-color: var(--card); 
   box-shadow: var(--shadow-md); 
   border-radius: var(--radius); 
-  border: 1px solid var(--border); /* AÑADIDO: Un borde sutil usando variable */
+  border: 1px solid var(--border); /* AÃ‘ADIDO: Un borde sutil usando variable */
   padding: 1.2rem;
   width: 100%;
   min-width: 30rem; /* Considera si esto es necesario o usar max-width */
@@ -400,7 +397,7 @@ html[data-theme='dark'] .btn-shine::after {
   left: 0;
   width: 100%;
   height: 100%;
-  /* Para tema oscuro, un overlay claro no se verá bien. Usar una variable o color-mix */
+  /* Para tema oscuro, un overlay claro no se verÃ¡ bien. Usar una variable o color-mix */
   background-color: color-mix(in srgb, var(--background) 85%, transparent); 
   display: flex;
   justify-content: center;
@@ -436,7 +433,7 @@ html[data-theme='dark'] .btn-shine::after {
   cursor: pointer; /* Cambia el cursor para indicar que es clickable */
 }
 
-/* Opcional: añade una transición suave para que aparezca/desaparezca */
+/* Opcional: aÃ±ade una transiciÃ³n suave para que aparezca/desaparezca */
 .sidebarOverlay {
     animation: fadeIn 0.3s ease-in-out;
 }
