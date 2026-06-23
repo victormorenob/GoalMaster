@@ -1,4 +1,7 @@
+@import "tailwindcss";
+
 /* frontend/app/src/styles/index.css */
+@import "tailwindcss";
 
 /* Variables CSS para el tema claro (por defecto) */
 :root {
@@ -58,6 +61,9 @@
   --shadow-sm: 0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.03);
   --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
   --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+  --shadow-xl: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);
+  --gradient-auth: linear-gradient(135deg, hsl(245 79% 59% / 0.08), hsl(270 60% 70% / 0.12));
+  --font-display: "Plus Jakarta Sans", "Inter", sans-serif;
 
   /* Variables de radio (ejemplos, ya tenías --radius) */
   --radius-sm: 0.25rem;
@@ -94,8 +100,7 @@ html[data-theme='dark'] {
   --secondary: hsl(160, 84%, 39%);                /* Mismo verde esmeralda que en claro */
 
   /* Colores de componentes de la nueva especificación */
-  --card: hsl(222.2, 84%, 4.9%);                 /* Mismo que background, las tarjetas se funden */
-                                                /* Considera un poco más claro si quieres que destaquen: hsl(217.2, 32.6%, 17.5%) */
+  --card: hsl(217.2, 32.6%, 12%);                 /* Slightly lighter than background for depth */
   --muted: hsl(217.2, 32.6%, 17.5%);              /* Gris oscuro */
   --border: hsl(217.2, 32.6%, 17.5%);             /* Mismo que muted */
   --input: hsl(217.2 32.6% 17.5%);
@@ -439,4 +444,182 @@ html[data-theme='dark'] .btn-shine::after {
 @keyframes fadeIn {
     from { opacity: 0; }
     to { opacity: 1; }
+}
+
+.page-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.empty-state-card {
+  text-align: center;
+  padding: 2.5rem 1.5rem;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--card);
+  color: var(--muted-foreground);
+}
+
+.stat-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 1rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: var(--card);
+  box-shadow: var(--shadow-sm);
+}
+
+.stat-card strong {
+  font-size: 1.5rem;
+  color: var(--primary);
+  font-family: var(--font-display);
+}
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1100;
+  padding: 1rem;
+}
+
+.modal-content {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  width: min(100%, 420px);
+  box-shadow: var(--shadow-xl);
+}
+
+html, body, #root {
+  font-family: "Inter", system-ui, sans-serif;
+}
+
+h1, h2, h3, .headerPageTitle {
+  font-family: var(--font-display);
+}
+
+body {
+  font-family: "Inter", var(--font-display), system-ui, sans-serif;
+}
+
+h1, h2, h3, .headerPageTitle {
+  font-family: var(--font-display);
+}
+
+.page-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0.5rem 0;
+}
+
+.empty-state-card {
+  text-align: center;
+  padding: 2.5rem 1.5rem;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--card);
+  box-shadow: var(--shadow-sm);
+}
+
+.stat-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: var(--card);
+  box-shadow: var(--shadow-sm);
+}
+
+.stat-card strong {
+  font-size: 1.5rem;
+  color: var(--primary);
+}
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  padding: 1rem;
+}
+
+.modal-content {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  width: min(100%, 420px);
+  box-shadow: var(--shadow-xl);
+}
+
+.card-hover {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.empty-state {
+  text-align: center;
+  padding: 3rem 1.5rem;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--card);
+  box-shadow: var(--shadow-sm);
+}
+
+.empty-state-icon {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+  opacity: 0.85;
+}
+
+.empty-state-title {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  margin: 0 0 0.5rem;
+  color: var(--foreground);
+}
+
+.empty-state-description {
+  color: var(--muted-foreground);
+  margin: 0 0 1.25rem;
+  max-width: 28rem;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.skeleton-loader {
+  background: linear-gradient(90deg, var(--muted) 25%, var(--border) 50%, var(--muted) 75%);
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.2s ease-in-out infinite;
+  border-radius: var(--radius-sm);
+}
+
+@keyframes skeleton-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
