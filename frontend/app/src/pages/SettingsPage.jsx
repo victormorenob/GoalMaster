@@ -1,0 +1,348 @@
+import React, { useState, useEffect, useCallback } from 'react'; // Added useCallback
+import Button from '../components/ui/Button';
+import Input from '../components/ui/Input';
+import FormGroup from '../components/ui/FormGroup';
+import LoadingSpinner from '../components/ui/LoadingSpinner';
+import apiService from '../services/apiService';
+import { toast } from 'react-toastify';
+import { FaChevronDown, FaChevronUp, FaEye, FaEyeSlash, FaDownload, FaTrash } from 'react-icons/fa';
+import { useSettings } from '../context/SettingsContext';
+import { useTranslation } from 'react-i18next';
+
+function SettingsPage() {
+    const { settings, updateSettings, isLoadingSettings, applyTemporarySettings } = useSettings(); // Assuming applyTemporarySettings exists or you'll add it
+    const { t, i18n } = useTranslation();
+
+    // Estado para los datos del formulario (el estado "sucio" o de borrador)
+    const [localSettingsData, setLocalSettingsData] = useState(settings || {});
+    // Nuevo estado para saber si hay cambios sin guardar
+    const [isDirty, setIsDirty] = useState(false);
+
+    // Estados para los diferentes procesos de guardado y errores
+    const [isSaving, setIsSaving] = useState(false);
+    const [isSavingPassword, setIsSavingPassword] = useState(false);
+    const [isProcessingDataAction, setIsProcessingDataAction] = useState(false);
+    const [passwordFormError, setPasswordFormError] = useState(null);
+    const [dataAccountError, setDataAccountError] = useState(null);
+
+    // States for the password form
+    const [currentPassword, setCurrentPassword] = useState('');
+    const [newPassword, setNewPassword] = useState('');
+    const [confirmNewPassword, setConfirmNewPassword] = useState('');
+
+    // Estado para las secciones desplegables
+    const [openSections, setOpenSections] = useState({
+        notifications: true,
+        appearance: true,
+        changePassword: true,
+        dataAccount: true,
+    });
+
+    // States for showing/hiding passwords
+    const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+    const [showNewPassword, setShowNewPassword] = useState(false);
+    const [showConfirmNewPassword, setShowConfirmNewPassword] = useState(false);
+
+    // Sync local state when context settings change (e.g. on page load or revert)
+    useEffect(() => {
+        if (settings) {
+            setLocalSettingsData(settings);
+            // Apply language immediately if it changes from settings (e.g., initial load or revert)
+            if (i18n.language !== settings.language) {
+                i18n.changeLanguage(settings.language);
+            }
+            // If you have a global mechanism to apply theme/date format immediately
+            // based on the context's 'settings', you would call it here too.
+            // For example, if your useSettings context applies these globally:
+            // applyTemporarySettings(settings); // Or a specific function for initial load
+        }
+    }, [settings, i18n]); // Added i18n to dependencies
+
+    // Detecta si hay cambios sin guardar comparando el estado local con el del contexto
+    useEffect(() => {
+        const hasChanges = JSON.stringify(settings) !== JSON.stringify(localSettingsData);
+        setIsDirty(hasChanges);
+    }, [settings, localSettingsData]);
+
+    // Handle changes for most form inputs
+    const handleInputChange = useCallback((e) => {
+        const { name, value, type, checked } = e.target;
+        const newValue = type === 'checkbox' ? checked : value;
+
+        setLocalSettingsData(prev => {
+            const updatedData = { ...prev, [name]: newValue };
+
+            // Apply appearance settings immediately to the UI
+            if (name === 'themePreference' || name === 'dateFormat') {
+                if (applyTemporarySettings) { // Assuming applyTemporarySettings exists in context
+                    applyTemporarySettings({ [name]: newValue });
+                } else {
+                    // Fallback or direct DOM manipulation if no context function
+                    // This is less ideal but would achieve immediate visual change
+                    if (name === 'themePreference') {
+                        document.documentElement.setAttribute('data-theme', newValue);
+                    }
+                    // For dateFormat, direct visual change might be harder without re-rendering components
+                }
+            }
+            return updatedData;
+        });
+    }, [applyTemporarySettings]); // Added applyTemporarySettings to dependencies
+
+    // Maneja el cambio de idioma: actualiza la UI y el estado local, pero no guarda
+    const handleLanguageChange = useCallback((e) => {
+        const newLang = e.target.value;
+        i18n.changeLanguage(newLang); // This changes the UI language immediately
+        setLocalSettingsData(prev => ({ ...prev, language: newLang })); // Update local form state
+    }, [i18n]); // Added i18n to dependencies
+
+    // Descarta los cambios locales y vuelve al estado guardado
+    const handleRevertChanges = useCallback(() => {
+        setLocalSettingsData(settings);
+        if (i18n.language !== settings.language) {
+            i18n.changeLanguage(settings.language);
+        }
+        if (applyTemporarySettings) { // Reapply original theme/date format if available
+            applyTemporarySettings(settings);
+        } else {
+             // Fallback for theme:
+             document.documentElement.setAttribute('data-theme', settings.themePreference || 'system');
+        }
+        toast.info(t('toast.changesReverted'));
+    }, [settings, i18n, t, applyTemporarySettings]); // Added applyTemporarySettings to dependencies
+
+    // Save all general settings changes
+    const handleSaveAllSettings = useCallback(async () => {
+        setIsSaving(true);
+        try {
+            await updateSettings(localSettingsData); // This calls the API
+            toast.success(t('toast.settingsSaveSuccess'));
+        } catch (err) {
+            // The error toast is already handled by the context or interceptor
+        } finally {
+            setIsSaving(false);
+        }
+    }, [localSettingsData, updateSettings, t]); // Added t to dependencies
+
+    const handlePasswordInputChange = useCallback((e) => {
+        const { name, value } = e.target;
+        if (name === 'currentPassword') setCurrentPassword(value);
+        else if (name === 'newPassword') setNewPassword(value);
+        else if (name === 'confirmNewPassword') setConfirmNewPassword(value);
+    }, []);
+
+    const handleChangePassword = useCallback(async (e) => {
+        e.preventDefault();
+        setIsSavingPassword(true);
+        setPasswordFormError(null);
+        if (!currentPassword || !newPassword || !confirmNewPassword) {
+            const errorMsg = t('formValidation.allPasswordFieldsRequired');
+            setPasswordFormError(errorMsg);
+            toast.error(errorMsg);
+            setIsSavingPassword(false);
+            return;
+        }
+        if (newPassword.length < 8) {
+            const errorMsg = t('formValidation.passwordMinLength', { count: 8 });
+            setPasswordFormError(errorMsg);
+            toast.error(errorMsg);
+            setIsSavingPassword(false);
+            return;
+        }
+        if (newPassword !== confirmNewPassword) {
+            const errorMsg = t('formValidation.passwordsDoNotMatch');
+            setPasswordFormError(errorMsg);
+            toast.error(errorMsg);
+            setIsSavingPassword(false);
+            return;
+        }
+        try {
+            await apiService.changePassword({ currentPassword, newPassword });
+            toast.success(t('toast.passwordUpdated'));
+            setCurrentPassword(''); setNewPassword(''); setConfirmNewPassword('');
+            setPasswordFormError(null);
+        } catch (err) {
+            const errorMessage = err.data?.message || err.message || t('toast.passwordUpdateError');
+            setPasswordFormError(errorMessage);
+            toast.error(errorMessage);
+        } finally {
+            setIsSavingPassword(false);
+        }
+    }, [currentPassword, newPassword, confirmNewPassword, t]); // Added t to dependencies
+
+    const handleExportData = useCallback(async () => {
+        setIsProcessingDataAction(true);
+        setDataAccountError(null);
+        try {
+            const responseData = await apiService.exportUserData();
+            const jsonString = JSON.stringify(responseData, null, 2);
+            const blob = new Blob([jsonString], { type: 'application/json' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `datos_goalmaster_${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(link.href);
+            toast.success(t('toast.exportSuccess'));
+        } catch (err) {
+            const errorMessage = err.data?.message || err.message || t('toast.exportError');
+            setDataAccountError(errorMessage);
+            toast.error(errorMessage);
+        } finally {
+            setIsProcessingDataAction(false);
+        }
+    }, [t]);
+
+    const handleDeleteAccount = useCallback(async () => {
+        if (!window.confirm(t('settingsPage.data.deleteConfirmation'))) {
+            return;
+        }
+        setIsProcessingDataAction(true);
+        setDataAccountError(null);
+        try {
+            await apiService.deleteAccount();
+            toast.success(t('toast.accountDeleted'));
+            window.dispatchEvent(new CustomEvent('logoutUser', { detail: { reason: 'accountDeleted', notifyBackend: false } }));
+        } catch (err) {
+            const errorMessage = err.data?.message || err.message || t('toast.deleteAccountError');
+            setDataAccountError(errorMessage);
+            toast.error(errorMessage);
+        } finally {
+            setIsProcessingDataAction(false);
+        }
+    }, [t]);
+
+    const toggleSection = useCallback((sectionName) => {
+        setOpenSections(prev => ({ ...prev, [sectionName]: !prev[sectionName] }));
+    }, []);
+
+    if (isLoadingSettings) {
+        return <div className="flex flex-col items-center justify-center min-h-[300px] text-center text-[var(--muted-foreground)] p-8"><LoadingSpinner size="large" text={t('loaders.loadingSettings')} /></div>;
+    }
+
+    return (
+        <div className="p-6 flex flex-col gap-6 w-full box-border">
+            <div className="flex justify-between items-center flex-wrap gap-4 mb-2">
+                <h1 className="text-[1.75rem] text-[var(--heading-color,var(--foreground))] m-0 font-semibold">{t('settingsPage.accountSettingsTitle')}</h1>
+                
+            </div>
+
+            <section className="bg-[var(--card)] p-6 rounded-[var(--radius-lg)] border border-[var(--border)] shadow-[var(--shadow-sm)] flex flex-col">
+                <div className="flex justify-between items-center pb-4 border-b border-[var(--border-light)] cursor-pointer mb-4 hover:bg-[var(--hover-bg,#f0f0f0)] hover:rounded-[var(--radius-lg)] hover:p-[0.5rem_1rem] hover:m-[-0.5rem_-1rem_0.5rem_-1rem]" onClick={() => toggleSection('appearance')} role="button" tabIndex={0}>
+                    <h2 className="text-[1.3rem] font-semibold text-[var(--foreground)] m-0">{t('settingsPage.appearance.title')}</h2>
+                    {openSections.appearance ? <FaChevronUp className="text-[1rem] text-[var(--muted-foreground)] transition-transform duration-300" /> : <FaChevronDown className="text-[1rem] text-[var(--muted-foreground)]" />}
+                </div>
+                {openSections.appearance && (
+                    <>
+                        <p className="text-[0.85rem] text-[var(--muted-foreground)] mb-4 block">{t('settingsPage.appearance.subtitle')}</p>
+                        <div className="flex flex-col gap-4">
+                            <FormGroup label={t('settingsPage.appearance.themeLabel')} htmlFor="theme-preference">
+                                <Input type="select" id="theme-preference" name="themePreference" value={localSettingsData.themePreference || 'system'} onChange={handleInputChange}>
+                                    <option value="light">{t('theme.light')}</option>
+                                    <option value="dark">{t('theme.dark')}</option>
+                                    <option value="system">{t('theme.system')}</option>
+                                </Input>
+                            </FormGroup>
+                            <FormGroup label={t('settingsPage.appearance.languageLabel')} htmlFor="language">
+                                <Input type="select" id="language" name="language" value={localSettingsData.language || 'es'} onChange={handleLanguageChange}>
+                                    <option value="es">{t('language.es')}</option>
+                                    <option value="en">{t('language.en')}</option>
+                                </Input>
+                            </FormGroup>
+                            <FormGroup label={t('settingsPage.appearance.dateFormatLabel')} htmlFor="date-format">
+                                <Input type="select" id="date-format" name="dateFormat" value={localSettingsData.dateFormat || 'dd/MM/yyyy'} onChange={handleInputChange}>
+                                    <option value="dd/MM/yyyy">DD/MM/YYYY</option>
+                                    <option value="MM/dd/yyyy">MM/DD/YYYY</option>
+                                    <option value="yyyy-MM-dd">YYYY-MM-DD</option>
+                                </Input>
+                            </FormGroup>
+                        </div>
+                    </>
+                )}
+            </section>
+
+            <section className="bg-[var(--card)] p-6 rounded-[var(--radius-lg)] border border-[var(--border)] shadow-[var(--shadow-sm)] flex flex-col">
+                <div className="flex justify-between items-center pb-4 border-b border-[var(--border-light)] cursor-pointer mb-4 hover:bg-[var(--hover-bg,#f0f0f0)] hover:rounded-[var(--radius-lg)] hover:p-[0.5rem_1rem] hover:m-[-0.5rem_-1rem_0.5rem_-1rem]" onClick={() => toggleSection('changePassword')} role="button" tabIndex={0}>
+                    <h2 className="text-[1.3rem] font-semibold text-[var(--foreground)] m-0">{t('settingsPage.password.title')}</h2>
+                    {openSections.changePassword ? <FaChevronUp className="text-[1rem] text-[var(--muted-foreground)] transition-transform duration-300" /> : <FaChevronDown className="text-[1rem] text-[var(--muted-foreground)]" />}
+                </div>
+                {openSections.changePassword && (
+                    <>
+                        <p className="text-[0.85rem] text-[var(--muted-foreground)] mb-4 block">{t('settingsPage.password.subtitle')}</p>
+                        <form onSubmit={handleChangePassword}>
+                            <div className="flex flex-col gap-4">
+                                <FormGroup label={t('settingsPage.password.currentLabel')} htmlFor="current-password">
+                                    <Input type={showCurrentPassword ? "text" : "password"} id="current-password" name="currentPassword" value={currentPassword} onChange={handlePasswordInputChange} actionIcon={showCurrentPassword ? <FaEyeSlash /> : <FaEye />} onActionClick={() => setShowCurrentPassword(!showCurrentPassword)} actionIconAriaLabel={t(showCurrentPassword ? 'settingsPage.password.toggleAria.hideCurrent' : 'settingsPage.password.toggleAria.showCurrent')} autoComplete="current-password" />
+                                </FormGroup>
+                                <FormGroup label={t('settingsPage.password.newLabel')} htmlFor="new-password">
+                                    <Input type={showNewPassword ? "text" : "password"} id="new-password" name="newPassword" value={newPassword} onChange={handlePasswordInputChange} actionIcon={showNewPassword ? <FaEyeSlash /> : <FaEye />} onActionClick={() => setShowNewPassword(!showNewPassword)} actionIconAriaLabel={t(showNewPassword ? 'settingsPage.password.toggleAria.hideNew' : 'settingsPage.password.toggleAria.showNew')} autoComplete="new-password" />
+                                </FormGroup>
+                                <FormGroup label={t('settingsPage.password.confirmLabel')} htmlFor="confirm-new-password">
+                                    <Input type={showConfirmNewPassword ? "text" : "password"} id="confirm-new-password" name="confirmNewPassword" value={confirmNewPassword} onChange={handlePasswordInputChange} actionIcon={showConfirmNewPassword ? <FaEyeSlash /> : <FaEye />} onActionClick={() => setShowConfirmNewPassword(!showConfirmNewPassword)} actionIconAriaLabel={t(showConfirmNewPassword ? 'settingsPage.password.toggleAria.hideConfirm' : 'settingsPage.password.toggleAria.showConfirm')} autoComplete="new-password" />
+                                </FormGroup>
+                                {passwordFormError && <p className="text-[var(--destructive)] text-[0.85rem] mt-2 text-left">{passwordFormError}</p>}
+                                <div className="flex justify-end mt-2">
+                                    <Button type="submit" variant="primary" isLoading={isSavingPassword} disabled={isSavingPassword}>{t('settingsPage.password.changeButton')}</Button>
+                                </div>
+                            </div>
+                        </form>
+                    </>
+                )}
+            </section>
+
+            <section className="bg-[var(--card)] p-6 rounded-[var(--radius-lg)] border border-[var(--border)] shadow-[var(--shadow-sm)] flex flex-col">
+                <div className="flex justify-between items-center pb-4 border-b border-[var(--border-light)] cursor-pointer mb-4 hover:bg-[var(--hover-bg,#f0f0f0)] hover:rounded-[var(--radius-lg)] hover:p-[0.5rem_1rem] hover:m-[-0.5rem_-1rem_0.5rem_-1rem]" onClick={() => toggleSection('dataAccount')} role="button" tabIndex={0}>
+                    <h2 className="text-[1.3rem] font-semibold text-[var(--foreground)] m-0">{t('settingsPage.data.title')}</h2>
+                    {openSections.dataAccount ? <FaChevronUp className="text-[1rem] text-[var(--muted-foreground)] transition-transform duration-300" /> : <FaChevronDown className="text-[1rem] text-[var(--muted-foreground)]" />}
+                </div>
+
+                {openSections.dataAccount && (
+                    <div className="flex flex-col gap-4">
+                        {/* Fila para Exportar Datos */}
+                        <div className="flex flex-wrap justify-between items-center gap-4 pb-6 border-b border-[var(--border)]">
+                            <div className="flex-grow mr-4">
+                                <strong className="block text-[1rem] font-semibold text-[var(--foreground)] mb-1">{t('settingsPage.data.exportLabel')}</strong>
+                                <p className="text-[0.9rem] text-[var(--muted-foreground)] m-0 max-w-[60ch]">{t('settingsPage.data.exportDescription')}</p>
+                            </div>
+                            <div className="shrink-0">
+                                <Button variant="secondary" onClick={handleExportData} isLoading={isProcessingDataAction} disabled={isProcessingDataAction} leftIcon={<FaDownload />} >
+                                    {t('settingsPage.data.exportButton')}
+                                </Button>
+                            </div>
+                        </div>
+
+                        {/* Fila para Eliminar Cuenta */}
+                        <div className="flex flex-wrap justify-between items-center gap-4 pb-6">
+                            <div className="flex-grow mr-4">
+                                <strong className="block text-[1rem] font-semibold text-[var(--destructive)] mb-1">{t('settingsPage.data.deleteLabel')}</strong>
+                                <p className="text-[0.9rem] text-[var(--muted-foreground)] m-0 max-w-[60ch]">{t('settingsPage.data.deleteDescription')}</p>
+                            </div>
+                            <div className="shrink-0">
+                                <Button variant="destructive" onClick={handleDeleteAccount} isLoading={isProcessingDataAction} disabled={isProcessingDataAction} leftIcon={<FaTrash />} >
+                                    {t('settingsPage.data.deleteButton')}
+                                </Button>
+                            </div>
+                        </div>
+                        
+                        {dataAccountError && <p className="text-[var(--destructive)] text-[0.85rem] mt-2 text-left">{dataAccountError}</p>}
+                    </div>
+                )}
+            </section>
+            <div>
+            {isDirty && (
+                    <div className="flex justify-end items-center gap-4 ml-auto">
+                        <Button variant="secondary" onClick={handleRevertChanges} disabled={isSaving}>
+                            {t('common.revert')}
+                        </Button>
+                        <Button variant="primary" onClick={handleSaveAllSettings} isLoading={isSaving} disabled={isSaving}>
+                            {t('common.saveChanges')}
+                        </Button>
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+}
+
+export default SettingsPage;
