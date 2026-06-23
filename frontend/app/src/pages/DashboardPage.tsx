@@ -2,6 +2,7 @@
 // @ts-nocheck
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import styles from './DashboardPage.module.css';
 import api from '../services/apiService';
 import { useTranslation } from 'react-i18next';
@@ -120,8 +121,8 @@ function DashboardPage() {
     if (!summaryData) return null;
 
     return (
-        <div className={styles.dashboardPageLayout}>
-            <section className={styles.statsRowContainer}>
+        <motion.div className={styles.dashboardPageLayout} initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+            <motion.section className={styles.statsRowContainer} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
                 <StatsCard title={t('dashboard.stats.totalObjectives')} value={String(summaryData.totalObjectives)} linkTo="/my-objectives">
                     {summaryData.totalObjectives > 0 ? renderStatusList() : <p className={styles.noStatusData}>{t('dashboard.stats.noObjectives')}</p>}
                 </StatsCard>
@@ -132,8 +133,8 @@ function DashboardPage() {
                 <StatsCard title={t('dashboard.stats.categories')} linkTo="/analysis">
                     <CategoryDonutChart data={categoryChartData} />
                 </StatsCard>
-            </section>
-            <section className={styles.bottomSectionsGrid}>
+            </motion.section>
+            <motion.section className={styles.bottomSectionsGrid} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
                 <div className={styles.sectionCard}>
                     <h3 className={styles.sectionTitle}>{t('dashboard.sections.keyObjectives')}</h3>
                     <RecentObjectivesList objectives={recentObjectives} />
@@ -142,8 +143,8 @@ function DashboardPage() {
                     <h3 className={styles.sectionTitle}>{t('dashboard.sections.recentActivity')}</h3>
                     <RecentActivityFeed activities={recentActivities} />
                 </div>
-            </section>
-        </div>
+            </motion.section>
+        </motion.div>
     );
 }
 
