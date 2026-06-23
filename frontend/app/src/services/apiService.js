@@ -2,7 +2,7 @@
 import axios from "axios";
 import { toast } from 'react-toastify';
 
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || "http://localhost:3001/api";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:3001/api";
 
 const axiosInstance = axios.create({
     baseURL: API_BASE_URL,
@@ -10,7 +10,6 @@ const axiosInstance = axios.create({
 
 let isSessionExpiredMessageShown = false;
 
-// Interceptor to add the authentication token to headers
 axiosInstance.interceptors.request.use(
     (config) => {
         const token = localStorage.getItem("token");
@@ -22,9 +21,8 @@ axiosInstance.interceptors.request.use(
     (error) => Promise.reject(error)
 );
 
-// Interceptor para manejar globalmente las respuestas y los errores
 axiosInstance.interceptors.response.use(
-    (response) => response.data, // Devuelve directamente la data de la respuesta
+    (response) => response.data,
     async (error) => {
         const { config: originalRequest, response } = error;
 
@@ -46,25 +44,22 @@ axiosInstance.interceptors.response.use(
             }
         }
 
-        const errorMessage = data?.message || 
-                             (Array.isArray(data?.errors) ? data.errors.map(e => e.msg).join(', ') : 'Ocurrió un error inesperado.');
-        
+        const errorMessage = data?.message ||
+            (Array.isArray(data?.errors) ? data.errors.map(e => e.msg).join(', ') : 'Ocurrió un error inesperado.');
+
         const errorToThrow = new Error(errorMessage);
         errorToThrow.data = data;
         errorToThrow.status = status;
-        
+
         return Promise.reject(errorToThrow);
     }
 );
 
-
 const api = {
-    // Auth
     register: (userData) => axiosInstance.post('/auth/register', userData),
     login: (credentials) => axiosInstance.post('/auth/login', credentials),
     logout: () => axiosInstance.post('/auth/logout'),
 
-    // Objectives
     getObjectives: (filters) => axiosInstance.get('/objectives', { params: filters }),
     getObjectiveById: (id) => axiosInstance.get(`/objectives/${id}`),
     createObjective: (data) => axiosInstance.post('/objectives', data),
@@ -72,12 +67,10 @@ const api = {
     deleteObjective: (id) => axiosInstance.delete(`/objectives/${id}`),
     unarchiveObjective: (id) => axiosInstance.patch(`/objectives/${id}/unarchive`),
 
-    // Dashboard
     getDashboardSummary: () => axiosInstance.get('/dashboard/summary-stats'),
     getRecentObjectives: (limit = 4) => axiosInstance.get(`/dashboard/recent-objectives?limit=${limit}`),
     getRecentActivities: (limit = 5) => axiosInstance.get(`/dashboard/recent-activities?limit=${limit}`),
 
-    // Analysis
     getAnalysisSummary: (params) => axiosInstance.get('/analysis/summary', { params }),
     getCategoryDistribution: (params) => axiosInstance.get('/analysis/category-distribution', { params }),
     getObjectiveStatusDistribution: (params) => axiosInstance.get('/analysis/status-distribution', { params }),
@@ -86,18 +79,28 @@ const api = {
     getRankedObjectives: (params) => axiosInstance.get('/analysis/ranked-objectives', { params }),
     getCategoryAverageProgress: (params) => axiosInstance.get('/analysis/category-average-progress', { params }),
     getDetailedObjectivesByCategory: (params) => axiosInstance.get('/analysis/detailed-by-category', { params }),
-    
-    // Profile
+
     getUserProfile: () => axiosInstance.get('/profile'),
     updateUserProfile: (formData) => axiosInstance.patch('/profile', formData),
     getUserProfileStats: () => axiosInstance.get('/profile/stats'),
 
-    // Settings
     getUserSettings: () => axiosInstance.get('/settings'),
     updateUserSettings: (data) => axiosInstance.put('/settings', data),
     changePassword: (data) => axiosInstance.put('/settings/change-password', data),
     exportUserData: () => axiosInstance.get('/settings/export-data'),
-    deleteAccount: () => axiosInstance.delete('/settings/account'),
+    deleteAccount: (password) => axiosInstance.delete('/settings/account', { data: { password } }),
+
+    getTags: () => axiosInstance.get('/tags'),
+    createTag: (data) => axiosInstance.post('/tags', data),
+    updateTag: (id, data) => axiosInstance.put(`/tags/${id}`, data),
+    deleteTag: (id) => axiosInstance.delete(`/tags/${id}`),
+
+    getTemplates: (category) => axiosInstance.get('/templates', { params: category ? { category } : {} }),
+    getStreak: () => axiosInstance.get('/streak'),
+    updateStreak: () => axiosInstance.post('/streak/update'),
+    sendChatMessage: (message) => axiosInstance.post('/ai/chat', { message }),
+    getAiSuggestions: (context) => axiosInstance.post('/ai/suggest', { context }),
 };
 
 export default api;
+export { API_BASE_URL };

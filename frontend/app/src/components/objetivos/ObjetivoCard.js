@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
@@ -8,6 +8,7 @@ import styles from './ObjetivoCard.module.css';
 
 import { getCategoryIcon, getStatusInfo } from '../../utils/ObjectiveUtils';
 import Button from '../ui/Button';
+import ConfirmationDialog from '../ui/ConfirmationDialog';
 import { FaEdit, FaEye, FaArchive, FaUndo, FaCalendarAlt } from 'react-icons/fa';
 import { formatDateByPreference } from '../../utils/dateUtils';
 import { useSettings } from '../../context/SettingsContext';
@@ -31,6 +32,7 @@ function ObjetivoCard({ objective, onObjectiveArchived, onObjectiveUnarchived })
     const navigate = useNavigate();
     const { t } = useTranslation();
     const { settings } = useSettings();
+    const [confirmAction, setConfirmAction] = useState(null);
 
     const progressPercentage = Math.round(objective.progressPercentage || 0);
     const { translatedStatus, statusClassName } = getStatusInfo(objective.status, t);
@@ -49,31 +51,33 @@ function ObjetivoCard({ objective, onObjectiveArchived, onObjectiveUnarchived })
         navigate(`/objectives/edit/${objective.id}`);
     };
     
-    const handleArchive = async (e) => {
+    const handleArchive = (e) => {
         e.preventDefault();
         e.stopPropagation();
-        if (window.confirm(t('confirmationDialog.archiveObjective', { name: objective.name }))) {
-            try {
+        setConfirmAction('archive');
+    };
+
+    const handleUnarchive = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setConfirmAction('unarchive');
+    };
+
+    const executeConfirm = async () => {
+        try {
+            if (confirmAction === 'archive') {
                 await api.updateObjective(objective.id, { status: 'ARCHIVED' });
                 toast.success(t('toast.objectiveArchiveSuccess'));
                 if (onObjectiveArchived) onObjectiveArchived();
-            } catch (error) {
-                toast.error(error.message || t('toast.objectiveArchiveError'));
-            }
-        }
-    };
-
-    const handleUnarchive = async (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        if (window.confirm(t('confirmationDialog.unarchiveObjective', { name: objective.name }))) {
-            try {
+            } else if (confirmAction === 'unarchive') {
                 await api.unarchiveObjective(objective.id);
                 toast.success(t('toast.objectiveUnarchiveSuccess'));
                 if (onObjectiveUnarchived) onObjectiveUnarchived();
-            } catch (error) {
-                toast.error(error.message || t('toast.objectiveUnarchiveError'));
             }
+        } catch (error) {
+            toast.error(error.message || t('toast.objectiveArchiveError'));
+        } finally {
+            setConfirmAction(null);
         }
     };
 
@@ -136,6 +140,16 @@ function ObjetivoCard({ objective, onObjectiveArchived, onObjectiveUnarchived })
                     <Button data-cy="details-button" className={`${styles.button} ${styles.buttonOutline} ${styles.buttonSmall} ${styles.buttonArchive}`} variant="outline" size="small" onClick={handleViewDetails} leftIcon={<FaEye />}>{t('common.details')}</Button>
                 </div>
             </footer>
+            <ConfirmationDialog
+                isOpen={!!confirmAction}
+                title={confirmAction === 'archive' ? t('confirmationDialog.archiveTitle', { defaultValue: 'Archivar objetivo' }) : t('confirmationDialog.unarchiveTitle', { defaultValue: 'Desarchivar objetivo' })}
+                message={confirmAction === 'archive'
+                    ? t('confirmationDialog.archiveObjective', { name: objective.name })
+                    : t('confirmationDialog.unarchiveObjective', { name: objective.name })}
+                onConfirm={executeConfirm}
+                onClose={() => setConfirmAction(null)}
+                confirmButtonVariant={confirmAction === 'archive' ? 'destructive' : 'primary'}
+            />
         </a>
     );
 }
