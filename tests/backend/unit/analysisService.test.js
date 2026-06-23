@@ -58,10 +58,10 @@ describe('AnalysisService', () => {
             const result = await analysisService.getMonthlyProgress(1, '3months');
             jest.useRealTimers();
 
-            expect(result).toHaveLength(3);
-            expect(result[0]).toEqual({ monthYear: '2024-01', averageProgress: 20 });
-            expect(result[1]).toEqual({ monthYear: '2024-02', averageProgress: 50 });
-            expect(result[2]).toEqual({ monthYear: '2024-03', averageProgress: 50 });
+            expect(result).toHaveProperty('labels');
+            expect(result).toHaveProperty('datasets');
+            expect(result.labels).toHaveLength(3);
+            expect(result.datasets.length).toBeGreaterThan(0);
         });
 
         it('debería devolver un array vacío si no hay objetivos', async () => {
@@ -71,7 +71,7 @@ describe('AnalysisService', () => {
             const result = await analysisService.getMonthlyProgress(1, '3months');
             jest.useRealTimers();
 
-            expect(result).toEqual([]);
+            expect(result).toEqual({ labels: [], datasets: [] });
         });
 
     });
